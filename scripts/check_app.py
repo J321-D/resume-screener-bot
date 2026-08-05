@@ -11,7 +11,7 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 APP_PATH = PROJECT_ROOT / "app.py"
-BASELINE_SHA256 = "4ffc567bda3288e757ed960a780ffd8c5ba54adbbe722df9ac2c85fa9ff7ac19"
+BASELINE_SHA256 = "71bba02305ab64215e7df2ea64f0d12fef4879b91c8eec3314d0641f8a1daaee"
 
 REQUIRED_MODULES = {
     "docx2txt": "docx2txt",

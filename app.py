@@ -14,6 +14,8 @@ from fpdf import FPDF
 from io import BytesIO
 import time
 
+from resume_screener.models import AnalysisResult, ExtractedDocument
+
 # --- Robust import for annotated_text with fallback ---
 try:
     from annotated_text import annotated_text  # provided by streamlit-annotated-text
@@ -62,16 +64,16 @@ if theme_toggle == "Dark":
 st.header("📄 Resume & 📝 Job Description Input")
 
 # Multi-file upload for resumes and job descriptions
-resume_texts = []  # Multiple resumes storage
-jd_text = ""
-resume_uploaded = False
-job_desc_uploaded = False
+resume_documents: list[ExtractedDocument] = []
+job_description_document: ExtractedDocument | None = None
+resume_uploaded: bool = False
+job_desc_uploaded: bool = False
 
 uploaded_resumes = st.file_uploader("Upload your resume(s) (PDF, DOCX, TXT)", type=["pdf", "docx", "txt"], accept_multiple_files=True)
 if uploaded_resumes:
     resume_uploaded = True
     for uploaded_resume in uploaded_resumes:
-        resume_text = ""
+        resume_text: str = ""
         # Check for PDF file
         if uploaded_resume.type == "application/pdf":
             with fitz.open(stream=uploaded_resume.read(), filetype="pdf") as doc:
@@ -84,11 +86,18 @@ if uploaded_resumes:
         else:
             resume_text = uploaded_resume.read().decode("utf-8", errors="ignore")
         
-        resume_texts.append(resume_text)
+        resume_documents.append(
+            ExtractedDocument(
+                text=resume_text,
+                source_name=uploaded_resume.name,
+                media_type=uploaded_resume.type,
+            )
+        )
 
 uploaded_jd = st.file_uploader("Upload job description (PDF, DOCX, TXT)", type=["pdf", "docx", "txt"], key="jd")
 if uploaded_jd:
     job_desc_uploaded = True
+    jd_text: str = ""
     if uploaded_jd.type == "application/pdf":
         with fitz.open(stream=uploaded_jd.read(), filetype="pdf") as doc:
             for page in doc:
@@ -97,6 +106,11 @@ if uploaded_jd:
         jd_text = docx2txt.process(uploaded_jd)
     else:
         jd_text = uploaded_jd.read().decode("utf-8", errors="ignore")
+    job_description_document = ExtractedDocument(
+        text=jd_text,
+        source_name=uploaded_jd.name,
+        media_type=uploaded_jd.type,
+    )
 
 # --- Text Input for Resume and Job Description ---
 st.header("Or Paste Your Text Manually Below")
@@ -109,11 +123,11 @@ jd_text_manual = st.text_area("Paste the job description here:", height=300)
 
 # If there is manual text input, use it instead of file uploads
 if resume_text_manual.strip():
-    resume_texts.append(resume_text_manual)
+    resume_documents.append(ExtractedDocument(text=resume_text_manual))
     resume_uploaded = True
 
 if jd_text_manual.strip():
-    jd_text = jd_text_manual
+    job_description_document = ExtractedDocument(text=jd_text_manual)
     job_desc_uploaded = True
 
 # --- Previews ---
@@ -122,38 +136,52 @@ if show_side_by_side and resume_uploaded and job_desc_uploaded:
 
     with col1:
         st.subheader("📋 Resume Preview")
-        for text in resume_texts:
-            st.text(text[:2000])
+        for document in resume_documents:
+            st.text(document.text[:2000])
 
     with col2:
         st.subheader("📋 Job Description Preview")
-        st.text(jd_text[:2000])
+        st.text(job_description_document.text[:2000])
 
 else:
     if resume_uploaded:
         with st.expander("📋 Resume Preview"):
-            for text in resume_texts:
-                st.text(text[:2000])
+            for document in resume_documents:
+                st.text(document.text[:2000])
     if job_desc_uploaded:
         with st.expander("📋 Job Description Preview"):
-            st.text(jd_text[:2000])
+            st.text(job_description_document.text[:2000])
 
 # --- Keyword Matching ---
 if resume_uploaded and job_desc_uploaded:
-    def extract_keywords(text):
-        words = re.findall(r"\b\w+\b", text.lower())
+    def extract_keywords(text: str) -> set[str]:
+        words: list[str] = re.findall(r"\b\w+\b", text.lower())
         return set(words)
 
-    resume_words = set()
-    for text in resume_texts:
-        resume_words.update(extract_keywords(text))
+    resume_words: set[str] = set()
+    for document in resume_documents:
+        resume_words.update(extract_keywords(document.text))
 
+    jd_text = job_description_document.text
     jd_words = extract_keywords(jd_text)
 
     matched = resume_words.intersection(jd_words)
     missing = jd_words - resume_words
 
     match_score = round(len(matched) / len(jd_words) * 100, 1) if jd_words else 0
+    analysis_result = AnalysisResult(
+        resume_words=resume_words,
+        job_description_words=jd_words,
+        matched=matched,
+        missing=missing,
+        match_score=match_score,
+    )
+
+    resume_words = analysis_result.resume_words
+    jd_words = analysis_result.job_description_words
+    matched = analysis_result.matched
+    missing = analysis_result.missing
+    match_score = analysis_result.match_score
 
     st.subheader("📊 Keyword Matching Results")
     st.markdown(f"**✅ Resume Match Score:** {match_score}%")
@@ -276,7 +304,6 @@ if resume_uploaded and job_desc_uploaded:
 # --- Footer ---
 st.markdown("---")
 st.markdown("<p style='text-align:center;'>© 2025 AI Resume Screener Bot | All Rights Reserved</p>", unsafe_allow_html=True)
-
 
 
 
