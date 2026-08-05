@@ -1,8 +1,6 @@
 import streamlit as st
-import base64
 import plotly.express as px
 import pandas as pd
-from fpdf import FPDF
 
 from resume_screener.analysis import (
     aggregate_resume_words,
@@ -14,6 +12,7 @@ from resume_screener.analysis import (
 )
 from resume_screener.models import AnalysisResult, ExtractedDocument
 from resume_screener.parsing import parse_uploaded_document
+from resume_screener.reporting import prepare_pdf_download
 
 # Page Configuration
 st.set_page_config(page_title="AI Resume Screener Bot", layout="wide")
@@ -167,15 +166,7 @@ if resume_uploaded and job_desc_uploaded:
 
     # --- Export as PDF ---
     if st.button("⬇️ Download Report as PDF"):
-        pdf = FPDF()
-        pdf.add_page()
-        pdf.set_font("Arial", size=12)
-        pdf.cell(200, 10, txt="Keyword Matching Report", ln=True, align='C')
-        pdf.ln(10)
-        pdf.multi_cell(0, 10, f"Matched Keywords: {sorted(matched)}\n\nMissing Keywords: {filtered_missing[:50]}")
-        pdf_file = pdf.output(dest='S', format='pdf')
-        b64 = base64.b64encode(pdf_file.encode()).decode()
-        href = f'<a href="data:file/pdf;base64,{b64}" download="report.pdf">📥 Click here to download PDF</a>'
+        href = prepare_pdf_download(matched, filtered_missing)
         st.markdown(href, unsafe_allow_html=True)
 
     # --- Resume Templates ---
