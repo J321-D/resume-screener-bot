@@ -1,6 +1,4 @@
 import streamlit as st
-import fitz  # PyMuPDF
-import docx2txt
 from collections import Counter
 import re
 import base64
@@ -9,6 +7,7 @@ import pandas as pd
 from fpdf import FPDF
 
 from resume_screener.models import AnalysisResult, ExtractedDocument
+from resume_screener.parsing import parse_uploaded_document
 
 # Page Configuration
 st.set_page_config(page_title="AI Resume Screener Bot", layout="wide")
@@ -55,44 +54,12 @@ uploaded_resumes = st.file_uploader("Upload your resume(s) (PDF, DOCX, TXT)", ty
 if uploaded_resumes:
     resume_uploaded = True
     for uploaded_resume in uploaded_resumes:
-        resume_text: str = ""
-        # Check for PDF file
-        if uploaded_resume.type == "application/pdf":
-            with fitz.open(stream=uploaded_resume.read(), filetype="pdf") as doc:
-                for page in doc:
-                    resume_text += page.get_text()
-        # Check for DOCX file
-        elif uploaded_resume.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-            resume_text = docx2txt.process(uploaded_resume)
-        # For plain text files
-        else:
-            resume_text = uploaded_resume.read().decode("utf-8", errors="ignore")
-        
-        resume_documents.append(
-            ExtractedDocument(
-                text=resume_text,
-                source_name=uploaded_resume.name,
-                media_type=uploaded_resume.type,
-            )
-        )
+        resume_documents.append(parse_uploaded_document(uploaded_resume))
 
 uploaded_jd = st.file_uploader("Upload job description (PDF, DOCX, TXT)", type=["pdf", "docx", "txt"], key="jd")
 if uploaded_jd:
     job_desc_uploaded = True
-    jd_text: str = ""
-    if uploaded_jd.type == "application/pdf":
-        with fitz.open(stream=uploaded_jd.read(), filetype="pdf") as doc:
-            for page in doc:
-                jd_text += page.get_text()
-    elif uploaded_jd.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-        jd_text = docx2txt.process(uploaded_jd)
-    else:
-        jd_text = uploaded_jd.read().decode("utf-8", errors="ignore")
-    job_description_document = ExtractedDocument(
-        text=jd_text,
-        source_name=uploaded_jd.name,
-        media_type=uploaded_jd.type,
-    )
+    job_description_document = parse_uploaded_document(uploaded_jd)
 
 # --- Text Input for Resume and Job Description ---
 st.header("Or Paste Your Text Manually Below")
@@ -285,5 +252,4 @@ if resume_uploaded and job_desc_uploaded:
 # --- Footer ---
 st.markdown("---")
 st.markdown("<p style='text-align:center;'>© 2025 AI Resume Screener Bot | All Rights Reserved</p>", unsafe_allow_html=True)
-
 
