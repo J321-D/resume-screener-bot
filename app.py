@@ -12,7 +12,7 @@ from resume_screener.analysis import (
 )
 from resume_screener.models import AnalysisResult, ExtractedDocument
 from resume_screener.parsing import parse_uploaded_document
-from resume_screener.reporting import prepare_pdf_download
+from resume_screener.reporting import generate_pdf_report
 
 # Page Configuration
 st.set_page_config(page_title="AI Resume Screener Bot", layout="wide")
@@ -166,8 +166,13 @@ if resume_uploaded and job_desc_uploaded:
 
     # --- Export as PDF ---
     if st.button("⬇️ Download Report as PDF"):
-        href = prepare_pdf_download(matched, filtered_missing)
-        st.markdown(href, unsafe_allow_html=True)
+        pdf_bytes = generate_pdf_report(matched, filtered_missing)
+        st.download_button(
+            "📥 Click here to download PDF",
+            data=pdf_bytes,
+            file_name="report.pdf",
+            mime="application/pdf",
+        )
 
     # --- Resume Templates ---
     st.markdown("## 📑 Resume Templates")

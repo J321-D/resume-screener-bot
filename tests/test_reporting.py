@@ -5,7 +5,9 @@ from __future__ import annotations
 import unittest
 from unittest.mock import patch
 
-from resume_screener.reporting import prepare_pdf_download
+import fitz
+
+from resume_screener.reporting import generate_pdf_report
 
 
 class RecordingPDF:
@@ -40,17 +42,17 @@ class RecordingPDF:
     def multi_cell(self, width: int, height: int, text: str) -> None:
         self.calls.append(("multi_cell", width, height, text))
 
-    def output(self, *, dest: str, format: str) -> str:
-        self.calls.append(("output", dest, format))
-        return "pdf-bytes"
+    def output(self) -> bytearray:
+        self.calls.append(("output",))
+        return bytearray(b"pdf-bytes")
 
 
-class PreparePdfDownloadTests(unittest.TestCase):
-    def test_preserves_report_content_order_formatting_and_download_link(self) -> None:
+class GeneratePdfReportTests(unittest.TestCase):
+    def test_preserves_report_content_order_formatting_and_truncation(self) -> None:
         missing_keywords = [f"missing{index}" for index in range(51)]
 
         with patch("resume_screener.reporting.FPDF", RecordingPDF):
-            href = prepare_pdf_download(
+            pdf_bytes = generate_pdf_report(
                 {"sql", "python"},
                 missing_keywords,
             )
@@ -71,21 +73,28 @@ class PreparePdfDownloadTests(unittest.TestCase):
                     "Matched Keywords: ['python', 'sql']\n\n"
                     f"Missing Keywords: {missing_keywords[:50]}",
                 ),
-                ("output", "S", "pdf"),
+                ("output",),
             ],
         )
-        self.assertEqual(
-            href,
-            '<a href="data:file/pdf;base64,cGRmLWJ5dGVz" '
-            'download="report.pdf">📥 Click here to download PDF</a>',
+        self.assertEqual(pdf_bytes, b"pdf-bytes")
+
+    def test_generates_valid_pdf_bytes_with_current_fpdf(self) -> None:
+        pdf_bytes = generate_pdf_report(
+            {"sql", "python"},
+            ["matlab"],
         )
 
-    def test_preserves_current_installed_fpdf_failure(self) -> None:
-        with self.assertRaisesRegex(
-            TypeError,
-            "unexpected keyword argument 'format'",
-        ):
-            prepare_pdf_download({"python"}, ["sql"])
+        self.assertIs(type(pdf_bytes), bytes)
+        self.assertTrue(pdf_bytes.startswith(b"%PDF-"))
+        self.assertIn(b"%%EOF", pdf_bytes[-16:])
+
+        with fitz.open(stream=pdf_bytes, filetype="pdf") as document:
+            self.assertEqual(document.page_count, 1)
+            report_text = "".join(page.get_text() for page in document)
+
+        self.assertIn("Keyword Matching Report", report_text)
+        self.assertIn("Matched Keywords: ['python', 'sql']", report_text)
+        self.assertIn("Missing Keywords: ['matlab']", report_text)
 
 
 if __name__ == "__main__":

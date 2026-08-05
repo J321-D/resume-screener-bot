@@ -98,13 +98,14 @@ class ResumeScreenerCharacterizationTests(unittest.TestCase):
         self.assertEqual(len(displayed_missing), 50)
         self.assertNotIn("common", displayed_missing)
 
-    def test_pdf_download_preserves_the_current_fpdf_failure(self) -> None:
+    def test_pdf_download_renders_without_an_application_exception(self) -> None:
         app = self.run_app("Python", "Python SQL")
         app.button[0].click()
         app.run(timeout=30)
 
-        self.assertEqual(len(app.exception), 1)
-        self.assertIn("unexpected keyword argument 'format'", app.exception[0].value)
+        self.assertEqual([exception.value for exception in app.exception], [])
+        download_buttons = app.get("download_button")
+        self.assertEqual(download_buttons[0].label, "📥 Click here to download PDF")
 
 
 if __name__ == "__main__":
