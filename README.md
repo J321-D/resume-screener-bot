@@ -47,7 +47,7 @@ cp .env.example .env
 ```
 
 Then add your key locally. Never commit `.env` or an API key. The current baseline
-creates an OpenAI client when a key is present but does not use that client.
+does not use OpenAI or transmit resume content to it.
 
 ## Run
 

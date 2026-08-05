@@ -1,32 +1,14 @@
 import streamlit as st
 import fitz  # PyMuPDF
 import docx2txt
-import os
-from dotenv import load_dotenv
-from openai import OpenAI
 from collections import Counter
 import re
 import base64
-import matplotlib.pyplot as plt
 import plotly.express as px
 import pandas as pd
 from fpdf import FPDF
-from io import BytesIO
-import time
 
 from resume_screener.models import AnalysisResult, ExtractedDocument
-
-# --- Robust import for annotated_text with fallback ---
-try:
-    from annotated_text import annotated_text  # provided by streamlit-annotated-text
-    HAVE_ANN = True
-except Exception:
-    HAVE_ANN = False
-
-# Load environment variables
-load_dotenv()
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-client = OpenAI(api_key=OPENAI_API_KEY) if OPENAI_API_KEY else None
 
 # Page Configuration
 st.set_page_config(page_title="AI Resume Screener Bot", layout="wide")
@@ -35,8 +17,8 @@ st.markdown("Upload OR paste in your resume and job description to get keyword m
 
 # --- Sidebar Settings ---
 st.sidebar.title("⚙️ Settings")
-show_gpt_toggle = st.sidebar.checkbox("Enable GPT Suggestions (coming soon)", value=False)
-show_highlighting = st.sidebar.checkbox("Enable Keyword Highlighting", value=True)
+st.sidebar.checkbox("Enable GPT Suggestions (coming soon)", value=False)
+st.sidebar.checkbox("Enable Keyword Highlighting", value=True)
 show_side_by_side = st.sidebar.checkbox("Enable Side-by-Side View", value=True)
 theme_toggle = st.sidebar.radio("Choose Theme", ["Light", "Dark"], index=1)
 
@@ -177,7 +159,6 @@ if resume_uploaded and job_desc_uploaded:
         match_score=match_score,
     )
 
-    resume_words = analysis_result.resume_words
     jd_words = analysis_result.job_description_words
     matched = analysis_result.matched
     missing = analysis_result.missing
@@ -233,7 +214,7 @@ if resume_uploaded and job_desc_uploaded:
 
     # --- Peer Reviews ---
     st.markdown("## 📣 Peer Reviews")
-    review = st.text_area("Submit your resume for peer review:")
+    st.text_area("Submit your resume for peer review:")
     if st.button("Submit for Peer Review"):
         st.success("Your resume has been submitted for peer review.")
 
@@ -304,6 +285,5 @@ if resume_uploaded and job_desc_uploaded:
 # --- Footer ---
 st.markdown("---")
 st.markdown("<p style='text-align:center;'>© 2025 AI Resume Screener Bot | All Rights Reserved</p>", unsafe_allow_html=True)
-
 
 
