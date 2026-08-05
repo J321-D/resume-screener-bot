@@ -1,11 +1,17 @@
 import streamlit as st
-from collections import Counter
-import re
 import base64
 import plotly.express as px
 import pandas as pd
 from fpdf import FPDF
 
+from resume_screener.analysis import (
+    aggregate_resume_words,
+    calculate_match_score,
+    calculate_matched_words,
+    calculate_missing_words,
+    extract_keywords,
+    rank_missing_keywords,
+)
 from resume_screener.models import AnalysisResult, ExtractedDocument
 from resume_screener.parsing import parse_uploaded_document
 
@@ -103,21 +109,17 @@ else:
 
 # --- Keyword Matching ---
 if resume_uploaded and job_desc_uploaded:
-    def extract_keywords(text: str) -> set[str]:
-        words: list[str] = re.findall(r"\b\w+\b", text.lower())
-        return set(words)
-
-    resume_words: set[str] = set()
-    for document in resume_documents:
-        resume_words.update(extract_keywords(document.text))
+    resume_words = aggregate_resume_words(
+        document.text for document in resume_documents
+    )
 
     jd_text = job_description_document.text
     jd_words = extract_keywords(jd_text)
 
-    matched = resume_words.intersection(jd_words)
-    missing = jd_words - resume_words
+    matched = calculate_matched_words(resume_words, jd_words)
+    missing = calculate_missing_words(resume_words, jd_words)
 
-    match_score = round(len(matched) / len(jd_words) * 100, 1) if jd_words else 0
+    match_score = calculate_match_score(matched, jd_words)
     analysis_result = AnalysisResult(
         resume_words=resume_words,
         job_description_words=jd_words,
@@ -148,10 +150,14 @@ if resume_uploaded and job_desc_uploaded:
     st.json(filtered_matched)
 
     st.markdown("**🔴 Top Missing Keywords (by frequency):**")
-    top_missing_counts = Counter(re.findall(r"\b\w+\b", jd_text.lower()))
-    top_missing = [word for word in top_missing_counts if word in missing]
-    filtered_missing = [w for w in top_missing if keyword_filter.lower() in w.lower()] if keyword_filter else top_missing
-    st.json(sorted(filtered_missing[:50], key=lambda x: -jd_text.lower().count(x)))
+    missing_keyword_ranking = rank_missing_keywords(
+        jd_text,
+        missing,
+        keyword_filter,
+    )
+    top_missing_counts = missing_keyword_ranking.counts
+    filtered_missing = missing_keyword_ranking.filtered
+    st.json(missing_keyword_ranking.displayed)
 
     if st.checkbox("📉 Show bar chart of missing keywords"):
         top_list = filtered_missing[:20]
@@ -252,4 +258,3 @@ if resume_uploaded and job_desc_uploaded:
 # --- Footer ---
 st.markdown("---")
 st.markdown("<p style='text-align:center;'>© 2025 AI Resume Screener Bot | All Rights Reserved</p>", unsafe_allow_html=True)
-
