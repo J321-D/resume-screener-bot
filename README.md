@@ -1,5 +1,8 @@
-# Resume Screener Bot
+# Resume Keyword Screener
 
+🚀 **Live Demo:** 🚀 **Live Demo:** https://resume-keyword-screener.streamlit.app
+
+ATS-style résumé keyword analysis tool with PDF, DOCX, and TXT parsing, lexical keyword matching, scoring, visualizations, and PDF report generation.
 A Streamlit application that compares the unique words in one or more resumes with
 the unique words in a job description. It accepts PDF, DOCX, and TXT input, shows
 matched and missing words, provides simple visualizations, and can export a PDF
@@ -115,5 +118,14 @@ data owner's informed consent. The current baseline performs keyword matching lo
 
 ## Project status
 
-The application is undergoing an incremental, behavior-preserving refactor. Algorithm
-changes will be reviewed separately and are not part of this baseline.
+Resume Keyword Screener v1.0.0 is a stable ATS-style résumé keyword analysis tool supporting:
+
+- PDF, DOCX, and TXT parsing
+- ATS-aware keyword tokenization
+- Exact keyword coverage analysis
+- Unicode-safe PDF report generation
+- Responsive Streamlit interface
+- Robust upload validation
+- 55 automated unit tests
+
+Future releases will focus on new capabilities rather than behavior-preserving refactors.
