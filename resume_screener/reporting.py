@@ -4,6 +4,12 @@ from __future__ import annotations
 
 import fitz
 
+from resume_screener.models import (
+    CategoryCoverage,
+    ConceptCategory,
+    NormalizedMatchExplanation,
+)
+
 _FONT_RESOURCE = "china-s"
 _PDF_FONT_NAME = "report-font"
 _FALLBACK_CHARACTER = "?"
@@ -62,6 +68,11 @@ def _add_page(document: fitz.Document, font: fitz.Font) -> fitz.Page:
 def generate_pdf_report(
     matched_keywords: set[str],
     filtered_missing_keywords: list[str],
+    *,
+    analysis_mode: str | None = None,
+    category_coverage: dict[ConceptCategory, CategoryCoverage] | None = None,
+    explanations: list[NormalizedMatchExplanation] | None = None,
+    ordered_matched_keywords: list[str] | None = None,
 ) -> bytes:
     """Build the current report and return valid, Unicode-capable PDF bytes.
 
@@ -71,15 +82,54 @@ def generate_pdf_report(
     """
     font = fitz.Font(fontname=_FONT_RESOURCE)
     title = _replace_unsupported_glyphs("Keyword Matching Report", font)
+    matched_for_report = (
+        ordered_matched_keywords
+        if ordered_matched_keywords is not None
+        else sorted(matched_keywords)
+    )
     report_lines = [
         _replace_unsupported_glyphs(
-            f"Matched Keywords: {sorted(matched_keywords)}", font
+            f"Matched Keywords: {matched_for_report}", font
         ),
         "",
         _replace_unsupported_glyphs(
             f"Missing Keywords: {filtered_missing_keywords[:50]}", font
         ),
     ]
+    if analysis_mode is not None:
+        report_lines.extend(
+            [
+                "",
+                _replace_unsupported_glyphs(
+                    f"Analysis Mode: {analysis_mode}", font
+                ),
+            ]
+        )
+    if category_coverage:
+        report_lines.extend(["", "Category Coverage:"])
+        for category in ConceptCategory:
+            coverage = category_coverage[category]
+            category_value = (
+                f"{coverage.display_value} "
+                f"({coverage.matched}/{coverage.total})"
+                if coverage.total
+                else coverage.display_value
+            )
+            report_lines.append(
+                _replace_unsupported_glyphs(
+                    f"{category.value}: {category_value}", font
+                )
+            )
+    if explanations:
+        report_lines.extend(["", "Normalized Matches:"])
+        for explanation in explanations:
+            report_lines.append(
+                _replace_unsupported_glyphs(
+                    f"{explanation.resume_term} -> {explanation.job_term} "
+                    f"({explanation.concept})",
+                    font,
+                )
+            )
 
     with fitz.open() as document:
         page = _add_page(document, font)

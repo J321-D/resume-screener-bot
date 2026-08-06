@@ -12,7 +12,9 @@ The keyword coverage score measures **lexical overlap only**. It is **not** an a
 
 - 📄 PDF, DOCX, and TXT parsing
 - 🎯 ATS-aware keyword tokenization
-- 📊 Exact lexical keyword coverage analysis
+- 📊 Skills-focused and v1.0-compatible lexical analysis modes
+- 🧩 Deterministic phrase and curated synonym matching
+- 🗂️ Technical, quality, tools, education, and experience category coverage
 - 📈 Matched and missing keyword visualizations
 - 📑 Unicode-safe PDF report generation
 - 📱 Responsive Streamlit interface
@@ -37,12 +39,25 @@ The keyword coverage score measures **lexical overlap only**. It is **not** an a
 
 - Upload multiple résumés or paste résumé text.
 - Upload or paste one job description.
-- Combine all résumé words into one unique keyword set.
+- Combine all supplied résumés into one comparison set.
+- Default to **Skills-focused analysis**, a relevance-focused lexical mode that
+  filters a small documented stop-word set, recognizes curated two- and three-word
+  phrases longest-first, and reports category coverage.
+- Offer **Full lexical analysis** as a v1.0 compatibility mode with unchanged
+  tokenization, ranking, filtering, résumé union, scoring, and warning behavior.
 - Preserve common punctuated and hyphenated technical terms during tokenization, including `C++`, `C#`, `.NET`, `Node.js`, and `machine-learning`.
 - Calculate the percentage of unique job-description keywords found in the résumé set.
 - Display matched keywords and rank missing keywords by descending exact-token frequency, using first appearance in the job description as the tie-breaker.
 - Render missing-keyword and skill-presence charts.
 - Generate a Unicode-safe PDF keyword report.
+
+Skills-focused normalization is intentionally narrow and deterministic. Curated
+aliases include `QC`/quality control, `QA`/quality assurance, `GMP`/good
+manufacturing practice, `DOE`/design of experiments, `CAPA`/corrective and
+preventive action, `SOP`/standard operating procedure, `EBR`/electronic batch
+record, and explicitly documented singular, plural, and hyphenated equivalents.
+Unknown non-stop-word terms remain visible in the **Uncategorized** category.
+There is no stemming, fuzzy matching, embedding model, AI, or external API call.
 
 The GPT toggle, template downloads, peer-review submission, and personalized coaching sections are currently non-functional placeholders reserved for future features.
 
@@ -127,12 +142,14 @@ The project also includes a comprehensive automated unittest suite.
 streamlit run app.py
 ```
 
-2. Paste `Python SQL` into the résumé field.
-3. Paste `Python SQL MATLAB` into the job description field.
-4. Confirm the displayed coverage score is **66.7%**.
-5. Confirm that `python` and `sql` are matched and `matlab` is missing.
-6. Upload representative PDF, DOCX, and TXT files and verify their extracted text.
-7. Verify that charts and keyword lists render correctly.
+2. Select **Full lexical analysis**.
+3. Paste `Python SQL` into the résumé field.
+4. Paste `Python SQL MATLAB` into the job description field.
+5. Confirm the displayed coverage score is **66.7%**.
+6. Confirm that `python` and `sql` are matched and `matlab` is missing.
+7. Switch to **Skills-focused analysis** and verify category coverage appears.
+8. Upload representative PDF, DOCX, and TXT files and verify their extracted text.
+9. Verify that charts and keyword lists render correctly.
 
 The **66.7%** result is a characterization of the current lexical keyword algorithm and is **not** an endorsement of that scoring model.
 
@@ -151,14 +168,15 @@ Résumés often contain sensitive personal information.
 
 ## Project status
 
-**Resume Keyword Screener v1.0.0** is a stable ATS-style résumé keyword analysis tool supporting:
+**Resume Keyword Screener v1.1.0** adds deterministic relevance-focused analysis while preserving the v1.0 lexical mode. It supports:
 
 - PDF, DOCX, and TXT parsing
 - ATS-aware keyword tokenization
-- Exact lexical keyword coverage analysis
+- Skills-focused phrase, synonym, and category analysis
+- Exact v1.0-compatible lexical keyword coverage
 - Unicode-safe PDF report generation
 - Responsive Streamlit interface
 - Robust upload validation
-- 55 automated unit tests
+- 71 automated unittest tests
 
 Future releases will focus on additional capabilities while maintaining reliable keyword analysis and report generation.

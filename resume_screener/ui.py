@@ -2,14 +2,20 @@
 
 from __future__ import annotations
 
-from collections import Counter
+from collections.abc import Mapping
 from typing import Any
 
 import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from resume_screener.models import ExtractedDocument
+from resume_screener.models import (
+    AnalysisMode,
+    CategoryCoverage,
+    ConceptCategory,
+    ExtractedDocument,
+    NormalizedMatchExplanation,
+)
 from resume_screener.parsing import MAX_UPLOAD_SIZE_MB
 from resume_screener.reporting import generate_pdf_report
 
@@ -32,6 +38,27 @@ def render_header() -> None:
         """,
         unsafe_allow_html=True,
     )
+
+
+def render_analysis_mode_selector() -> AnalysisMode:
+    """Render the compact deterministic analysis-mode control."""
+    selected = st.radio(
+        "Analysis mode",
+        options=[mode.value for mode in AnalysisMode],
+        horizontal=True,
+        help=(
+            "Skills-focused analysis filters filler words and uses only curated "
+            "phrases and synonyms. Full lexical analysis preserves v1.0 behavior."
+        ),
+    )
+    if selected == AnalysisMode.SKILLS_FOCUSED.value:
+        st.caption(
+            "Relevance-focused lexical comparison—not an ATS prediction or "
+            "hiring assessment."
+        )
+    else:
+        st.caption("v1.0-compatible full lexical keyword comparison.")
+    return AnalysisMode(selected)
 
 
 def render_input_panels() -> tuple[list[Any], Any | None, str, str]:
@@ -109,21 +136,59 @@ def render_keyword_coverage_summary(
     total_job_description_tokens: int,
     *,
     show_low_score_warning: bool,
+    score_label: str = "Keyword coverage",
+    analysis_caption: str | None = None,
 ) -> None:
     """Render the existing score with neutral lexical-coverage framing."""
     st.markdown('<div class="rks-section-rule"></div>', unsafe_allow_html=True)
     st.subheader("Coverage overview")
     score_column, matched_column, missing_column, total_column = st.columns(4)
-    score_column.metric("Keyword coverage", f"{match_score}%")
+    score_column.metric(score_label, f"{match_score}%")
     matched_column.metric("Matched", matched_count)
     missing_column.metric("Missing", missing_count)
     total_column.metric("Unique JD tokens", total_job_description_tokens)
-    st.caption("Multiple supplied résumés are combined for this lexical comparison.")
+    st.caption(
+        analysis_caption
+        or "Multiple supplied résumés are combined for this lexical comparison."
+    )
 
     if show_low_score_warning:
         st.warning(
             "📉 Low match score — consider revising your resume to include more relevant keywords."
         )
+
+
+def render_category_coverage(
+    category_coverage: dict[ConceptCategory, CategoryCoverage],
+) -> None:
+    """Render deterministic category scores, including the explicit fallback."""
+    st.subheader("Category coverage")
+    columns = st.columns(3)
+    for index, category in enumerate(ConceptCategory):
+        coverage = category_coverage[category]
+        columns[index % len(columns)].metric(
+            category.value,
+            coverage.display_value,
+            help=(
+                f"{coverage.matched} of {coverage.total} job concepts matched"
+                if coverage.total
+                else "No applicable job-description concepts in this category"
+            ),
+        )
+
+
+def render_normalized_match_explanations(
+    explanations: list[NormalizedMatchExplanation],
+) -> None:
+    """Render explicit normalized matches in a collapsed disclosure."""
+    if not explanations:
+        return
+    with st.expander("Normalized match explanations", expanded=False):
+        for explanation in explanations:
+            st.markdown(
+                f"- `{explanation.resume_term}` matched "
+                f"`{explanation.job_term}` as **{explanation.concept}**"
+            )
 
 
 def render_keyword_panels(
@@ -149,9 +214,11 @@ def render_keyword_panels(
 
 def render_visualizations(
     filtered_missing_keywords: list[str],
-    missing_keyword_counts: Counter[str],
+    missing_keyword_counts: Mapping[str, int],
     matched_keywords: set[str],
     job_description_keywords: set[str],
+    *,
+    focused_skill_terms: list[tuple[str, bool]] | None = None,
 ) -> None:
     """Render the existing charts after the keyword collections."""
     st.subheader("Visualizations")
@@ -167,13 +234,18 @@ def render_visualizations(
         )
         st.plotly_chart(missing_figure)
 
-    skills_in_resume = list(matched_keywords)
-    skills_in_job = list(job_description_keywords)
+    if focused_skill_terms is not None:
+        skills_in_job = [term for term, _ in focused_skill_terms]
+        skill_presence = [int(is_matched) for _, is_matched in focused_skill_terms]
+    else:
+        skills_in_resume = list(matched_keywords)
+        skills_in_job = list(job_description_keywords)
+        skill_presence = [
+            1 if skill in skills_in_resume else 0 for skill in skills_in_job
+        ]
     skill_matrix_data = {
         "Skills": skills_in_job,
-        "In Resume": [
-            1 if skill in skills_in_resume else 0 for skill in skills_in_job
-        ],
+        "In Resume": skill_presence,
     }
     skill_matrix = pd.DataFrame(skill_matrix_data)
     skill_figure = px.bar(
@@ -189,6 +261,11 @@ def render_visualizations(
 def render_pdf_download(
     matched_keywords: set[str],
     filtered_missing_keywords: list[str],
+    *,
+    analysis_mode: AnalysisMode = AnalysisMode.FULL_LEXICAL,
+    category_coverage: dict[ConceptCategory, CategoryCoverage] | None = None,
+    explanations: list[NormalizedMatchExplanation] | None = None,
+    ordered_matched_keywords: list[str] | None = None,
 ) -> None:
     """Render the existing two-step PDF generation and download workflow."""
     st.subheader("Export")
@@ -196,6 +273,10 @@ def render_pdf_download(
         pdf_bytes = generate_pdf_report(
             matched_keywords,
             filtered_missing_keywords,
+            analysis_mode=analysis_mode.value,
+            category_coverage=category_coverage,
+            explanations=explanations or [],
+            ordered_matched_keywords=ordered_matched_keywords,
         )
         st.download_button(
             "📥 Click here to download PDF",

@@ -19,6 +19,7 @@ os.environ.setdefault("MPLCONFIGDIR", "/private/tmp/resume-screener-matplotlib-t
 from streamlit.testing.v1 import AppTest  # noqa: E402
 
 from resume_screener.parsing import PDF_MEDIA_TYPE  # noqa: E402
+from resume_screener.models import AnalysisMode  # noqa: E402
 
 
 APP_PATH = Path(__file__).resolve().parents[1] / "app.py"
@@ -37,13 +38,21 @@ class UploadedBytes(BytesIO):
 class ResumeScreenerCharacterizationTests(unittest.TestCase):
     """Lock the observable baseline before production code is reorganized."""
 
-    def run_app(self, resume: str = "", job_description: str = "") -> AppTest:
+    def run_app(
+        self,
+        resume: str = "",
+        job_description: str = "",
+        *,
+        mode: AnalysisMode | None = AnalysisMode.FULL_LEXICAL,
+    ) -> AppTest:
         app = AppTest.from_file(str(APP_PATH)).run(timeout=30)
+        if mode is not None:
+            app.radio[0].set_value(mode.value)
         if resume:
             app.text_area[0].input(resume)
         if job_description:
             app.text_area[1].input(job_description)
-        if resume or job_description:
+        if resume or job_description or mode is not None:
             app.run(timeout=30)
         return app
 
@@ -56,7 +65,7 @@ class ResumeScreenerCharacterizationTests(unittest.TestCase):
         return "\n".join(element.value for element in app.markdown)
 
     def test_initial_ui_has_the_current_controls_and_no_results(self) -> None:
-        app = self.run_app()
+        app = self.run_app(mode=None)
 
         visible_markdown = self.markdown_text(app)
         self.assertIn("Resume Keyword Screener", visible_markdown)
@@ -73,6 +82,7 @@ class ResumeScreenerCharacterizationTests(unittest.TestCase):
             ["Paste your resume here:", "Paste the job description here:"],
         )
         self.assertEqual([checkbox.label for checkbox in app.checkbox], [])
+        self.assertEqual(app.radio[0].value, AnalysisMode.SKILLS_FOCUSED.value)
         self.assertEqual(self.metric_values(app), {})
         self.assertEqual([exception.value for exception in app.exception], [])
 
@@ -110,6 +120,30 @@ class ResumeScreenerCharacterizationTests(unittest.TestCase):
         )
         self.assertEqual(json.loads(app.json[0].value), ["c++"])
         self.assertEqual(json.loads(app.json[1].value), ["c#", ".net"])
+
+    def test_skills_focused_mode_filters_filler_and_explains_synonyms(self) -> None:
+        app = self.run_app(
+            "QC C++ cell-culture",
+            "We are seeking quality control and C++ with cell culture Python",
+            mode=AnalysisMode.SKILLS_FOCUSED,
+        )
+
+        metrics = self.metric_values(app)
+        self.assertEqual(metrics["Overall coverage"], "60.0%")
+        self.assertEqual(metrics["Quality/regulatory"], "100.0%")
+        self.assertEqual(metrics["Tools/software"], "50.0%")
+        self.assertEqual(metrics["Technical skills"], "100.0%")
+        self.assertEqual(metrics["Education"], "N/A — no applicable concepts")
+        self.assertEqual(
+            json.loads(app.json[0].value),
+            ["quality control", "C++", "cell culture"],
+        )
+        self.assertIn("Python", json.loads(app.json[1].value))
+        self.assertIn(
+            "Normalized match explanations",
+            [expander.label for expander in app.expander],
+        )
+        self.assertEqual([exception.value for exception in app.exception], [])
 
     def test_low_score_warning_uses_strictly_less_than_thirty_percent(self) -> None:
         app = self.run_app("one", "one two three four")

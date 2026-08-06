@@ -8,6 +8,11 @@ import warnings
 import fitz
 
 from resume_screener.reporting import generate_pdf_report
+from resume_screener.models import (
+    CategoryCoverage,
+    ConceptCategory,
+    NormalizedMatchExplanation,
+)
 
 
 def extract_pdf_text(pdf_bytes: bytes) -> str:
@@ -108,6 +113,55 @@ class GeneratePdfReportTests(unittest.TestCase):
         self.assertIn("Matched Keywords: ['python', 'sql']", normalized)
         self.assertLess(normalized.index("missing0"), normalized.index("missing49"))
         self.assertNotIn("missing50", normalized)
+
+    def test_adds_mode_categories_and_normalized_matches_after_existing_sections(self) -> None:
+        categories = {
+            category: CategoryCoverage(category, 0, 0, 0)
+            for category in ConceptCategory
+        }
+        categories[ConceptCategory.QUALITY_REGULATORY] = CategoryCoverage(
+            ConceptCategory.QUALITY_REGULATORY,
+            1,
+            2,
+            50.0,
+        )
+        report_text = extract_pdf_text(
+            generate_pdf_report(
+                {"quality control"},
+                ["process validation"],
+                analysis_mode="Skills-focused analysis",
+                category_coverage=categories,
+                explanations=[
+                    NormalizedMatchExplanation(
+                        concept="quality control",
+                        resume_term="QC",
+                        job_term="quality control",
+                    )
+                ],
+                ordered_matched_keywords=["quality control"],
+            )
+        )
+        normalized = " ".join(report_text.split())
+
+        positions = [
+            normalized.index(label)
+            for label in (
+                "Keyword Matching Report",
+                "Matched Keywords:",
+                "Missing Keywords:",
+                "Analysis Mode:",
+                "Category Coverage:",
+                "Normalized Matches:",
+            )
+        ]
+        self.assertEqual(positions, sorted(positions))
+        self.assertIn("Skills-focused analysis", normalized)
+        self.assertIn("Quality/regulatory: 50.0% (1/2)", normalized)
+        self.assertIn(
+            "Education: N/A — no applicable concepts",
+            normalized,
+        )
+        self.assertIn("QC -> quality control (quality control)", normalized)
 
 
 if __name__ == "__main__":

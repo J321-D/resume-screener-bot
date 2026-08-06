@@ -4,7 +4,14 @@ from __future__ import annotations
 
 import unittest
 
-from resume_screener.models import AnalysisResult, ExtractedDocument
+from resume_screener.models import (
+    AnalysisMode,
+    AnalysisResult,
+    CategoryCoverage,
+    ConceptCategory,
+    ExtractedDocument,
+    NormalizedConcept,
+)
 
 
 class ExtractedDocumentTests(unittest.TestCase):
@@ -40,6 +47,32 @@ class AnalysisResultTests(unittest.TestCase):
         self.assertIs(result.matched, matched)
         self.assertIs(result.missing, missing)
         self.assertEqual(result.match_score, 50.0)
+
+
+class FocusedModelTests(unittest.TestCase):
+    def test_declares_stable_mode_values_and_mutable_concept_counts(self) -> None:
+        concept = NormalizedConcept(
+            concept="quality control",
+            display_term="QC",
+            category=ConceptCategory.QUALITY_REGULATORY,
+            count=1,
+        )
+        concept.count += 1
+
+        self.assertEqual(AnalysisMode.SKILLS_FOCUSED.value, "Skills-focused analysis")
+        self.assertEqual(AnalysisMode.FULL_LEXICAL.value, "Full lexical analysis")
+        self.assertEqual(concept.count, 2)
+
+        empty_coverage = CategoryCoverage(
+            ConceptCategory.EDUCATION,
+            matched=0,
+            total=0,
+            score=0,
+        )
+        self.assertEqual(
+            empty_coverage.display_value,
+            "N/A — no applicable concepts",
+        )
 
 
 if __name__ == "__main__":
