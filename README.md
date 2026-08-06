@@ -14,6 +14,8 @@ job performance. Several UI sections are placeholders and are identified below.
 - Upload multiple resumes or paste resume text.
 - Upload or paste one job description.
 - Combine all resume words into one set.
+- Preserve common punctuated and hyphenated technical terms during tokenization,
+  including `C++`, `C#`, `.NET`, `Node.js`, and `machine-learning`.
 - Calculate the percentage of unique job-description words also found in that set.
 - Display matched and missing words.
 - Render missing-word and skill-presence charts.

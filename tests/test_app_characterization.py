@@ -82,12 +82,20 @@ class ResumeScreenerCharacterizationTests(unittest.TestCase):
         )
         self.assertEqual([exception.value for exception in app.exception], [])
 
-    def test_tokenization_preserves_the_current_technical_term_collapse(self) -> None:
+    def test_tokenization_preserves_ats_technical_terms(self) -> None:
         app = self.run_app("C++", "C++ C# .NET")
 
-        self.assertEqual(self.metric_values(app)["Keyword coverage"], "50.0%")
-        self.assertEqual(json.loads(app.json[0].value), ["c"])
-        self.assertEqual(json.loads(app.json[1].value), ["net"])
+        self.assertEqual(
+            self.metric_values(app),
+            {
+                "Keyword coverage": "33.3%",
+                "Matched": "1",
+                "Missing": "2",
+                "Unique JD tokens": "3",
+            },
+        )
+        self.assertEqual(json.loads(app.json[0].value), ["c++"])
+        self.assertEqual(json.loads(app.json[1].value), [])
 
     def test_low_score_warning_uses_strictly_less_than_thirty_percent(self) -> None:
         app = self.run_app("one", "one two three four")

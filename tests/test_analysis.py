@@ -15,10 +15,32 @@ from resume_screener.analysis import (
 
 
 class TokenizerTests(unittest.TestCase):
-    def test_preserves_current_technical_term_tokenization(self) -> None:
-        self.assertEqual(extract_keywords("C++ C# .NET"), {"c", "net"})
+    def test_preserves_cpp_as_one_token(self) -> None:
+        self.assertEqual(extract_keywords("C++"), {"c++"})
 
-    def test_lowercases_and_returns_unique_word_tokens(self) -> None:
+    def test_preserves_csharp_as_one_token(self) -> None:
+        self.assertEqual(extract_keywords("C#"), {"c#"})
+
+    def test_preserves_dotnet_as_one_token(self) -> None:
+        self.assertEqual(extract_keywords(".NET"), {".net"})
+
+    def test_preserves_nodejs_as_one_token(self) -> None:
+        self.assertEqual(extract_keywords("Node.js"), {"node.js"})
+
+    def test_preserves_hyphenated_technical_terms(self) -> None:
+        self.assertEqual(
+            extract_keywords(
+                "cell-culture quality-control real-time machine-learning"
+            ),
+            {
+                "cell-culture",
+                "quality-control",
+                "real-time",
+                "machine-learning",
+            },
+        )
+
+    def test_lowercases_and_returns_unique_ordinary_word_tokens(self) -> None:
         self.assertEqual(
             extract_keywords("Python, PYTHON and SQL_2!"),
             {"python", "and", "sql_2"},

@@ -8,6 +8,11 @@ from dataclasses import dataclass
 from typing import Iterable
 
 
+TOKEN_PATTERN = re.compile(
+    r"(?<!\w)(?:c\+\+|c#|\.net|node\.js|\w+(?:-\w+)+|\w+)(?!\w)"
+)
+
+
 @dataclass(slots=True)
 class MissingKeywordRanking:
     """Current missing-keyword counts, filtering, and display ordering."""
@@ -18,8 +23,8 @@ class MissingKeywordRanking:
 
 
 def extract_keywords(text: str) -> set[str]:
-    """Return the baseline set of lowercased word-regex tokens."""
-    words: list[str] = re.findall(r"\b\w+\b", text.lower())
+    """Return unique lowercase words while preserving common technical terms."""
+    words: list[str] = TOKEN_PATTERN.findall(text.lower())
     return set(words)
 
 
