@@ -24,11 +24,16 @@ export function Hero() {
           </Link>
         </div>
       </div>
-      <div className="hero-visual" aria-label="Illustration of a résumé keyword scan">
-        <div className="visual-grid" />
-        <div className="document-orbit orbit-one" />
-        <div className="document-orbit orbit-two" />
+      <div className="hero-visual" role="img" aria-label="Illustration of a résumé keyword scan">
+        <div className="hero-bloom bloom-cyan" aria-hidden="true" />
+        <div className="hero-bloom bloom-violet" aria-hidden="true" />
+        <div className="visual-grid" aria-hidden="true" />
+        <div className="visual-plate plate-back" aria-hidden="true" />
+        <div className="visual-plate plate-mid" aria-hidden="true" />
+        <div className="document-orbit orbit-one" aria-hidden="true" />
+        <div className="document-orbit orbit-two" aria-hidden="true" />
         <div className="scan-document">
+          <div className="document-reflection" aria-hidden="true" />
           <div className="document-topline"><span>RÉSUMÉ / ROLE MAP</span><span>01</span></div>
           <div className="document-heading" />
           <div className="document-line wide" />
@@ -41,8 +46,8 @@ export function Hero() {
             <span>78%</span><small>COVERAGE</small>
           </div>
         </div>
-        <div className="node node-a"><span /> MATCHED</div>
-        <div className="node node-b"><span /> OPPORTUNITY</div>
+        <div className="node node-a"><span /> MATCHED <i>12</i></div>
+        <div className="node node-b"><span /> OPPORTUNITY <i>04</i></div>
       </div>
     </section>
   );

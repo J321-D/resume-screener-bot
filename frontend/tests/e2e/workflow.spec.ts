@@ -14,8 +14,11 @@ const payload = {
 test("completes a keyboard-accessible pasted-text analysis", async ({ page }) => {
   await page.route("**/api/v1/analyze", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(payload) }));
   await page.goto("/");
+  await page.waitForLoadState("networkidle");
   await page.getByLabel("Résumé text").fill("QC Python");
   await page.getByLabel("Job-description text").fill("quality control Python SQL");
+  await expect(page.getByText("9 characters", { exact: true })).toBeVisible();
+  await expect(page.getByText("26 characters", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Run Keyword Scan" }).click();
   await expect(page.getByRole("heading", { name: "Your lexical coverage map" })).toBeVisible();
   await expect(page.getByRole("img", { name: "66.7% keyword coverage" })).toBeVisible();

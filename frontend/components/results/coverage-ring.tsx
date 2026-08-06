@@ -3,8 +3,9 @@
 import { motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState } from "react";
 
-export function CoverageRing({ score }: { score: number | null }) {
-  const reduceMotion = useReducedMotion();
+export function CoverageRing({ score, reducedMotion }: { score: number | null; reducedMotion?: boolean }) {
+  const systemReducedMotion = useReducedMotion();
+  const reduceMotion = reducedMotion ?? systemReducedMotion;
   const normalized = Math.max(0, Math.min(score ?? 0, 100));
   const [displayed, setDisplayed] = useState(reduceMotion ? normalized : 0);
   const circumference = 2 * Math.PI * 76;
@@ -14,6 +15,7 @@ export function CoverageRing({ score }: { score: number | null }) {
       setDisplayed(normalized);
       return;
     }
+    setDisplayed(0);
     const start = performance.now();
     let frame = 0;
     const animate = (time: number) => {
@@ -40,7 +42,7 @@ export function CoverageRing({ score }: { score: number | null }) {
           style={{ strokeDasharray: circumference }}
         />
       </svg>
-      <div><strong>{score === null ? "N/A" : `${displayed.toFixed(1)}%`}</strong><span>KEYWORD COVERAGE</span></div>
+      <div aria-hidden="true"><strong>{score === null ? "N/A" : `${displayed.toFixed(1)}%`}</strong><span>KEYWORD COVERAGE</span></div>
     </div>
   );
 }

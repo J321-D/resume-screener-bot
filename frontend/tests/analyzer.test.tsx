@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -56,6 +56,42 @@ describe("Analyzer", () => {
     expect(screen.getByText("CATEGORIZED GAPS")).toBeInTheDocument();
     expect(screen.getByText("Coverage opportunities")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /download pdf report/i })).toBeEnabled();
+  });
+
+  it("preserves engine order while progressively disclosing long opportunity lists", async () => {
+    const user = userEvent.setup();
+    const missingTerms = Array.from({ length: 20 }, (_, index) => ({
+      term: `term-${String(index + 1).padStart(2, "0")}`,
+      count: 20 - index,
+      category: "Technical skills",
+    }));
+    vi.spyOn(globalThis, "fetch").mockImplementation(() => jsonResponse({
+      ...response,
+      missing_terms: missingTerms,
+    }));
+    render(<Analyzer />);
+
+    await user.type(screen.getByLabelText("Résumé text"), "Python");
+    await user.type(screen.getByLabelText("Job-description text"), "Python SQL");
+    await user.click(screen.getByRole("button", { name: /run keyword scan/i }));
+
+    const list = await screen.findByRole("list", { name: "Coverage opportunities" });
+    expect(within(list).getAllByRole("listitem").map((item) => item.textContent)).toEqual(
+      missingTerms.slice(0, 12).map((item) => item.term),
+    );
+    expect(screen.queryByText("term-13")).not.toBeInTheDocument();
+
+    const disclosure = screen.getByRole("button", { name: "Show 8 more" });
+    expect(disclosure).toHaveAttribute("aria-expanded", "false");
+    disclosure.focus();
+    await user.keyboard("{Enter}");
+    expect(disclosure).toHaveAttribute("aria-expanded", "true");
+    expect(within(list).getAllByRole("listitem").map((item) => item.textContent)).toEqual(
+      missingTerms.map((item) => item.term),
+    );
+
+    await user.click(screen.getByRole("button", { name: "Show fewer" }));
+    await waitFor(() => expect(screen.queryByText("term-13")).not.toBeInTheDocument());
   });
 
   it("shows truthful request progress while the API is pending", async () => {
