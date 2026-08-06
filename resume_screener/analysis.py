@@ -66,24 +66,24 @@ def rank_missing_keywords(
     missing_words: set[str],
     keyword_filter: str,
 ) -> MissingKeywordRanking:
-    """Reproduce the baseline missing-keyword filtering and display ordering."""
-    counts = Counter(re.findall(r"\b\w+\b", job_description_text.lower()))
-    top_missing = [word for word in counts if word in missing_words]
+    """Rank missing ATS-aware tokens by exact frequency and first appearance."""
+    tokens = TOKEN_PATTERN.findall(job_description_text.lower())
+    counts = Counter(tokens)
+    missing_in_first_occurrence_order = [
+        word for word in counts if word in missing_words
+    ]
     filtered = (
         [
             word
-            for word in top_missing
+            for word in missing_in_first_occurrence_order
             if keyword_filter.lower() in word.lower()
         ]
         if keyword_filter
-        else top_missing
+        else missing_in_first_occurrence_order
     )
-    displayed = sorted(
-        filtered[:50],
-        key=lambda word: -job_description_text.lower().count(word),
-    )
+    ranked = sorted(filtered, key=lambda word: -counts[word])
     return MissingKeywordRanking(
         counts=counts,
-        filtered=filtered,
-        displayed=displayed,
+        filtered=ranked,
+        displayed=ranked[:50],
     )

@@ -17,7 +17,8 @@ job performance. Several UI sections are placeholders and are identified below.
 - Preserve common punctuated and hyphenated technical terms during tokenization,
   including `C++`, `C#`, `.NET`, `Node.js`, and `machine-learning`.
 - Calculate the percentage of unique job-description words also found in that set.
-- Display matched and missing words.
+- Display matched words and rank missing words by descending exact-token frequency,
+  using their first job-description appearance as the stable tie-breaker.
 - Render missing-word and skill-presence charts.
 - Generate a PDF keyword report when the installed FPDF implementation is compatible.
 

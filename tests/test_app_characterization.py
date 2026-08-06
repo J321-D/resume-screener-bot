@@ -95,7 +95,7 @@ class ResumeScreenerCharacterizationTests(unittest.TestCase):
             },
         )
         self.assertEqual(json.loads(app.json[0].value), ["c++"])
-        self.assertEqual(json.loads(app.json[1].value), [])
+        self.assertEqual(json.loads(app.json[1].value), ["c#", ".net"])
 
     def test_low_score_warning_uses_strictly_less_than_thirty_percent(self) -> None:
         app = self.run_app("one", "one two three four")
@@ -108,14 +108,14 @@ class ResumeScreenerCharacterizationTests(unittest.TestCase):
         self.assertEqual(self.metric_values(app)["Keyword coverage"], "30.0%")
         self.assertEqual(len(app.warning), 0)
 
-    def test_missing_keyword_display_truncates_before_frequency_ranking(self) -> None:
+    def test_missing_keyword_display_ranks_before_limit(self) -> None:
         early_words = [f"word{index}" for index in range(51)]
         job_description = " ".join(early_words + (["common"] * 100))
         app = self.run_app("present", job_description)
 
         displayed_missing = json.loads(app.json[1].value)
         self.assertEqual(len(displayed_missing), 50)
-        self.assertNotIn("common", displayed_missing)
+        self.assertEqual(displayed_missing[0], "common")
 
     def test_unfinished_placeholder_sections_are_hidden(self) -> None:
         app = self.run_app("Python SQL", "Python SQL MATLAB")

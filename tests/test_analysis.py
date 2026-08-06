@@ -98,7 +98,7 @@ class MatchScoreTests(unittest.TestCase):
 
 
 class MissingKeywordRankingTests(unittest.TestCase):
-    def test_truncates_before_ranking_and_can_exclude_most_frequent_word(self) -> None:
+    def test_ranks_before_limiting_to_fifty_items(self) -> None:
         early_words = [f"word{index}" for index in range(51)]
         text = " ".join(early_words + (["common"] * 100))
 
@@ -106,19 +106,19 @@ class MissingKeywordRankingTests(unittest.TestCase):
 
         self.assertEqual(result.counts["common"], 100)
         self.assertEqual(len(result.displayed), 50)
-        self.assertNotIn("common", result.displayed)
-        self.assertIn("common", result.filtered)
+        self.assertEqual(result.displayed[0], "common")
+        self.assertEqual(result.filtered[0], "common")
 
-    def test_ranks_with_substring_counts_instead_of_token_counts(self) -> None:
+    def test_uses_exact_token_counts_instead_of_substring_counts(self) -> None:
         result = rank_missing_keywords(
-            "training ai",
-            {"training", "ai"},
+            "artificial art",
+            {"artificial", "art"},
             "",
         )
 
-        self.assertEqual(result.counts["ai"], 1)
-        self.assertEqual(result.filtered, ["training", "ai"])
-        self.assertEqual(result.displayed, ["ai", "training"])
+        self.assertEqual(result.counts["art"], 1)
+        self.assertEqual(result.counts["artificial"], 1)
+        self.assertEqual(result.displayed, ["artificial", "art"])
 
     def test_filter_uses_substring_matching_and_preserves_first_occurrence(self) -> None:
         result = rank_missing_keywords(
@@ -128,12 +128,48 @@ class MissingKeywordRankingTests(unittest.TestCase):
         )
 
         self.assertEqual(result.filtered, ["training", "ai", "detail"])
-        self.assertEqual(result.displayed, ["ai", "training", "detail"])
+        self.assertEqual(result.displayed, ["training", "ai", "detail"])
 
     def test_equal_counts_keep_job_description_first_occurrence_order(self) -> None:
         result = rank_missing_keywords("beta alpha", {"alpha", "beta"}, "")
 
         self.assertEqual(result.displayed, ["beta", "alpha"])
+
+    def test_ranks_cpp_by_exact_token_frequency(self) -> None:
+        result = rank_missing_keywords("C++ Python C++", {"c++", "python"}, "")
+
+        self.assertEqual(result.counts["c++"], 2)
+        self.assertEqual(result.displayed, ["c++", "python"])
+
+    def test_includes_csharp_in_missing_keywords(self) -> None:
+        result = rank_missing_keywords("C# Python", {"c#", "python"}, "")
+
+        self.assertEqual(result.displayed, ["c#", "python"])
+
+    def test_includes_dotnet_in_missing_keywords(self) -> None:
+        result = rank_missing_keywords(".NET Python", {".net", "python"}, "")
+
+        self.assertEqual(result.displayed, [".net", "python"])
+
+    def test_includes_nodejs_in_missing_keywords(self) -> None:
+        result = rank_missing_keywords("Node.js Python", {"node.js", "python"}, "")
+
+        self.assertEqual(result.displayed, ["node.js", "python"])
+
+    def test_includes_hyphenated_terms_in_missing_keywords(self) -> None:
+        result = rank_missing_keywords(
+            "cell-culture real-time cell-culture",
+            {"cell-culture", "real-time"},
+            "",
+        )
+
+        self.assertEqual(result.counts["cell-culture"], 2)
+        self.assertEqual(result.displayed, ["cell-culture", "real-time"])
+
+    def test_ranks_ordinary_words_by_frequency(self) -> None:
+        result = rank_missing_keywords("python sql sql", {"python", "sql"}, "")
+
+        self.assertEqual(result.displayed, ["sql", "python"])
 
 
 if __name__ == "__main__":
