@@ -25,15 +25,15 @@ The keyword coverage score measures **lexical overlap only**. It is **not** an a
 
 ### Desktop
 
-![Desktop](docs/images/desktop.png)
+[![Desktop](docs/images/desktop.png)](docs/images/desktop.png)
 
 ### Mobile
 
-![Mobile](docs/images/mobile.png)
+[![Mobile](docs/images/mobile.png)](docs/images/mobile.png)
 
 ---
 
-## Current behavior
+## Core functionality
 
 - Upload multiple résumés or paste résumé text.
 - Upload or paste one job description.
