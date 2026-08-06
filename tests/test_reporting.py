@@ -12,6 +12,7 @@ from resume_screener.models import (
     CategoryCoverage,
     ConceptCategory,
     NormalizedMatchExplanation,
+    PrimaryCoverage,
 )
 
 
@@ -139,6 +140,7 @@ class GeneratePdfReportTests(unittest.TestCase):
                     )
                 ],
                 ordered_matched_keywords=["quality control"],
+                primary_coverage=PrimaryCoverage(1, 2, 50.0),
             )
         )
         normalized = " ".join(report_text.split())
@@ -156,12 +158,37 @@ class GeneratePdfReportTests(unittest.TestCase):
         ]
         self.assertEqual(positions, sorted(positions))
         self.assertIn("Skills-focused analysis", normalized)
+        self.assertIn("Primary Categorized Coverage: 50.0%", normalized)
+        self.assertIn(
+            "Uncategorized concepts are excluded from primary coverage.",
+            normalized,
+        )
         self.assertIn("Quality/regulatory: 50.0% (1/2)", normalized)
         self.assertIn(
             "Education: N/A — no applicable concepts",
             normalized,
         )
         self.assertIn("QC -> quality control (quality control)", normalized)
+
+    def test_reports_no_categorized_concepts_as_not_applicable(self) -> None:
+        categories = {
+            category: CategoryCoverage(category, 0, 0, 0)
+            for category in ConceptCategory
+        }
+        report_text = extract_pdf_text(
+            generate_pdf_report(
+                set(),
+                ["unknown"],
+                analysis_mode="Skills-focused analysis",
+                category_coverage=categories,
+                primary_coverage=PrimaryCoverage(0, 0, None),
+            )
+        )
+
+        self.assertIn(
+            "Primary Categorized Coverage: N/A — no categorized concepts",
+            " ".join(report_text.split()),
+        )
 
 
 if __name__ == "__main__":

@@ -14,7 +14,9 @@ from resume_screener.models import (
     CategoryCoverage,
     ConceptCategory,
     ExtractedDocument,
+    FocusedChartItem,
     NormalizedMatchExplanation,
+    PrimaryCoverage,
 )
 from resume_screener.parsing import MAX_UPLOAD_SIZE_MB
 from resume_screener.reporting import generate_pdf_report
@@ -130,7 +132,7 @@ def render_preview_expanders(
 
 
 def render_keyword_coverage_summary(
-    match_score: float | int,
+    match_score: float | int | None,
     matched_count: int,
     missing_count: int,
     total_job_description_tokens: int,
@@ -143,7 +145,10 @@ def render_keyword_coverage_summary(
     st.markdown('<div class="rks-section-rule"></div>', unsafe_allow_html=True)
     st.subheader("Coverage overview")
     score_column, matched_column, missing_column, total_column = st.columns(4)
-    score_column.metric(score_label, f"{match_score}%")
+    score_column.metric(
+        score_label,
+        "N/A — no categorized concepts" if match_score is None else f"{match_score}%",
+    )
     matched_column.metric("Matched", matched_count)
     missing_column.metric("Missing", missing_count)
     total_column.metric("Unique JD tokens", total_job_description_tokens)
@@ -163,6 +168,21 @@ def render_category_coverage(
 ) -> None:
     """Render deterministic category scores, including the explicit fallback."""
     st.subheader("Category coverage")
+    uncategorized = category_coverage[ConceptCategory.UNCATEGORIZED]
+    st.metric(
+        "Uncategorized lexical coverage",
+        uncategorized.display_value,
+        help=(
+            f"{uncategorized.matched} of {uncategorized.total} Uncategorized "
+            "job concepts matched. This metric is excluded from primary coverage."
+            if uncategorized.total
+            else "No Uncategorized job-description concepts"
+        ),
+    )
+    st.caption(
+        "Primary Skills-focused coverage excludes Uncategorized concepts; "
+        "their lexical coverage remains visible here and below."
+    )
     columns = st.columns(3)
     for index, category in enumerate(ConceptCategory):
         coverage = category_coverage[category]
@@ -218,7 +238,8 @@ def render_visualizations(
     matched_keywords: set[str],
     job_description_keywords: set[str],
     *,
-    focused_skill_terms: list[tuple[str, bool]] | None = None,
+    focused_skill_terms: list[FocusedChartItem] | None = None,
+    focused_summary: tuple[int, int] | None = None,
 ) -> None:
     """Render the existing charts after the keyword collections."""
     st.subheader("Visualizations")
@@ -235,8 +256,42 @@ def render_visualizations(
         st.plotly_chart(missing_figure)
 
     if focused_skill_terms is not None:
-        skills_in_job = [term for term, _ in focused_skill_terms]
-        skill_presence = [int(is_matched) for _, is_matched in focused_skill_terms]
+        if focused_summary is not None:
+            st.caption(
+                f"{focused_summary[0]} categorized concepts matched; "
+                f"{focused_summary[1]} categorized concepts missing"
+            )
+        if not focused_skill_terms:
+            st.info("No categorized concepts are available for this chart.")
+            return
+        focused_data = pd.DataFrame(
+            {
+                "Concept": [item.display_term for item in focused_skill_terms],
+                "Status": [item.state for item in focused_skill_terms],
+                "Coverage marker": [1] * len(focused_skill_terms),
+            }
+        )
+        st.caption(
+            "Top 25 categorized concepts: missing first, then matched; frequency "
+            "and first job-description appearance determine order."
+        )
+        focused_figure = px.bar(
+            focused_data,
+            x="Coverage marker",
+            y="Concept",
+            color="Status",
+            orientation="h",
+            title="Categorized skill coverage",
+            category_orders={"Status": ["Missing", "Matched"]},
+            color_discrete_map={"Missing": "#d55e00", "Matched": "#009e73"},
+        )
+        focused_figure.update_layout(
+            yaxis={"autorange": "reversed"},
+            xaxis={"showticklabels": False, "title": None},
+            height=max(360, 30 * len(focused_skill_terms) + 140),
+        )
+        st.plotly_chart(focused_figure)
+        return
     else:
         skills_in_resume = list(matched_keywords)
         skills_in_job = list(job_description_keywords)
@@ -266,6 +321,7 @@ def render_pdf_download(
     category_coverage: dict[ConceptCategory, CategoryCoverage] | None = None,
     explanations: list[NormalizedMatchExplanation] | None = None,
     ordered_matched_keywords: list[str] | None = None,
+    primary_coverage: PrimaryCoverage | None = None,
 ) -> None:
     """Render the existing two-step PDF generation and download workflow."""
     st.subheader("Export")
@@ -277,6 +333,7 @@ def render_pdf_download(
             category_coverage=category_coverage,
             explanations=explanations or [],
             ordered_matched_keywords=ordered_matched_keywords,
+            primary_coverage=primary_coverage,
         )
         st.download_button(
             "📥 Click here to download PDF",

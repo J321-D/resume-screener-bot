@@ -80,6 +80,31 @@ class CategoryCoverage:
         return f"{self.score}%"
 
 
+@dataclass(frozen=True)
+class PrimaryCoverage:
+    """Categorized-only coverage used as the focused-mode primary metric."""
+
+    matched: int
+    total: int
+    score: float | int | None
+
+    @property
+    def display_value(self) -> str:
+        """Avoid treating a job description with no categorized concepts as 0%."""
+        if self.total == 0:
+            return "N/A — no categorized concepts"
+        return f"{self.score}%"
+
+
+@dataclass(frozen=True)
+class FocusedChartItem:
+    """One deterministic, categorized concept in the focused coverage chart."""
+
+    display_term: str
+    state: str
+    count: int
+
+
 @dataclass
 class SkillsFocusedResult:
     """Ordered outputs from deterministic relevance-focused analysis."""
@@ -90,4 +115,9 @@ class SkillsFocusedResult:
     missing: list[NormalizedConcept]
     explanations: list[NormalizedMatchExplanation]
     category_coverage: dict[ConceptCategory, CategoryCoverage]
-    overall_score: float | int
+    primary_coverage: PrimaryCoverage
+
+    @property
+    def overall_score(self) -> float | int | None:
+        """Compatibility name for the categorized primary score."""
+        return self.primary_coverage.score

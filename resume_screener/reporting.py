@@ -8,6 +8,7 @@ from resume_screener.models import (
     CategoryCoverage,
     ConceptCategory,
     NormalizedMatchExplanation,
+    PrimaryCoverage,
 )
 
 _FONT_RESOURCE = "china-s"
@@ -73,6 +74,7 @@ def generate_pdf_report(
     category_coverage: dict[ConceptCategory, CategoryCoverage] | None = None,
     explanations: list[NormalizedMatchExplanation] | None = None,
     ordered_matched_keywords: list[str] | None = None,
+    primary_coverage: PrimaryCoverage | None = None,
 ) -> bytes:
     """Build the current report and return valid, Unicode-capable PDF bytes.
 
@@ -106,6 +108,26 @@ def generate_pdf_report(
             ]
         )
     if category_coverage:
+        if primary_coverage is not None:
+            report_lines.extend(
+                [
+                    "",
+                    _replace_unsupported_glyphs(
+                        "Primary Categorized Coverage: "
+                        f"{primary_coverage.display_value}",
+                        font,
+                    ),
+                    _replace_unsupported_glyphs(
+                        "Uncategorized Lexical Coverage: "
+                        f"{category_coverage[ConceptCategory.UNCATEGORIZED].display_value}",
+                        font,
+                    ),
+                    _replace_unsupported_glyphs(
+                        "Uncategorized concepts are excluded from primary coverage.",
+                        font,
+                    ),
+                ]
+            )
         report_lines.extend(["", "Category Coverage:"])
         for category in ConceptCategory:
             coverage = category_coverage[category]

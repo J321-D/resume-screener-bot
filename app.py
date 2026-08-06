@@ -13,12 +13,12 @@ from resume_screener.analysis import (
 from resume_screener.models import (
     AnalysisMode,
     AnalysisResult,
-    ConceptCategory,
     ExtractedDocument,
 )
 from resume_screener.parsing import DocumentParsingError, parse_uploaded_document
 from resume_screener.styles import apply_app_styles
 from resume_screener.skills.matcher import analyze_skills_focused
+from resume_screener.skills.charting import prepare_focused_chart_items
 from resume_screener.ui import (
     render_analysis_mode_selector,
     render_category_coverage,
@@ -152,11 +152,15 @@ if resume_uploaded and job_description_uploaded:
         )
         render_keyword_coverage_summary(
             focused_result.overall_score,
-            len(focused_result.matched),
-            len(focused_result.missing),
-            len(focused_result.job_concepts),
-            show_low_score_warning=focused_result.overall_score < 30,
-            score_label="Overall coverage",
+            focused_result.primary_coverage.matched,
+            focused_result.primary_coverage.total
+            - focused_result.primary_coverage.matched,
+            focused_result.primary_coverage.total,
+            show_low_score_warning=(
+                focused_result.overall_score is not None
+                and focused_result.overall_score < 30
+            ),
+            score_label="Categorized coverage",
             analysis_caption=(
                 "Skills-focused relevance coverage using deterministic curated "
                 "phrases and synonyms. Supplied résumés are combined."
@@ -182,17 +186,21 @@ if resume_uploaded and job_description_uploaded:
 
         render_keyword_panels(filtered_matched, filtered_missing[:50])
         render_normalized_match_explanations(focused_result.explanations)
-        categorized_terms = [
-            (item.display_term, item in focused_result.matched)
-            for item in focused_result.job_concepts
-            if item.category is not ConceptCategory.UNCATEGORIZED
-        ]
+        categorized_terms = prepare_focused_chart_items(
+            focused_result.job_concepts,
+            {item.concept for item in focused_result.matched},
+        )
         render_visualizations(
             filtered_missing,
             {item.display_term: item.count for item in filtered_missing_items},
             set(filtered_matched),
             {item.display_term for item in focused_result.job_concepts},
             focused_skill_terms=categorized_terms,
+            focused_summary=(
+                focused_result.primary_coverage.matched,
+                focused_result.primary_coverage.total
+                - focused_result.primary_coverage.matched,
+            ),
         )
         render_pdf_download(
             {item.concept for item in focused_result.matched},
@@ -201,6 +209,7 @@ if resume_uploaded and job_description_uploaded:
             category_coverage=focused_result.category_coverage,
             explanations=focused_result.explanations,
             ordered_matched_keywords=filtered_matched,
+            primary_coverage=focused_result.primary_coverage,
         )
 
 render_footer()

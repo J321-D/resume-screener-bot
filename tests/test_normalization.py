@@ -30,6 +30,10 @@ class ConceptNormalizationTests(unittest.TestCase):
             extract_keywords("a the and to of in with we are"),
             {"a", "the", "and", "to", "of", "in", "with", "we", "are"},
         )
+        self.assertEqual(
+            extract_keywords("Bachelor's candidate’s"),
+            {"bachelor", "s", "candidate"},
+        )
 
     def test_prefers_longest_phrase_and_does_not_double_count_components(self) -> None:
         concepts = normalize_concepts("root cause analysis root cause")
@@ -39,6 +43,73 @@ class ConceptNormalizationTests(unittest.TestCase):
             [("root cause analysis", 1), ("root cause", 1)],
         )
         self.assertNotIn("analysis", {item.concept for item in concepts})
+
+    def test_phrase_and_parenthetical_abbreviation_are_one_occurrence(self) -> None:
+        concepts = normalize_concepts(
+            "Standard Operating Procedures (SOP) and standard"
+        )
+
+        self.assertEqual(
+            [(item.concept, item.count) for item in concepts],
+            [("standard operating procedure", 1), ("standard", 1)],
+        )
+
+    def test_parenthetical_synonyms_do_not_inflate_phrase_counts(self) -> None:
+        concepts = normalize_concepts(
+            "Quality Control (QC), Quality Assurance (QA), "
+            "and Design of Experiments (DOE)"
+        )
+
+        self.assertEqual(
+            [(item.concept, item.count) for item in concepts],
+            [
+                ("quality control", 1),
+                ("quality assurance", 1),
+                ("design of experiments", 1),
+            ],
+        )
+
+    def test_removes_straight_and_curly_possessive_suffixes(self) -> None:
+        concepts = normalize_concepts("Bachelor's candidate’s Python's")
+
+        self.assertEqual(
+            [item.concept for item in concepts],
+            ["bachelor", "python"],
+        )
+        self.assertNotIn("s", {item.concept for item in concepts})
+
+    def test_filters_generic_focused_terms_but_keeps_categorized_actions(self) -> None:
+        concepts = normalize_concepts(
+            "The candidate has responsibilities to perform work and led "
+            "technical writing with Python unknown-platform"
+        )
+
+        self.assertEqual(
+            [item.concept for item in concepts],
+            ["led", "technical writing", "python", "unknown-platform"],
+        )
+
+    def test_preserves_curated_technical_phrases_while_filtering_headings(self) -> None:
+        concepts = normalize_concepts(
+            "Responsibilities Required Qualifications Preferred: process validation, "
+            "equipment qualification, root cause analysis, risk assessment, "
+            "design of experiments, electronic batch records, statistical analysis, "
+            "continuous improvement"
+        )
+
+        self.assertEqual(
+            [item.concept for item in concepts],
+            [
+                "process validation",
+                "equipment qualification",
+                "root cause analysis",
+                "risk assessment",
+                "design of experiments",
+                "electronic batch record",
+                "statistical analysis",
+                "continuous improvement",
+            ],
+        )
 
     def test_normalizes_only_curated_synonyms_and_preserves_first_surface(self) -> None:
         concepts = normalize_concepts("QC quality control unrelated-tools")

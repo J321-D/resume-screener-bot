@@ -2,16 +2,20 @@
 
 from __future__ import annotations
 
+import re
 from collections import OrderedDict
 
 from resume_screener.analysis import TOKEN_PATTERN
-from resume_screener.models import NormalizedConcept
+from resume_screener.models import ConceptCategory, NormalizedConcept
 from resume_screener.normalization.phrases import (
     MAX_PHRASE_TOKENS,
     MIN_PHRASE_TOKENS,
     PHRASE_MAP,
 )
-from resume_screener.normalization.stop_words import ENGLISH_STOP_WORDS
+from resume_screener.normalization.stop_words import (
+    FOCUSED_GENERIC_TERMS,
+    STANDARD_STOP_WORDS,
+)
 from resume_screener.normalization.synonyms import SYNONYM_MAP
 from resume_screener.skills.taxonomy import classify_concept
 
@@ -22,6 +26,37 @@ def _concept_for(surface: str) -> str:
         normalized_surface,
         PHRASE_MAP.get(normalized_surface, normalized_surface),
     )
+
+
+_POSSESSIVE_SUFFIX = re.compile(r"(?<=\w)['’]s\b", re.IGNORECASE)
+
+
+def _without_possessive_suffixes(text: str) -> str:
+    """Remove possessive suffixes while keeping every source offset stable."""
+    return _POSSESSIVE_SUFFIX.sub(lambda match: " " * len(match.group(0)), text)
+
+
+def _is_contiguous_phrase(text: str, candidate_matches: list[re.Match[str]]) -> bool:
+    """Permit phrase recognition only across whitespace, not punctuation."""
+    return all(
+        text[left.end() : right.start()].isspace()
+        for left, right in zip(candidate_matches, candidate_matches[1:])
+    )
+
+
+def _is_parenthetical_repeat(
+    text: str,
+    previous_end: int | None,
+    current_match: re.Match[str],
+    concept: str,
+    previous_concept: str | None,
+) -> bool:
+    """Identify ``long phrase (ABBR)`` as one occurrence of one concept."""
+    if previous_end is None or concept != previous_concept:
+        return False
+    before = text[previous_end : current_match.start()]
+    after = text[current_match.end() :]
+    return bool(re.fullmatch(r"\s*\(\s*", before) and re.match(r"\s*\)", after))
 
 
 def normalize_concepts(
@@ -35,9 +70,12 @@ def normalize_concepts(
     preventing its component tokens from being counted separately for that span.
     The first surface form remains the deterministic display form.
     """
-    matches = list(TOKEN_PATTERN.finditer(text.lower()))
+    normalized_text = _without_possessive_suffixes(text)
+    matches = list(TOKEN_PATTERN.finditer(normalized_text.lower()))
     concepts: OrderedDict[str, NormalizedConcept] = OrderedDict()
     index = 0
+    previous_concept: str | None = None
+    previous_end: int | None = None
 
     while index < len(matches):
         phrase_length = 0
@@ -48,6 +86,8 @@ def normalize_concepts(
         for candidate_length in range(MAX_PHRASE_TOKENS, MIN_PHRASE_TOKENS - 1, -1):
             candidate_matches = matches[index : index + candidate_length]
             if len(candidate_matches) != candidate_length:
+                continue
+            if not _is_contiguous_phrase(normalized_text, candidate_matches):
                 continue
             candidate = " ".join(match.group(0).lower() for match in candidate_matches)
             if candidate in PHRASE_MAP or candidate in SYNONYM_MAP:
@@ -60,21 +100,41 @@ def normalize_concepts(
 
         consumed = phrase_length or 1
         concept = _concept_for(normalized_surface)
-        if not (
-            filter_stop_words
-            and consumed == 1
-            and normalized_surface in ENGLISH_STOP_WORDS
-        ):
+        category = classify_concept(concept)
+        excluded_single_term = (
+            consumed == 1
+            and (
+                normalized_surface in STANDARD_STOP_WORDS
+                or (
+                    normalized_surface in FOCUSED_GENERIC_TERMS
+                    and category is ConceptCategory.UNCATEGORIZED
+                )
+            )
+        )
+        current_end = matches[index + consumed - 1].end()
+        parenthetical_repeat = consumed == 1 and _is_parenthetical_repeat(
+            normalized_text,
+            previous_end,
+            current_match,
+            concept,
+            previous_concept,
+        )
+        if not (filter_stop_words and excluded_single_term) and not parenthetical_repeat:
             existing = concepts.get(concept)
             if existing is None:
                 concepts[concept] = NormalizedConcept(
                     concept=concept,
                     display_term=surface,
-                    category=classify_concept(concept),
+                    category=category,
                     count=1,
                 )
             else:
                 existing.count += 1
+            previous_concept = concept
+            previous_end = current_end
+        elif not (filter_stop_words and excluded_single_term):
+            previous_concept = concept
+            previous_end = current_end
         index += consumed
 
     return list(concepts.values())

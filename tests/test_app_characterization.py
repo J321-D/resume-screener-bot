@@ -129,7 +129,14 @@ class ResumeScreenerCharacterizationTests(unittest.TestCase):
         )
 
         metrics = self.metric_values(app)
-        self.assertEqual(metrics["Overall coverage"], "60.0%")
+        self.assertEqual(metrics["Categorized coverage"], "75.0%")
+        self.assertEqual(metrics["Matched"], "3")
+        self.assertEqual(metrics["Missing"], "1")
+        self.assertEqual(metrics["Unique JD tokens"], "4")
+        self.assertEqual(
+            metrics["Uncategorized lexical coverage"],
+            "N/A — no applicable concepts",
+        )
         self.assertEqual(metrics["Quality/regulatory"], "100.0%")
         self.assertEqual(metrics["Tools/software"], "50.0%")
         self.assertEqual(metrics["Technical skills"], "100.0%")
@@ -143,6 +150,18 @@ class ResumeScreenerCharacterizationTests(unittest.TestCase):
             "Normalized match explanations",
             [expander.label for expander in app.expander],
         )
+        self.assertEqual([exception.value for exception in app.exception], [])
+
+    def test_focused_mode_reports_uncategorized_separately(self) -> None:
+        app = self.run_app(
+            "Python unknown-one",
+            "Python SQL unknown-one unknown-two",
+            mode=AnalysisMode.SKILLS_FOCUSED,
+        )
+
+        metrics = self.metric_values(app)
+        self.assertEqual(metrics["Categorized coverage"], "50.0%")
+        self.assertEqual(metrics["Uncategorized lexical coverage"], "50.0%")
         self.assertEqual([exception.value for exception in app.exception], [])
 
     def test_low_score_warning_uses_strictly_less_than_thirty_percent(self) -> None:

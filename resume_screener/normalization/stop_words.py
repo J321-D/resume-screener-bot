@@ -1,10 +1,10 @@
-"""Curated stop words used only by skills-focused analysis.
+"""Curated exclusions used only by skills-focused analysis.
 
 The list is intentionally small and explicit. Full lexical analysis does not use
 it, and technical abbreviations are not inferred or removed.
 """
 
-ENGLISH_STOP_WORDS = frozenset(
+STANDARD_STOP_WORDS = frozenset(
     {
         "a",
         "an",
@@ -16,6 +16,16 @@ ENGLISH_STOP_WORDS = frozenset(
         "by",
         "for",
         "from",
+        "has",
+        "have",
+        "having",
+        "he",
+        "her",
+        "here",
+        "hers",
+        "him",
+        "his",
+        "how",
         "in",
         "is",
         "it",
@@ -23,13 +33,83 @@ ENGLISH_STOP_WORDS = frozenset(
         "on",
         "or",
         "our",
+        "ours",
         "that",
+        "their",
+        "theirs",
+        "them",
+        "then",
+        "there",
+        "these",
         "the",
         "this",
+        "those",
         "to",
         "we",
+        "were",
+        "what",
+        "when",
+        "where",
+        "which",
+        "who",
+        "whom",
+        "why",
+        "will",
         "with",
         "you",
         "your",
     }
 )
+
+# Recruiting and generic action boilerplate is excluded only when the resulting
+# concept is Uncategorized. Explicit phrases, synonyms, and taxonomy entries win.
+FOCUSED_GENERIC_TERMS = frozenset(
+    {
+        "activities",
+        "analyze",
+        "applicant",
+        "applicants",
+        "candidate",
+        "candidates",
+        "duties",
+        "engineer",
+        "engineers",
+        "execute",
+        "executing",
+        "field",
+        "ideal",
+        "include",
+        "includes",
+        "including",
+        "investigate",
+        "maintain",
+        "operate",
+        "opportunity",
+        "organization",
+        "organizations",
+        "perform",
+        "performing",
+        "preferred",
+        "prepare",
+        "qualification",
+        "qualifications",
+        "related",
+        "required",
+        "requirements",
+        "responsibilities",
+        "responsibility",
+        "role",
+        "seeking",
+        "successful",
+        "support",
+        "team",
+        "teams",
+        "work",
+        "working",
+        "write",
+        "using",
+    }
+)
+
+# Kept as a public compatibility alias for callers and tests from v1.1.0.
+ENGLISH_STOP_WORDS = STANDARD_STOP_WORDS

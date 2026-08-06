@@ -16,6 +16,7 @@ TECHNICAL_SKILLS = frozenset(
         "machine learning",
         "process development",
         "real time",
+        "statistical analysis",
     }
 )
 
@@ -74,6 +75,7 @@ EXPERIENCE_ACTION = frozenset(
         "led",
         "managed",
         "technical writing",
+        "continuous improvement",
         "validated",
     }
 )

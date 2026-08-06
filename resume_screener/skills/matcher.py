@@ -9,7 +9,10 @@ from resume_screener.models import (
     SkillsFocusedResult,
 )
 from resume_screener.normalization.matcher import normalize_concepts
-from resume_screener.scoring.categories import calculate_category_coverage
+from resume_screener.scoring.categories import (
+    calculate_category_coverage,
+    calculate_primary_coverage,
+)
 
 
 def analyze_skills_focused(
@@ -41,17 +44,13 @@ def analyze_skills_focused(
                 )
             )
 
-    overall_score = (
-        round(len(matched) / len(job_concepts) * 100, 1)
-        if job_concepts
-        else 0
-    )
+    category_coverage = calculate_category_coverage(job_concepts, matched_names)
     return SkillsFocusedResult(
         resume_concepts=list(resume_by_concept.values()),
         job_concepts=job_concepts,
         matched=matched,
         missing=missing,
         explanations=explanations,
-        category_coverage=calculate_category_coverage(job_concepts, matched_names),
-        overall_score=overall_score,
+        category_coverage=category_coverage,
+        primary_coverage=calculate_primary_coverage(category_coverage),
     )

@@ -2,7 +2,7 @@
 
 🚀 **Live demo:** https://resume-keyword-screener.streamlit.app
 
-Resume Keyword Screener v1.1.0 is a local, deterministic résumé-to-job-description
+Resume Keyword Screener v1.1.2 is a local, deterministic résumé-to-job-description
 comparison tool built with Python and Streamlit. It measures lexical coverage; it
 does not predict ATS decisions, candidate performance, or hiring outcomes.
 
@@ -11,16 +11,23 @@ does not predict ATS decisions, candidate performance, or hiring outcomes.
 - **Skills-focused analysis** is the default relevance-focused lexical mode.
 - **Full lexical analysis** preserves the v1.0 tokenization, scoring, ranking,
   filtering, warning threshold, and combined-résumé behavior.
-- Deterministic English stop-word filtering in skills-focused mode.
-- Longest-first recognition of curated two- and three-word phrases.
+- Deterministic standard-stop-word and generic-boilerplate filtering in
+  skills-focused mode.
+- Longest-first recognition of curated two- and three-word phrases, with consumed
+  phrase components suppressed.
+- English possessive suffix cleanup in Skills-focused mode only.
 - Curated synonym and abbreviation normalization with original display terms.
 - Category coverage for technical skills, quality/regulatory terminology,
   tools/software, education, experience/action terms, and Uncategorized terms.
 - Explicit **Uncategorized** fallback for unknown non-stop-word concepts.
+- Categorized concepts determine primary focused coverage; separate Uncategorized
+  lexical coverage remains visible but does not affect that score.
 - ATS-aware tokens including `C++`, `C#`, `.NET`, `Node.js`, and hyphenated terms.
 - PDF, DOCX, and UTF-8 TXT uploads with a **10 MB per-file limit**.
 - Unicode-safe PDF reports with mode, category, and normalized-match details.
 - Responsive desktop and mobile Streamlit interface.
+- Horizontal focused coverage chart that visibly distinguishes matched and missing
+  categorized concepts.
 - Local-only document processing.
 
 There is no AI, embedding model, fuzzy matching, stemming, OCR, or external résumé
@@ -56,7 +63,8 @@ phrases longest-first, and maps only explicitly curated aliases. Examples includ
 - `bioreactors` ↔ bioreactor
 
 The first job-description surface form is used for deterministic display. Unknown
-meaningful terms are retained as Uncategorized. Empty categories display
+meaningful terms are retained as Uncategorized. The primary score excludes that
+fallback category, whose lexical coverage is displayed separately. Empty categories display
 `N/A — no applicable concepts` rather than a misleading zero-percent result.
 
 ### Full lexical analysis
@@ -110,7 +118,7 @@ streamlit run app.py
 
 ## Verification
 
-The project contains **72 deterministic unittest tests**.
+The project contains **84 deterministic unittest tests**.
 
 ```bash
 MPLCONFIGDIR=/private/tmp/resume-screener-matplotlib-tests \
@@ -146,7 +154,9 @@ python -c "import app"
 
 ## Project status
 
-**v1.1.0** provides deterministic skills-focused analysis while retaining the full
+**v1.1.2** is a focused quality-fix release that improves phrase consumption,
+possessive cleanup, generic-term filtering, categorized scoring, and chart clarity
+while retaining the full
 v1.0 lexical compatibility mode. It includes robust document parsing, category
 coverage, curated phrase and synonym matching, Unicode-safe reports, responsive UI,
-and 72 automated tests.
+and 84 automated tests.

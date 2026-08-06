@@ -2,7 +2,12 @@
 
 from __future__ import annotations
 
-from resume_screener.models import CategoryCoverage, ConceptCategory, NormalizedConcept
+from resume_screener.models import (
+    CategoryCoverage,
+    ConceptCategory,
+    NormalizedConcept,
+    PrimaryCoverage,
+)
 
 
 def calculate_category_coverage(
@@ -27,3 +32,18 @@ def calculate_category_coverage(
             score=score,
         )
     return coverage
+
+
+def calculate_primary_coverage(
+    category_coverage: dict[ConceptCategory, CategoryCoverage],
+) -> PrimaryCoverage:
+    """Combine explicit categories while excluding the fallback category."""
+    categorized = [
+        coverage
+        for category, coverage in category_coverage.items()
+        if category is not ConceptCategory.UNCATEGORIZED
+    ]
+    matched = sum(item.matched for item in categorized)
+    total = sum(item.total for item in categorized)
+    score = round(matched / total * 100, 1) if total else None
+    return PrimaryCoverage(matched=matched, total=total, score=score)
