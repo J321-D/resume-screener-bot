@@ -44,6 +44,8 @@ class ResponsiveStyleTests(unittest.TestCase):
         self.assertIn('base = "light"', config)
         self.assertIn('primaryColor = "#315EFB"', config)
         self.assertIn('font = "sans serif"', config)
+        self.assertIn('[server]', config)
+        self.assertIn('maxUploadSize = 10', config)
 
 
 if __name__ == "__main__":

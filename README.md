@@ -26,6 +26,14 @@ The GPT toggle, template downloads, peer-review submission, and personalized coa
 sections are placeholders in the current baseline. They should not be treated as
 implemented services.
 
+## Upload support and limitations
+
+- Supported uploads are PDF, DOCX, and UTF-8 TXT files up to 10 MB each.
+- Password-protected, malformed, unsupported, unreadable, and empty files are
+  rejected with a concise message instead of a raw parser error.
+- Image-only PDFs are detected when they contain no extractable text. OCR is not
+  included, so those files must be converted to text-searchable PDFs before upload.
+
 ## Requirements
 
 - Python 3.10 or newer

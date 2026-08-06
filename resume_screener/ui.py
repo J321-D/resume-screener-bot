@@ -10,6 +10,7 @@ import plotly.express as px
 import streamlit as st
 
 from resume_screener.models import ExtractedDocument
+from resume_screener.parsing import MAX_UPLOAD_SIZE_MB
 from resume_screener.reporting import generate_pdf_report
 
 
@@ -48,6 +49,7 @@ def render_input_panels() -> tuple[list[Any], Any | None, str, str]:
             "Upload your resume(s) (PDF, DOCX, TXT)",
             type=["pdf", "docx", "txt"],
             accept_multiple_files=True,
+            help=f"Maximum file size: {MAX_UPLOAD_SIZE_MB} MB per file.",
         )
         resume_text_manual = st.text_area("Paste your resume here:", height=260)
 
@@ -61,6 +63,7 @@ def render_input_panels() -> tuple[list[Any], Any | None, str, str]:
             "Upload job description (PDF, DOCX, TXT)",
             type=["pdf", "docx", "txt"],
             key="jd",
+            help=f"Maximum file size: {MAX_UPLOAD_SIZE_MB} MB per file.",
         )
         job_description_text_manual = st.text_area(
             "Paste the job description here:",

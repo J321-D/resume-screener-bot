@@ -4,13 +4,16 @@ from __future__ import annotations
 
 import unittest
 from io import BytesIO
-from zipfile import BadZipFile, ZIP_DEFLATED, ZipFile
+from zipfile import ZIP_DEFLATED, ZipFile
 
 import fitz
 
 from resume_screener.parsing import (
     DOCX_MEDIA_TYPE,
+    MAX_UPLOAD_SIZE_BYTES,
     PDF_MEDIA_TYPE,
+    DocumentParsingError,
+    ParsingErrorCode,
     parse_uploaded_document,
 )
 
@@ -22,6 +25,18 @@ class UploadedBytes(BytesIO):
         super().__init__(content)
         self.name = name
         self.type = media_type
+        self.size = len(content)
+
+
+class OversizedUpload:
+    """Upload double that proves size rejection happens before reading."""
+
+    name = "large.pdf"
+    type = PDF_MEDIA_TYPE
+    size = MAX_UPLOAD_SIZE_BYTES + 1
+
+    def read(self, size: int = -1) -> bytes:
+        raise AssertionError("oversized upload should not be read")
 
 
 def make_pdf(text: str | None = None) -> bytes:
@@ -85,9 +100,9 @@ class ParseUploadedDocumentTests(unittest.TestCase):
 
         self.assertEqual(result.text, "DOCX resume")
 
-    def test_decodes_text_as_utf8_and_ignores_invalid_bytes(self) -> None:
+    def test_extracts_valid_utf8_text(self) -> None:
         upload = UploadedBytes(
-            b"Python\xff SQL",
+            b"Python SQL",
             name="resume.txt",
             media_type="text/plain",
         )
@@ -96,57 +111,101 @@ class ParseUploadedDocumentTests(unittest.TestCase):
 
         self.assertEqual(result.text, "Python SQL")
 
-    def test_unknown_media_type_uses_the_plain_text_branch(self) -> None:
+    def test_rejects_oversized_upload_before_parsing(self) -> None:
+        with self.assertRaises(DocumentParsingError) as caught:
+            parse_uploaded_document(OversizedUpload())
+
+        self.assertEqual(caught.exception.code, ParsingErrorCode.FILE_TOO_LARGE)
+        self.assertIn("10 MB", caught.exception.user_message)
+
+    def test_rejects_unreadable_text(self) -> None:
+        upload = UploadedBytes(
+            b"Python\xff SQL",
+            name="resume.txt",
+            media_type="text/plain",
+        )
+
+        with self.assertRaises(DocumentParsingError) as caught:
+            parse_uploaded_document(upload)
+
+        self.assertEqual(caught.exception.code, ParsingErrorCode.UNREADABLE_TEXT)
+        self.assertIsInstance(caught.exception.__cause__, UnicodeDecodeError)
+
+    def test_rejects_unsupported_media_type(self) -> None:
         upload = UploadedBytes(
             b"fallback text",
             name="resume.bin",
             media_type="application/octet-stream",
         )
 
-        result = parse_uploaded_document(upload)
+        with self.assertRaises(DocumentParsingError) as caught:
+            parse_uploaded_document(upload)
 
-        self.assertEqual(result.text, "fallback text")
+        self.assertEqual(caught.exception.code, ParsingErrorCode.UNSUPPORTED_TYPE)
 
-    def test_image_only_pdf_returns_empty_text(self) -> None:
+    def test_rejects_image_only_pdf_without_ocr(self) -> None:
         upload = UploadedBytes(
             make_pdf(),
             name="scan.pdf",
             media_type=PDF_MEDIA_TYPE,
         )
 
-        result = parse_uploaded_document(upload)
+        with self.assertRaises(DocumentParsingError) as caught:
+            parse_uploaded_document(upload)
 
-        self.assertEqual(result.text, "")
+        self.assertEqual(caught.exception.code, ParsingErrorCode.NO_EXTRACTABLE_TEXT)
+        self.assertIn("OCR", caught.exception.user_message)
 
-    def test_malformed_pdf_preserves_fitz_exception(self) -> None:
+    def test_converts_malformed_pdf_exception(self) -> None:
         upload = UploadedBytes(
             b"not a pdf",
             name="broken.pdf",
             media_type=PDF_MEDIA_TYPE,
         )
 
-        with self.assertRaises(fitz.FileDataError):
+        with self.assertRaises(DocumentParsingError) as caught:
             parse_uploaded_document(upload)
 
-    def test_encrypted_pdf_preserves_fitz_exception(self) -> None:
+        self.assertEqual(caught.exception.code, ParsingErrorCode.MALFORMED_PDF)
+        self.assertIsInstance(caught.exception.__cause__, fitz.FileDataError)
+
+    def test_rejects_encrypted_pdf_with_friendly_error(self) -> None:
         upload = UploadedBytes(
             make_encrypted_pdf(),
             name="locked.pdf",
             media_type=PDF_MEDIA_TYPE,
         )
 
-        with self.assertRaisesRegex(ValueError, "document closed or encrypted"):
+        with self.assertRaises(DocumentParsingError) as caught:
             parse_uploaded_document(upload)
 
-    def test_malformed_docx_preserves_zip_exception(self) -> None:
+        self.assertEqual(caught.exception.code, ParsingErrorCode.ENCRYPTED_PDF)
+        self.assertIn("password-protected", caught.exception.user_message)
+
+    def test_converts_malformed_docx_exception(self) -> None:
         upload = UploadedBytes(
             b"not a docx archive",
             name="broken.docx",
             media_type=DOCX_MEDIA_TYPE,
         )
 
-        with self.assertRaises(BadZipFile):
+        with self.assertRaises(DocumentParsingError) as caught:
             parse_uploaded_document(upload)
+
+        self.assertEqual(caught.exception.code, ParsingErrorCode.MALFORMED_DOCX)
+        self.assertIsNotNone(caught.exception.__cause__)
+
+    def test_rejects_empty_extracted_text(self) -> None:
+        upload = UploadedBytes(
+            b"  \n\t",
+            name="empty.txt",
+            media_type="text/plain",
+        )
+
+        with self.assertRaises(DocumentParsingError) as caught:
+            parse_uploaded_document(upload)
+
+        self.assertEqual(caught.exception.code, ParsingErrorCode.EMPTY_TEXT)
 
 
 if __name__ == "__main__":

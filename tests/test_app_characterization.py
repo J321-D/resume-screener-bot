@@ -9,15 +9,29 @@ from __future__ import annotations
 import json
 import os
 import unittest
+from io import BytesIO
 from pathlib import Path
+from unittest.mock import patch
 
 
 os.environ.setdefault("MPLCONFIGDIR", "/private/tmp/resume-screener-matplotlib-tests")
 
 from streamlit.testing.v1 import AppTest  # noqa: E402
 
+from resume_screener.parsing import PDF_MEDIA_TYPE  # noqa: E402
+
 
 APP_PATH = Path(__file__).resolve().parents[1] / "app.py"
+
+
+class UploadedBytes(BytesIO):
+    """In-memory upload used to exercise the application parsing boundary."""
+
+    def __init__(self, content: bytes, *, name: str, media_type: str) -> None:
+        super().__init__(content)
+        self.name = name
+        self.type = media_type
+        self.size = len(content)
 
 
 class ResumeScreenerCharacterizationTests(unittest.TestCase):
@@ -158,6 +172,26 @@ class ResumeScreenerCharacterizationTests(unittest.TestCase):
         self.assertEqual([exception.value for exception in app.exception], [])
         download_buttons = app.get("download_button")
         self.assertEqual(download_buttons[0].label, "📥 Click here to download PDF")
+
+    def test_upload_parsing_error_is_friendly_and_does_not_crash(self) -> None:
+        broken_pdf = UploadedBytes(
+            b"not a pdf",
+            name="broken.pdf",
+            media_type=PDF_MEDIA_TYPE,
+        )
+
+        with patch(
+            "resume_screener.ui.render_input_panels",
+            return_value=([broken_pdf], None, "", ""),
+        ):
+            app = AppTest.from_file(str(APP_PATH)).run(timeout=30)
+
+        self.assertEqual(
+            [error.value for error in app.error],
+            ["broken.pdf is not a valid PDF or is corrupted."],
+        )
+        self.assertEqual([exception.value for exception in app.exception], [])
+        self.assertEqual(self.metric_values(app), {})
 
 
 if __name__ == "__main__":

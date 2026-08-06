@@ -9,7 +9,7 @@ from resume_screener.analysis import (
     rank_missing_keywords,
 )
 from resume_screener.models import AnalysisResult, ExtractedDocument
-from resume_screener.parsing import parse_uploaded_document
+from resume_screener.parsing import DocumentParsingError, parse_uploaded_document
 from resume_screener.styles import apply_app_styles
 from resume_screener.ui import (
     render_footer,
@@ -40,13 +40,21 @@ resume_uploaded = False
 job_description_uploaded = False
 
 if uploaded_resumes:
-    resume_uploaded = True
     for uploaded_resume in uploaded_resumes:
-        resume_documents.append(parse_uploaded_document(uploaded_resume))
+        try:
+            resume_documents.append(parse_uploaded_document(uploaded_resume))
+        except DocumentParsingError as error:
+            st.error(error.user_message)
+    resume_uploaded = bool(resume_documents)
 
 if uploaded_job_description:
-    job_description_uploaded = True
-    job_description_document = parse_uploaded_document(uploaded_job_description)
+    try:
+        job_description_document = parse_uploaded_document(
+            uploaded_job_description
+        )
+        job_description_uploaded = True
+    except DocumentParsingError as error:
+        st.error(error.user_message)
 
 # Preserve the current precedence: manual resume text is additive, while manual
 # job-description text replaces an uploaded job description.
