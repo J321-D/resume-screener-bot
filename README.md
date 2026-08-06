@@ -20,7 +20,7 @@ job performance. Several UI sections are placeholders and are identified below.
 - Display matched words and rank missing words by descending exact-token frequency,
   using their first job-description appearance as the stable tie-breaker.
 - Render missing-word and skill-presence charts.
-- Generate a PDF keyword report when the installed FPDF implementation is compatible.
+- Generate a Unicode-capable PDF keyword report.
 
 The GPT toggle, template downloads, peer-review submission, and personalized coaching
 sections are placeholders in the current baseline. They should not be treated as
@@ -33,6 +33,11 @@ implemented services.
   rejected with a concise message instead of a raw parser error.
 - Image-only PDFs are detected when they contain no extractable text. OCR is not
   included, so those files must be converted to text-searchable PDFs before upload.
+- PDF reports use the Droid Sans Fallback font supplied by PyMuPDF/MuPDF, supporting
+  accented Latin and Chinese, Japanese, and Korean text without a system-font install.
+  Droid Sans Fallback is an Android font licensed under the Apache License 2.0.
+  Characters unavailable in the font are replaced with `?` rather than causing
+  report generation to fail.
 
 ## Requirements
 
