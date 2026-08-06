@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from enum import Enum
 
 
-@dataclass(slots=True)
+@dataclass
 class ExtractedDocument:
     """Text extracted from an uploaded file or supplied manually."""
 
@@ -15,7 +15,7 @@ class ExtractedDocument:
     media_type: str | None = None
 
 
-@dataclass(slots=True)
+@dataclass
 class AnalysisResult:
     """The current keyword-analysis outputs without changing their semantics."""
 
@@ -44,7 +44,7 @@ class ConceptCategory(str, Enum):
     UNCATEGORIZED = "Uncategorized"
 
 
-@dataclass(slots=True)
+@dataclass
 class NormalizedConcept:
     """A canonical concept and its first observed surface representation."""
 
@@ -54,7 +54,7 @@ class NormalizedConcept:
     count: int
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class NormalizedMatchExplanation:
     """Explain an explicit synonym or surface-form match."""
 
@@ -63,7 +63,7 @@ class NormalizedMatchExplanation:
     job_term: str
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True)
 class CategoryCoverage:
     """Coverage for one curated concept category."""
 
@@ -80,7 +80,7 @@ class CategoryCoverage:
         return f"{self.score}%"
 
 
-@dataclass(slots=True)
+@dataclass
 class SkillsFocusedResult:
     """Ordered outputs from deterministic relevance-focused analysis."""
 

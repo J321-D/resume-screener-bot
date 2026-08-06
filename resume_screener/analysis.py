@@ -13,7 +13,7 @@ TOKEN_PATTERN = re.compile(
 )
 
 
-@dataclass(slots=True)
+@dataclass
 class MissingKeywordRanking:
     """Current missing-keyword counts, filtering, and display ordering."""
 
