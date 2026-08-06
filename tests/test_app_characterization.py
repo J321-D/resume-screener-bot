@@ -1,4 +1,4 @@
-"""Characterization tests for the Milestone 1 Streamlit baseline.
+"""Characterization tests for the Streamlit application workflow.
 
 These assertions intentionally describe current behavior, including known defects.
 They are not endorsements of the scoring or ranking algorithms.
@@ -34,59 +34,70 @@ class ResumeScreenerCharacterizationTests(unittest.TestCase):
         return app
 
     @staticmethod
-    def score_markdown(app: AppTest) -> list[str]:
-        return [
-            element.value
-            for element in app.markdown
-            if "Resume Match Score" in element.value
-        ]
+    def metric_values(app: AppTest) -> dict[str, str]:
+        return {element.label: element.value for element in app.metric}
+
+    @staticmethod
+    def markdown_text(app: AppTest) -> str:
+        return "\n".join(element.value for element in app.markdown)
 
     def test_initial_ui_has_the_current_controls_and_no_results(self) -> None:
         app = self.run_app()
 
-        self.assertEqual(
-            [title.value for title in app.title],
-            ["📄 AI Resume Screener Bot", "⚙️ Settings"],
+        visible_markdown = self.markdown_text(app)
+        self.assertIn("Resume Keyword Screener", visible_markdown)
+        self.assertIn(
+            "Compare résumé language with a job description",
+            visible_markdown,
+        )
+        self.assertIn(
+            "Lexical keyword comparison—not a candidate-performance assessment.",
+            visible_markdown,
         )
         self.assertEqual(
             [area.label for area in app.text_area],
             ["Paste your resume here:", "Paste the job description here:"],
         )
-        self.assertEqual(
-            [checkbox.label for checkbox in app.checkbox],
-            [
-                "Enable GPT Suggestions (coming soon)",
-                "Enable Keyword Highlighting",
-                "Enable Side-by-Side View",
-            ],
-        )
-        self.assertEqual(self.score_markdown(app), [])
+        self.assertEqual([checkbox.label for checkbox in app.checkbox], [])
+        self.assertEqual(self.metric_values(app), {})
         self.assertEqual([exception.value for exception in app.exception], [])
 
     def test_manual_text_produces_the_documented_score_and_keyword_lists(self) -> None:
         app = self.run_app("Python SQL", "Python SQL MATLAB")
 
-        self.assertEqual(self.score_markdown(app), ["**✅ Resume Match Score:** 66.7%"])
+        self.assertEqual(
+            self.metric_values(app),
+            {
+                "Keyword coverage": "66.7%",
+                "Matched": "2",
+                "Missing": "1",
+                "Unique JD tokens": "3",
+            },
+        )
         self.assertEqual(json.loads(app.json[0].value), ["python", "sql"])
         self.assertEqual(json.loads(app.json[1].value), ["matlab"])
+        self.assertEqual(
+            [expander.label for expander in app.expander],
+            ["Résumé preview", "Job description preview"],
+        )
         self.assertEqual([exception.value for exception in app.exception], [])
 
     def test_tokenization_preserves_the_current_technical_term_collapse(self) -> None:
         app = self.run_app("C++", "C++ C# .NET")
 
-        self.assertEqual(self.score_markdown(app), ["**✅ Resume Match Score:** 50.0%"])
+        self.assertEqual(self.metric_values(app)["Keyword coverage"], "50.0%")
         self.assertEqual(json.loads(app.json[0].value), ["c"])
         self.assertEqual(json.loads(app.json[1].value), ["net"])
 
     def test_low_score_warning_uses_strictly_less_than_thirty_percent(self) -> None:
         app = self.run_app("one", "one two three four")
-        self.assertEqual(self.score_markdown(app), ["**✅ Resume Match Score:** 25.0%"])
+        self.assertEqual(self.metric_values(app)["Keyword coverage"], "25.0%")
         self.assertEqual(len(app.warning), 1)
 
         app.text_area[0].input("one two three")
         app.text_area[1].input("one two three four five six seven eight nine ten")
         app.run(timeout=30)
-        self.assertEqual(self.score_markdown(app), ["**✅ Resume Match Score:** 30.0%"])
+        self.assertEqual(self.metric_values(app)["Keyword coverage"], "30.0%")
         self.assertEqual(len(app.warning), 0)
 
     def test_missing_keyword_display_truncates_before_frequency_ranking(self) -> None:
@@ -97,6 +108,39 @@ class ResumeScreenerCharacterizationTests(unittest.TestCase):
         displayed_missing = json.loads(app.json[1].value)
         self.assertEqual(len(displayed_missing), 50)
         self.assertNotIn("common", displayed_missing)
+
+    def test_unfinished_placeholder_sections_are_hidden(self) -> None:
+        app = self.run_app("Python SQL", "Python SQL MATLAB")
+        visible_markdown = self.markdown_text(app)
+
+        hidden_copy = [
+            "GPT Suggestions",
+            "Keyword Highlighting",
+            "Resume Templates",
+            "Peer Reviews",
+            "Virtual Career Coach",
+            "Interview Preparation",
+            "Personalized Career Path",
+            "Industry-Specific Resume Optimizer",
+            "Skill Development Plan",
+            "Smart Suggestions",
+        ]
+        for text in hidden_copy:
+            self.assertNotIn(text, visible_markdown)
+
+        self.assertEqual([selectbox.label for selectbox in app.selectbox], [])
+        self.assertNotIn(
+            "Submit your resume for peer review:",
+            [area.label for area in app.text_area],
+        )
+        self.assertNotIn(
+            "Enable GPT Suggestions (coming soon)",
+            [checkbox.label for checkbox in app.checkbox],
+        )
+        self.assertNotIn(
+            "Enable Keyword Highlighting",
+            [checkbox.label for checkbox in app.checkbox],
+        )
 
     def test_pdf_download_renders_without_an_application_exception(self) -> None:
         app = self.run_app("Python", "Python SQL")
