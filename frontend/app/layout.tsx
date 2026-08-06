@@ -1,0 +1,29 @@
+import type { Metadata, Viewport } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+
+const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
+const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono" });
+
+export const metadata: Metadata = {
+  title: "Resume Keyword Screener",
+  description:
+    "Private lexical résumé-to-job comparison with matched terms, coverage opportunities, and Unicode PDF reports.",
+  metadataBase: new URL("https://resume-keyword-screener.example"),
+  openGraph: {
+    title: "Resume Keyword Screener",
+    description: "Map your résumé language to the role—privately and deterministically.",
+    images: ["/social-preview.svg"],
+    type: "website",
+  },
+};
+
+export const viewport: Viewport = { colorScheme: "dark", themeColor: "#070B14" };
+
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  return (
+    <html lang="en" className={`${geist.variable} ${geistMono.variable}`}>
+      <body>{children}</body>
+    </html>
+  );
+}

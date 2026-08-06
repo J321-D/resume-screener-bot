@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from html import escape
 from typing import Any
 
 import pandas as pd
@@ -26,16 +27,34 @@ def render_header() -> None:
     """Render the product identity, explanation, and assessment disclaimer."""
     st.markdown(
         """
+        <nav class="rks-nav" aria-label="Application navigation">
+            <div class="rks-brand">
+                <span class="rks-brand-mark" aria-hidden="true">R</span>
+                <span>Resume Keyword Screener</span>
+            </div>
+            <span class="rks-nav-status">
+                <span class="rks-status-dot" aria-hidden="true"></span>
+                Local processing
+            </span>
+        </nav>
         <section class="rks-hero">
-            <div class="rks-eyebrow">Recruiter workflow</div>
-            <h1>Resume Keyword Screener</h1>
-            <p class="rks-hero-copy">
-                Compare résumé language with a job description and review lexical
-                keyword coverage in one focused workspace.
-            </p>
-            <p class="rks-disclaimer">
-                Lexical keyword comparison—not a candidate-performance assessment.
-            </p>
+            <div class="rks-hero-content">
+                <div class="rks-eyebrow">Focused document comparison</div>
+                <h1>Turn job descriptions into an actionable keyword plan.</h1>
+                <p class="rks-hero-copy">
+                    Compare résumé language with a job description and review lexical
+                    keyword coverage in one focused workspace.
+                </p>
+                <p class="rks-disclaimer">
+                    <span aria-hidden="true">ⓘ</span>
+                    Lexical keyword comparison—not a candidate-performance assessment.
+                </p>
+            </div>
+            <div class="rks-hero-aside" aria-hidden="true">
+                <div class="rks-hero-signal"><span></span><span></span><span></span></div>
+                <div class="rks-hero-aside-label">Private by design</div>
+                <div class="rks-hero-aside-copy">Your documents stay in this app session.</div>
+            </div>
         </section>
         """,
         unsafe_allow_html=True,
@@ -44,6 +63,15 @@ def render_header() -> None:
 
 def render_analysis_mode_selector() -> AnalysisMode:
     """Render the compact deterministic analysis-mode control."""
+    st.markdown(
+        """
+        <div class="rks-section-heading rks-section-heading--compact">
+            <span class="rks-step">01</span>
+            <div><h2>Choose comparison mode</h2><p>Control how terms are interpreted.</p></div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
     selected = st.radio(
         "Analysis mode",
         options=[mode.value for mode in AnalysisMode],
@@ -65,39 +93,59 @@ def render_analysis_mode_selector() -> AnalysisMode:
 
 def render_input_panels() -> tuple[list[Any], Any | None, str, str]:
     """Render desktop columns that naturally stack at narrow widths."""
-    st.subheader("Candidate and role inputs")
+    st.markdown(
+        """
+        <div class="rks-section-heading">
+            <span class="rks-step">02</span>
+            <div><h2>Add your documents</h2><p>Upload files or paste text directly.</p></div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
     resume_column, job_column = st.columns(2, gap="large")
 
     with resume_column:
-        st.markdown('<div class="rks-panel-label">Résumé content</div>', unsafe_allow_html=True)
-        st.markdown(
-            '<div class="rks-panel-copy">Upload one or more files, paste text, or use both.</div>',
-            unsafe_allow_html=True,
-        )
-        uploaded_resumes = st.file_uploader(
-            "Upload your resume(s) (PDF, DOCX, TXT)",
-            type=["pdf", "docx", "txt"],
-            accept_multiple_files=True,
-            help=f"Maximum file size: {MAX_UPLOAD_SIZE_MB} MB per file.",
-        )
-        resume_text_manual = st.text_area("Paste your resume here:", height=260)
+        with st.container(border=True):
+            st.markdown(
+                """
+                <div class="rks-panel-header">
+                    <span class="rks-panel-icon" aria-hidden="true">↥</span>
+                    <div><div class="rks-panel-label">Résumé content</div>
+                    <div class="rks-panel-copy">Upload one or more files, paste text, or use both.</div></div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+            uploaded_resumes = st.file_uploader(
+                "Upload your resume(s) (PDF, DOCX, TXT)",
+                type=["pdf", "docx", "txt"],
+                accept_multiple_files=True,
+                help=f"Maximum file size: {MAX_UPLOAD_SIZE_MB} MB per file.",
+            )
+            resume_text_manual = st.text_area("Paste your resume here:", height=260)
 
     with job_column:
-        st.markdown('<div class="rks-panel-label">Job description</div>', unsafe_allow_html=True)
-        st.markdown(
-            '<div class="rks-panel-copy">Upload one role description or paste its text.</div>',
-            unsafe_allow_html=True,
-        )
-        uploaded_job_description = st.file_uploader(
-            "Upload job description (PDF, DOCX, TXT)",
-            type=["pdf", "docx", "txt"],
-            key="jd",
-            help=f"Maximum file size: {MAX_UPLOAD_SIZE_MB} MB per file.",
-        )
-        job_description_text_manual = st.text_area(
-            "Paste the job description here:",
-            height=260,
-        )
+        with st.container(border=True):
+            st.markdown(
+                """
+                <div class="rks-panel-header">
+                    <span class="rks-panel-icon" aria-hidden="true">◎</span>
+                    <div><div class="rks-panel-label">Job description</div>
+                    <div class="rks-panel-copy">Upload one role description or paste its text.</div></div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+            uploaded_job_description = st.file_uploader(
+                "Upload job description (PDF, DOCX, TXT)",
+                type=["pdf", "docx", "txt"],
+                key="jd",
+                help=f"Maximum file size: {MAX_UPLOAD_SIZE_MB} MB per file.",
+            )
+            job_description_text_manual = st.text_area(
+                "Paste the job description here:",
+                height=260,
+            )
 
     return (
         uploaded_resumes or [],
@@ -143,7 +191,15 @@ def render_keyword_coverage_summary(
 ) -> None:
     """Render the existing score with neutral lexical-coverage framing."""
     st.markdown('<div class="rks-section-rule"></div>', unsafe_allow_html=True)
-    st.subheader("Coverage overview")
+    st.markdown(
+        """
+        <div class="rks-section-heading">
+            <span class="rks-step rks-step--success">03</span>
+            <div><h2>Coverage overview</h2><p>Your lexical comparison at a glance.</p></div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
     score_column, matched_column, missing_column, total_column = st.columns(4)
     score_column.metric(
         score_label,
@@ -156,6 +212,18 @@ def render_keyword_coverage_summary(
         analysis_caption
         or "Multiple supplied résumés are combined for this lexical comparison."
     )
+
+    if match_score is not None:
+        progress_value = max(0.0, min(float(match_score), 100.0))
+        st.markdown(
+            f"""
+            <div class="rks-progress" role="progressbar" aria-label="{escape(score_label)}"
+                 aria-valuemin="0" aria-valuemax="100" aria-valuenow="{progress_value}">
+                <span style="width: {progress_value}%"></span>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
     if show_low_score_warning:
         st.warning(
@@ -223,13 +291,44 @@ def render_keyword_panels(
         with st.container(border=True):
             st.markdown("#### Matched keywords")
             st.caption(f"{len(matched_keywords)} terms found in the supplied résumé content")
+            st.markdown(
+                _render_keyword_cloud(matched_keywords, "matched", "Matched terms"),
+                unsafe_allow_html=True,
+            )
             st.json(matched_keywords)
 
     with missing_column:
         with st.container(border=True):
             st.markdown("#### Missing keywords")
-            st.caption(f"{len(missing_keywords)} terms shown using the current ranking")
+            st.caption(f"{len(missing_keywords)} opportunities shown using the current ranking")
+            st.markdown(
+                _render_keyword_cloud(missing_keywords, "missing", "Missing terms"),
+                unsafe_allow_html=True,
+            )
             st.json(missing_keywords)
+
+
+def _render_keyword_cloud(
+    keywords: list[str],
+    state: str,
+    accessible_label: str,
+) -> str:
+    """Render escaped, ordered terms as an accessible presentation-only list."""
+    if not keywords:
+        empty_copy = (
+            "No matched terms yet."
+            if state == "matched"
+            else "No missing terms—excellent lexical coverage."
+        )
+        return f'<div class="rks-empty-state">{empty_copy}</div>'
+    chips = "".join(
+        f'<li class="rks-chip rks-chip--{state}">{escape(keyword)}</li>'
+        for keyword in keywords
+    )
+    return (
+        f'<ul class="rks-keyword-cloud" aria-label="{accessible_label}">'
+        f"{chips}</ul>"
+    )
 
 
 def render_visualizations(
@@ -242,7 +341,15 @@ def render_visualizations(
     focused_summary: tuple[int, int] | None = None,
 ) -> None:
     """Render the existing charts after the keyword collections."""
-    st.subheader("Visualizations")
+    st.markdown(
+        """
+        <div class="rks-section-heading rks-section-heading--compact">
+            <span class="rks-section-icon" aria-hidden="true">↗</span>
+            <div><h2>Visual insights</h2><p>Explore the distribution behind the result.</p></div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
     if st.checkbox("📉 Show bar chart of missing keywords"):
         top_list = filtered_missing_keywords[:20]
@@ -324,7 +431,16 @@ def render_pdf_download(
     primary_coverage: PrimaryCoverage | None = None,
 ) -> None:
     """Render the existing two-step PDF generation and download workflow."""
-    st.subheader("Export")
+    st.markdown(
+        """
+        <div class="rks-export-heading">
+            <div class="rks-export-icon" aria-hidden="true">↓</div>
+            <div><h2>Export your report</h2>
+            <p>Save a portable summary of the keyword comparison.</p></div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
     if st.button("⬇️ Download Report as PDF"):
         pdf_bytes = generate_pdf_report(
             matched_keywords,
@@ -346,6 +462,14 @@ def render_pdf_download(
 def render_footer() -> None:
     """Render a concise product footer."""
     st.markdown(
-        '<div class="rks-footer">Resume Keyword Screener · Local lexical analysis</div>',
+        """
+        <div class="rks-footer">
+            <span>Resume Keyword Screener</span>
+            <span class="rks-footer-separator">·</span>
+            <span>Local lexical analysis</span>
+            <span class="rks-footer-separator">·</span>
+            <span>Private by design</span>
+        </div>
+        """,
         unsafe_allow_html=True,
     )

@@ -8,6 +8,11 @@ It supports PDF, DOCX, and TXT uploads, ATS-aware technical tokenization, phrase
 
 The reported scores measure **lexical overlap only**. They are **not** assessments of candidate quality, experience, job performance, hiring suitability, or the behavior of a specific applicant-tracking system.
 
+The published v1.1.2 release uses the stable Streamlit interface. An additive,
+local Version 2 interface pairs a responsive Next.js client with a narrow FastAPI
+boundary over the same deterministic Python engine. Version 2 remains unreleased
+and has not been published or deployed.
+
 ---
 
 ## Features
@@ -232,6 +237,62 @@ Streamlit will display a local URL. Open it in a browser, provide résumé conte
 
 ---
 
+## Version 2 development interface
+
+Version 2 is additive: it does not replace or reimplement the Python engine. Run
+the API and frontend in separate terminals:
+
+```bash
+source .venv/bin/activate
+uvicorn api.main:app --reload --port 8000
+```
+
+```bash
+cd frontend
+pnpm install --frozen-lockfile
+pnpm dev
+```
+
+Copy `frontend/.env.example` to `frontend/.env.local` only when the API is not at
+the default `http://localhost:8000`. The API permits local development origins by
+default; production origins must be supplied explicitly through its environment.
+The client never performs scoring or normalization—it submits validated inputs to
+the API and renders the returned ordered contract.
+
+### Version 2 architecture
+
+```text
+frontend/                  Next.js application and browser-facing tests
+  app/                     Routes, metadata, and global design system
+  components/              Workspace, upload, progress, and result views
+  lib/                     Typed API contract and presentation helpers
+api/                       FastAPI transport boundary
+  routes/                  Health, analysis, and report endpoints
+  services/                Upload validation and engine orchestration
+resume_screener/           Established deterministic analysis and PDF engine
+tests/                     Python engine and API contract tests
+```
+
+Production deployments should set `NEXT_PUBLIC_API_URL` to the public HTTPS API
+origin and `RESUME_SCREENER_ALLOWED_ORIGINS` to the exact frontend origin. The
+frontend is compatible with standard Next.js hosts; the API requires a Python host
+that starts `uvicorn api.main:app --host 0.0.0.0 --port $PORT`. No deployment is
+performed by this repository configuration.
+
+### Project documentation
+
+- [Repository operating manual](AGENTS.md)
+- [Product definition](docs/PRODUCT.md)
+- [Roadmap](docs/ROADMAP.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [Design system](docs/DESIGN_SYSTEM.md)
+- [Verification checklist](docs/VERIFICATION.md)
+- [Architectural decisions](docs/DECISIONS.md)
+- [Changelog](docs/CHANGELOG.md)
+- [Contributing guide](docs/CONTRIBUTING.md)
+
+---
+
 ## Verification
 
 Run the application integrity and syntax check:
@@ -254,6 +315,26 @@ python -m unittest discover -s tests -v
 ```
 
 The v1.1.2 release includes **84 automated unittest tests** covering analysis, normalization, scoring, parsing, reporting, models, chart preparation, responsive styles, application behavior, and Python import compatibility.
+
+### Version 2 verification
+
+The local Version 2 milestone currently includes **97 Python unittest tests** plus
+**9 frontend unit, interaction, formatting, and accessibility tests**.
+
+```bash
+MPLCONFIGDIR=/private/tmp/resume-screener-matplotlib-tests \
+python -m unittest discover -s tests -v
+
+python scripts/check_app.py
+python -m pip check
+git diff --check
+python -m compileall app.py api resume_screener
+python -c "import app; import api.main"
+
+cd frontend
+pnpm check
+pnpm test:e2e
+```
 
 ---
 
@@ -379,4 +460,11 @@ The current release includes:
 - robust upload validation
 - 84 automated unittest tests
 
-Future work may include independent candidate comparison, weighted requirements, semantic matching, richer exports, OCR, project history, accessibility improvements, authentication, or optional AI-assisted features.
+The additive Version 2 frontend and FastAPI boundary remain local and unreleased;
+they have not been published or deployed. At this point in the local Version 2
+history, repository verification covers 97 Python tests, 9 frontend unit tests,
+and browser end-to-end checks.
+
+Future work may include independent candidate comparison, weighted requirements,
+semantic matching, richer exports, OCR, project history, accessibility
+improvements, authentication, or optional AI-assisted features.

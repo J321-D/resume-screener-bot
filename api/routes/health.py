@@ -1,0 +1,13 @@
+"""Service health endpoint."""
+
+from fastapi import APIRouter
+
+from api.schemas import HealthResponse
+
+
+router = APIRouter()
+
+
+@router.get("/health", response_model=HealthResponse)
+def health() -> HealthResponse:
+    return HealthResponse(status="ok", service="resume-keyword-screener", api_version="v1")
