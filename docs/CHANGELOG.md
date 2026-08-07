@@ -4,6 +4,18 @@ All notable changes are documented here. This project follows [Keep a Changelog]
 
 ## [Unreleased]
 
+### Version 2.1 review workspace milestone
+
+#### Added
+
+- Session-local opportunity review with Add to résumé, Already represented, Not relevant, and Review later decisions.
+- Review progress, status totals, filtering, search, reset confirmation, and ordered Markdown action checklist export.
+- Desktop/mobile browser coverage for review decisions and stale-analysis invalidation.
+
+#### Security
+
+- Review decisions remain in React memory, store no raw documents, and clear when the current analysis becomes stale.
+
 ### Repository operating system
 
 #### Added

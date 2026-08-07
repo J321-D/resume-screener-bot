@@ -62,6 +62,10 @@ Coverage is the results centerpiece. The score, ring, and supporting counts comm
 
 Long ordered lists show a useful initial subset and disclose the remaining count. Expansion preserves exact engine order, provides “Show more” and “Show fewer” controls, and remains usable by keyboard and assistive technology.
 
+## Review workspace
+
+Opportunity review is a focused editing workflow, not a survey or ranking system. Present one compact decision control per term, retain engine order, and keep progress and status totals factual. Use cyan for Add to résumé, emerald for Already represented, neutral treatment for Not relevant, and amber for Review later. Filters and search may narrow the view but never rerank it. Reset requires explicit confirmation, and stale analyses expose no prior decisions.
+
 ## Responsive behavior
 
 The same workflow must remain clear at desktop, tablet, and mobile widths. Preserve score prominence, natural chip wrapping, compact export actions, usable navigation, and zero horizontal overflow. Validate the breakpoint matrix in [VERIFICATION.md](VERIFICATION.md).

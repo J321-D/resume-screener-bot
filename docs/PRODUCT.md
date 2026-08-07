@@ -40,6 +40,7 @@ It does **not** measure candidate quality, predict applicant-tracking-system dec
 - Unicode-safe PDF reports
 - Streamlit compatibility interface
 - FastAPI boundary and responsive Next.js interface
+- Session-local opportunity review with status filters, search, progress, reset, and a Markdown action checklist
 - Local processing without document persistence or external résumé transmission
 
 ## Current limitations
@@ -47,7 +48,7 @@ It does **not** measure candidate quality, predict applicant-tracking-system dec
 - No OCR for image-only PDFs
 - No semantic similarity, stemming, fuzzy matching, embeddings, or generative AI
 - Curated normalization recognizes only documented concepts
-- No saved analyses, accounts, collaboration, or cross-candidate comparison
+- Review decisions reset on refresh or when analysis inputs become stale; there are no saved analyses, accounts, collaboration, or cross-candidate comparisons
 - Coverage is lexical evidence, not evidence of competency or experience
 
 ## Future vision

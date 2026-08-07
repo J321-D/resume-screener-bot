@@ -14,11 +14,11 @@ Priorities: **P0** release-critical, **P1** next planned work, **P2** valuable f
 
 ## Version 2.1 — Review workspace
 
-- [ ] **P1** Add a focused review workspace for moving between findings
+- [x] **P1** Add a focused review workspace for moving between findings
 - [ ] **P1** Highlight represented and missing résumé language without altering engine results
 - [ ] **P1** Add user-selectable theme support with accessible contrast
 - [ ] **P1** Add an export-readiness checklist
-- [ ] **P2** Expand browser coverage for review-state interactions
+- [x] **P2** Expand browser coverage for review-state interactions
 
 Approval gate: preserve engine calculations and API contracts; approve any new dependency before implementation.
 

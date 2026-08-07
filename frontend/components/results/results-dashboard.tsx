@@ -5,12 +5,14 @@ import { AlertTriangle, ArrowDownToLine, Check, ChevronDown, Clock3, FileText, L
 import { useId, useState } from "react";
 
 import type { AnalysisResponse } from "@/lib/contracts";
+import { ReviewWorkspace } from "@/components/review/review-workspace";
 import { CoverageRing } from "./coverage-ring";
 
 interface ResultsDashboardProps {
   result: AnalysisResponse;
   stale: boolean;
   reporting: boolean;
+  analysisKey: string;
   onDownload: () => void;
 }
 
@@ -70,7 +72,7 @@ function TermList({ items, label, limit, reduceMotion }: TermListProps) {
   );
 }
 
-export function ResultsDashboard({ result, stale, reporting, onDownload }: ResultsDashboardProps) {
+export function ResultsDashboard({ result, stale, reporting, analysisKey, onDownload }: ResultsDashboardProps) {
   const reduceMotion = useReducedMotion();
   const date = new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(result.metadata.analyzed_at));
   const categorized = result.categories.filter((category) => category.category !== "Uncategorized");
@@ -165,6 +167,12 @@ export function ResultsDashboard({ result, stale, reporting, onDownload }: Resul
           {result.warnings.map((warning) => <p key={`${warning.code}-${warning.message}`}><AlertTriangle size={15} /> {warning.message}</p>)}
         </div>
       )}
+
+      <ReviewWorkspace
+        key={`${analysisKey}:${stale ? "stale" : "current"}`}
+        opportunities={result.missing_terms}
+        stale={stale}
+      />
 
       <motion.article className="export-card" variants={cardVariants}>
         <div className="report-thumbnail" aria-hidden="true"><span>RKS</span><div /><div /><div /></div>

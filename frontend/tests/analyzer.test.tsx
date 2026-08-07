@@ -121,9 +121,16 @@ describe("Analyzer", () => {
     await user.click(screen.getByRole("button", { name: /run keyword scan/i }));
     await screen.findByRole("heading", { name: "Your lexical coverage map" });
 
+    await user.selectOptions(screen.getByLabelText("Review status for SQL"), "add");
+    expect(screen.getByText("1 of 1")).toBeInTheDocument();
+
     await user.type(resume, " MATLAB");
     expect(screen.getByText(/inputs changed after this scan/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /download pdf report/i })).toBeDisabled();
+    expect(screen.getByText(/review decisions were cleared/i)).toBeInTheDocument();
+    expect(screen.getByLabelText("Review status for SQL")).toHaveValue("");
+    expect(screen.getByLabelText("Review status for SQL")).toBeDisabled();
+    expect(screen.getByRole("button", { name: /download markdown checklist/i })).toBeDisabled();
   });
 
   it("shows structured API errors without exposing a stack trace", async () => {

@@ -30,6 +30,15 @@ and has not been published or deployed.
 - ✅ Robust upload validation and user-friendly errors
 - 🧪 84 automated unittest tests
 
+### Local Version 2 additions
+
+- Responsive Next.js client over the FastAPI application boundary.
+- Session-local review of every coverage opportunity using **Add to résumé**,
+  **Already represented**, **Not relevant**, and **Review later** statuses.
+- Reviewed/remaining progress, factual status totals, filters, and term search.
+- Ordered Markdown checklist export for opportunities marked Add to résumé.
+- Automatic decision clearing when changed inputs make the current analysis stale.
+
 ---
 
 ## Screenshots
@@ -319,8 +328,8 @@ The v1.1.2 release includes **84 automated unittest tests** covering analysis, n
 ### Version 2 verification
 
 The locally complete Version 2 milestone contains **97 deterministic Python
-unittest tests**, **12 frontend unit, interaction, formatting, and accessibility
-tests**, and **4 Playwright desktop/mobile checks**: **113 checks total**.
+unittest tests**, **17 frontend unit, interaction, formatting, and accessibility
+tests**, and **6 Playwright desktop/mobile checks**: **120 checks total**.
 
 ```bash
 MPLCONFIGDIR=/private/tmp/resume-screener-matplotlib-tests \
@@ -464,8 +473,8 @@ The current release includes:
 Version 2.0 is complete locally, including the additive FastAPI boundary, Next.js
 frontend, premium responsive interface, and repository operating documentation.
 It remains unpublished and undeployed. The current repository-level verification
-count is **113 checks**: 97 Python tests, 12 frontend unit/accessibility tests, and
-4 Playwright tests.
+count is **120 checks**: 97 Python tests, 17 frontend unit/accessibility tests, and
+6 Playwright tests.
 
 Future work may include independent candidate comparison, weighted requirements,
 semantic matching, richer exports, OCR, project history, accessibility

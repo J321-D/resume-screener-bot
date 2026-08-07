@@ -11,6 +11,17 @@ const payload = {
   warnings: [],
 };
 
+const reviewPayload = {
+  ...payload,
+  coverage: { ...payload.coverage, missing: 4, total: 6 },
+  missing_terms: [
+    { term: "SQL", count: 4, category: "Tools/software" },
+    { term: "GMP", count: 3, category: "Quality/regulatory" },
+    { term: "cell-culture", count: 2, category: "Technical skills" },
+    { term: "Node.js", count: 1, category: "Tools/software" },
+  ],
+};
+
 test("completes a keyboard-accessible pasted-text analysis", async ({ page }) => {
   await page.route("**/api/v1/analyze", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(payload) }));
   await page.goto("/");
@@ -22,7 +33,7 @@ test("completes a keyboard-accessible pasted-text analysis", async ({ page }) =>
   await page.getByRole("button", { name: "Run Keyword Scan" }).click();
   await expect(page.getByRole("heading", { name: "Your lexical coverage map" })).toBeVisible();
   await expect(page.getByRole("img", { name: "66.7% keyword coverage" })).toBeVisible();
-  await expect(page.getByText("SQL", { exact: true })).toBeVisible();
+  await expect(page.getByLabel("Coverage opportunities").getByText("SQL", { exact: true })).toBeVisible();
 });
 
 test("has no horizontal overflow at mobile width", async ({ page }) => {
@@ -30,4 +41,35 @@ test("has no horizontal overflow at mobile width", async ({ page }) => {
   await page.goto("/");
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
   expect(overflow).toBe(false);
+});
+
+test("reviews ordered opportunities and clears decisions when inputs become stale", async ({ page }) => {
+  await page.route("**/api/v1/analyze", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(reviewPayload) }));
+  await page.goto("/");
+  await page.waitForLoadState("networkidle");
+  await page.getByLabel("Résumé text").fill("QC Python");
+  await page.getByLabel("Job-description text").fill("quality control Python SQL GMP cell-culture Node.js");
+  await page.getByRole("button", { name: "Run Keyword Scan" }).click();
+
+  await expect(page.getByRole("heading", { name: "Turn opportunities into an editing plan" })).toBeVisible();
+  const reviewList = page.getByLabel("Opportunity review list");
+  await expect(reviewList.getByRole("article")).toHaveCount(4);
+  await expect(reviewList.getByRole("article").nth(0)).toContainText("SQL");
+  await expect(reviewList.getByRole("article").nth(3)).toContainText("Node.js");
+
+  await page.getByLabel("Review status for SQL").selectOption("add");
+  await page.getByLabel("Review status for GMP").selectOption("later");
+  await expect(page.getByText("2 of 4")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Download Markdown checklist" })).toBeEnabled();
+
+  await page.getByRole("radio", { name: "Review later" }).check();
+  await expect(reviewList.getByRole("article")).toHaveCount(1);
+  await expect(reviewList).toContainText("GMP");
+
+  await page.getByLabel("Résumé text").fill("QC Python MATLAB");
+  await expect(page.getByText(/review decisions were cleared/i)).toBeVisible();
+  await expect(page.getByLabel("Review status for SQL")).toHaveValue("");
+  await expect(page.getByLabel("Review status for SQL")).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Download Markdown checklist" })).toBeDisabled();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(false);
 });

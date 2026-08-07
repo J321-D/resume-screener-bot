@@ -99,3 +99,13 @@
 **Trade-offs:** Some terms require one additional interaction.
 
 **Alternatives rejected:** Unbounded chip walls; client-side reprioritization or invented impact scores.
+
+## ADR-011: Ephemeral client review state
+
+**Decision:** Keep Version 2.1 review decisions in React state keyed to the successful analysis signature.
+
+**Reason:** The workflow needs temporary presentation state, not persistence. Remounting on stale or unrelated analysis signatures prevents decisions from appearing under different inputs without storing document-derived data.
+
+**Trade-offs:** Decisions disappear on refresh and cannot yet be shared or included authoritatively in the server PDF.
+
+**Alternatives rejected:** `localStorage` or `sessionStorage` before a saved-workflow requirement; backend persistence; mutating the analysis response; trusting browser decisions as server report input without validation.

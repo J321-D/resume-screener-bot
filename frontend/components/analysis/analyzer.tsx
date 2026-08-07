@@ -191,6 +191,7 @@ export function Analyzer() {
           result={result}
           stale={stale}
           reporting={reporting}
+          analysisKey={resultSignature ?? "unkeyed"}
           onDownload={downloadReport}
         />
       )}
