@@ -109,3 +109,22 @@
 **Trade-offs:** Decisions disappear on refresh and cannot yet be shared or included authoritatively in the server PDF.
 
 **Alternatives rejected:** `localStorage` or `sessionStorage` before a saved-workflow requirement; backend persistence; mutating the analysis response; trusting browser decisions as server report input without validation.
+
+## ADR-012: Batched autonomous milestone execution
+
+**Decision:** Treat an approved milestone as authority for one complete,
+in-repository implementation and verification loop, while retaining explicit
+human gates for protected, architectural, external, destructive, dependency, and
+Git publication operations.
+
+**Reason:** The user should make product and risk decisions while the engineering
+agent handles routine implementation, diagnosis, self-correction, and verification
+without interrupting after each file group or check.
+
+**Trade-offs:** Milestone scope and invariants must be written clearly, and the
+completion report must provide enough evidence for the user to review a larger
+batch of work at once.
+
+**Alternatives rejected:** Approval after every edit or test; unrestricted
+autonomy that weakens protected boundaries; treating routine verification failures
+as mandatory human decision points.

@@ -51,6 +51,23 @@ The Streamlit compatibility interface remains available with:
 
 Protected changes and dependencies require approval before implementation.
 
+## Milestone execution
+
+Once a milestone is approved, work through it as one batch. Inspect and extend the
+existing implementation before adding new abstractions, identify compatibility
+requirements up front, and keep the diff to the smallest complete solution. Do not
+pause after ordinary file edits, tests, screenshots, or local verification.
+
+Routine lint, type, test, build, browser, accessibility, and responsive failures
+should be diagnosed, corrected within scope, and retested before the milestone is
+reported. Stop only at the approval gates in [../AGENTS.md](../AGENTS.md), for an
+unresolved product decision, or when a safe in-scope solution is unavailable.
+
+Before handoff, review regressions, architecture, performance, accessibility,
+responsive behavior, security, and diff scope. Confirm the change contains no
+secrets, credentials, PII, unsafe HTML, unnecessary persistence, or expanded
+permissions.
+
 ## Testing
 
 Run the complete checklist in [VERIFICATION.md](VERIFICATION.md). At minimum, a change must pass its targeted tests, the relevant Python or frontend suite, type checking, lint, build, `pip check`, and `git diff --check`.
@@ -68,6 +85,11 @@ A pull request should:
 - update [ROADMAP.md](ROADMAP.md), [DECISIONS.md](DECISIONS.md), or [CHANGELOG.md](CHANGELOG.md) when applicable.
 
 Keep generated files and unrelated refactors out of the diff.
+
+Milestone handoffs should provide one consolidated report covering the objective,
+changed and preserved behavior, files, tests, verification evidence, screenshots
+when applicable, documentation, limitations, risks, the next roadmap item, and a
+commit recommendation.
 
 ## Commits
 

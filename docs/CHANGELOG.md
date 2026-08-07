@@ -4,6 +4,15 @@ All notable changes are documented here. This project follows [Keep a Changelog]
 
 ## [Unreleased]
 
+### Repository operating-system autonomy milestone
+
+#### Changed
+
+- Defined Product Owner and Engineering Lead responsibilities for approved milestones.
+- Required batched implementation, routine failure recovery, consolidated reporting, and regression-first self-review.
+- Expanded accessibility, cross-browser, performance, security, and Git-hygiene verification guidance.
+- Documented future automation candidates without implementing or authorizing them.
+
 ### Version 2.1 review workspace milestone
 
 #### Added

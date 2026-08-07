@@ -43,3 +43,18 @@ Approval gate: no AI, external service, enterprise data path, or plugin executio
 ## Future candidates
 
 Add proposals here only after documenting user value, scope, privacy impact, contract impact, verification strategy, and dependencies.
+
+## Repository automation candidates
+
+These are documented future operations improvements, not implemented automation:
+
+- Nightly locked-dependency build and full test run
+- Scheduled dependency and license review
+- Scheduled security and secret-scanning review
+- Cross-browser screenshot-regression review
+- README and verification-count drift check
+- Issue-triage assistance with human-owned prioritization
+- Deployment-health checks after an explicitly approved deployment
+
+Each automation requires separate approval of permissions, runtime, reporting,
+failure handling, and any external service before implementation.

@@ -1,6 +1,10 @@
 # Verification
 
-Every milestone must pass this checklist before commit, tag, push, publication, or deployment. Record command output and investigate failures; do not retry silently until green.
+Every milestone must pass this checklist before commit, tag, push, publication, or deployment. Record command output and investigate failures. Correct routine in-scope failures and rerun the affected checks; never conceal a failure by silently retrying or weakening a test.
+
+Run verification as one milestone phase rather than an approval checkpoint after
+each command. Report early only when a failure reaches a repository approval gate,
+reveals a material architectural conflict, or cannot be resolved safely in scope.
 
 ## Python and API
 
@@ -42,6 +46,20 @@ Do not install or upgrade packages during routine verification.
 - Test reduced motion: animations are suppressed and final values render immediately.
 - Review 1600, 1440, 1280, 1024, 820, 768, 430, 390, and 360 px widths.
 - Confirm no overflow, clipping, hidden controls, or unreadable contrast.
+- Smoke-test the latest supported Chrome, Edge, Safari, and Firefox when the
+  environment provides those engines. Record any unavailable browser as a coverage
+  limitation rather than claiming it passed.
+
+## Security and performance
+
+- Confirm no secrets, credentials, résumé data, or other PII entered tracked files
+  or command output intended for publication.
+- Confirm the change adds no unsafe HTML, unnecessary persistence, external data
+  transmission, permissions, or telemetry.
+- Confirm dependency and lockfile changes are absent unless explicitly approved.
+- Review rerenders, list bounds, network requests, and bundle impact for frontend
+  changes; avoid duplicate parsing or score computation.
+- Confirm error paths do not expose stack traces or document contents.
 
 ## Repository integrity
 
@@ -60,6 +78,8 @@ git diff --exit-code -- \
 
 Review the staged file list before every commit. Exclude `.env`, résumés, `node_modules`, `.next`, Playwright output, caches, temporary screenshots, and nested repositories. Confirm lockfiles change only with approved dependency work.
 
+Use explicit paths for staging. Never use unrestricted `git add .`.
+
 ## Screenshot review
 
 Capture representative desktop and 390 px mobile states when UI changes. Review landing, workspace, fresh results, expanded lists, export, error states, and reduced motion where practical. Store release documentation screenshots only in `docs/images/`; keep temporary captures outside the repository.
@@ -67,3 +87,10 @@ Capture representative desktop and 390 px mobile states when UI changes. Review 
 ## Release gate
 
 No deployment proceeds unless every applicable item passes, protected diffs are authorized, documentation is current, repository status is understood, and the user explicitly approves the release operation.
+
+## Verification handoff
+
+Before the single milestone report, review the integrated diff and map the approved
+objective to direct evidence. State test counts, browser coverage, protected-file
+status, limitations, and any checks that could not run. A successful subset must
+not be presented as complete verification.
