@@ -4,6 +4,26 @@ All notable changes are documented here. This project follows [Keep a Changelog]
 
 ## [Unreleased]
 
+### Version 2 private Preview deployment milestone
+
+#### Added
+
+- Added a Render Blueprint for the FastAPI release-candidate service with a health
+  check and automatic deploys disabled.
+- Added explicit Python and pnpm runtime configuration for reproducible cloud
+  builds.
+- Added a Vercel/Render deployment, privacy, verification, and rollback runbook.
+- Created and verified an access-protected Vercel Preview backed by the Render API.
+- Verified both analysis modes, uploads, review state, Markdown and PDF downloads,
+  exact-origin CORS, structured errors, provider-log privacy, and responsive layouts.
+
+#### Security
+
+- Kept document processing non-persistent, required exact frontend CORS origins,
+  and documented provider request-metadata risk.
+- Preserved the stable Streamlit deployment and kept Version 2 unpromoted,
+  unpublished, and separate from the primary application.
+
 ### Repository operating-system autonomy milestone
 
 #### Changed

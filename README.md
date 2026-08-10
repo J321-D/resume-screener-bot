@@ -8,10 +8,11 @@ It supports PDF, DOCX, and TXT uploads, ATS-aware technical tokenization, phrase
 
 The reported scores measure **lexical overlap only**. They are **not** assessments of candidate quality, experience, job performance, hiring suitability, or the behavior of a specific applicant-tracking system.
 
-The published v1.1.2 release uses the stable Streamlit interface. An additive,
-local Version 2 interface pairs a responsive Next.js client with a narrow FastAPI
-boundary over the same deterministic Python engine. Version 2 remains unreleased
-and has not been published or deployed.
+The published v1.1.2 release uses the stable Streamlit interface. An additive
+Version 2 release candidate pairs a responsive Next.js client with a narrow
+FastAPI boundary over the same deterministic Python engine. It has been verified
+as an access-protected Vercel/Render Preview, but remains unreleased, unpromoted,
+and separate from the stable Streamlit application.
 
 ---
 
@@ -276,6 +277,7 @@ the API and renders the returned ordered contract.
 - [Architecture](docs/ARCHITECTURE.md)
 - [Design system](docs/DESIGN_SYSTEM.md)
 - [Verification checklist](docs/VERIFICATION.md)
+- [Deployment runbook](docs/DEPLOYMENT.md)
 - [Architectural decisions](docs/DECISIONS.md)
 - [Changelog](docs/CHANGELOG.md)
 - [Contributing guide](docs/CONTRIBUTING.md)
@@ -294,11 +296,11 @@ resume_screener/           Established deterministic analysis and PDF engine
 tests/                     Python engine and API contract tests
 ```
 
-Production deployments should set `NEXT_PUBLIC_API_URL` to the public HTTPS API
-origin and `RESUME_SCREENER_ALLOWED_ORIGINS` to the exact frontend origin. The
-frontend is compatible with standard Next.js hosts; the API requires a Python host
-that starts `uvicorn api.main:app --host 0.0.0.0 --port $PORT`. No deployment is
-performed by this repository configuration.
+The repository contains release-candidate configuration for a Vercel frontend and
+Render API. [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) records the exact settings,
+environment boundaries, verified private Preview, and rollback plan. Version 2
+has not been promoted or published, and the existing Streamlit application remains
+the stable release.
 
 ---
 
@@ -470,11 +472,12 @@ The current release includes:
 - robust upload validation
 - 84 automated unittest tests
 
-Version 2.0 is complete locally, including the additive FastAPI boundary, Next.js
-frontend, premium responsive interface, and repository operating documentation.
-It remains unpublished and undeployed. The current repository-level verification
-count is **120 checks**: 97 Python tests, 17 frontend unit/accessibility tests, and
-6 Playwright tests.
+Version 2.0 is complete, including the additive FastAPI boundary, Next.js frontend,
+premium responsive interface, and repository operating documentation. Its private
+Vercel/Render Preview has passed hosted verification, but it remains unpublished,
+unpromoted, and is not the primary application. The current repository-level
+verification count is **120 checks**: 97 Python tests, 17 frontend
+unit/accessibility tests, and 6 Playwright tests.
 
 Future work may include independent candidate comparison, weighted requirements,
 semantic matching, richer exports, OCR, project history, accessibility

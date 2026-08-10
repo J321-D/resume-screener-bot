@@ -128,3 +128,22 @@ batch of work at once.
 **Alternatives rejected:** Approval after every edit or test; unrestricted
 autonomy that weakens protected boundaries; treating routine verification failures
 as mandatory human decision points.
+
+## ADR-013: Split preview hosting with no persistence
+
+**Decision:** Host the private Version 2 release candidate with the Next.js
+frontend in an access-protected Vercel Preview and the FastAPI boundary on Render.
+Pin Python 3.12 and pnpm 11.16.0, disable automatic Render deploys, configure CORS
+for the exact Preview origin, and add no database or persistent disk.
+
+**Reason:** The split follows the existing application boundary, keeps the Python
+engine authoritative, and permits independent health and browser validation while
+leaving the published Streamlit application unchanged.
+
+**Trade-offs:** The frontend API origin is embedded at build time, preview origins
+must be synchronized with the backend allowlist, free hosting may cold-start, and
+provider request metadata is governed by external retention policies.
+
+**Alternatives rejected:** Rewriting the engine for a serverless frontend runtime;
+adding Docker without a runtime need; wildcard CORS; introducing persistence;
+replacing Streamlit before the release candidate is verified.

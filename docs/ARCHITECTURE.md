@@ -81,3 +81,17 @@ The server reuses analysis output and the protected reporting engine. Reports pr
 - Manual screenshots: hierarchy, clipping, motion, and breakpoint quality
 
 Mandatory commands are in [VERIFICATION.md](VERIFICATION.md). Architectural decisions are recorded in [DECISIONS.md](DECISIONS.md).
+
+## Preview hosting boundary
+
+The private release-candidate topology hosts `frontend/` on a Vercel Preview and
+`api.main:app` on Render. The browser receives a build-time public API origin;
+the API admits only the explicitly configured Preview origin. Automatic Render
+deploys remain disabled, Vercel access protection remains enabled, and the
+existing Streamlit deployment remains independent.
+
+The hosting boundary does not add persistence. Documents are processed in memory
+and application code does not log their contents. Platform request metadata and
+provider retention remain external privacy considerations that must be reviewed
+before real résumé data is used. Exact settings and rollback steps are in
+[DEPLOYMENT.md](DEPLOYMENT.md).

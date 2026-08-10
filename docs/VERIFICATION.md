@@ -88,6 +88,28 @@ Capture representative desktop and 390 px mobile states when UI changes. Review 
 
 No deployment proceeds unless every applicable item passes, protected diffs are authorized, documentation is current, repository status is understood, and the user explicitly approves the release operation.
 
+## Deployment configuration and private Preview
+
+Before committing deployment configuration or requesting another provider change:
+
+- Confirm `.python-version`, `render.yaml`, `frontend/package.json`,
+  `frontend/pnpm-lock.yaml`, and `frontend/pnpm-workspace.yaml` are tracked and
+  internally consistent.
+- Parse `render.yaml`; verify the entrypoint is `api.main:app`, the health path is
+  `/api/v1/health`, and automatic deploys are off.
+- Run the frontend frozen install and production build with Node 24 and pnpm
+  11.16.0.
+- Confirm the only required runtime values are the exact-origin
+  `RESUME_SCREENER_ALLOWED_ORIGINS`, public build-time `NEXT_PUBLIC_API_URL`, and
+  Vercel's non-secret `ENABLE_EXPERIMENTAL_COREPACK=1` build switch.
+- Confirm the Vercel deployment is a Preview rather than Production, access
+  protection remains enabled, Render allows only the exact Preview origin, and
+  automatic Render deploys remain off.
+- Recheck health, both analysis modes, uploads, review state, Markdown/PDF export,
+  structured errors, provider-log privacy, and desktop/mobile overflow against
+  the hosted release candidate.
+- Follow [DEPLOYMENT.md](DEPLOYMENT.md) for hosted smoke tests and rollback.
+
 ## Verification handoff
 
 Before the single milestone report, review the integrated diff and map the approved

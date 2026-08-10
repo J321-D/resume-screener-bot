@@ -22,6 +22,19 @@ Priorities: **P0** release-critical, **P1** next planned work, **P2** valuable f
 
 Approval gate: preserve engine calculations and API contracts; approve any new dependency before implementation.
 
+## Version 2 deployment preparation
+
+- [x] **P0** Define the Render FastAPI and Vercel Next.js release-candidate topology
+- [x] **P0** Add runtime pins, health checks, exact-origin CORS guidance, and rollback documentation
+- [x] **P0** Keep automatic backend deploys off and preserve the stable Streamlit deployment
+- [x] **P0** Connect external accounts and create private preview services after explicit approval
+- [x] **P0** Validate hosted analysis, upload errors, responsive behavior, and PDF download
+- [ ] **P0** Approve any public promotion, domain, release tag, or Streamlit retirement separately
+
+Approval gate: no provider login, repository connection, service creation,
+credential or environment-variable write, deployment, domain change, or public
+promotion occurs without explicit user approval.
+
 ## Version 2.2 — Workflow continuity
 
 - [ ] **P1** Design saved analyses with explicit privacy and retention rules
