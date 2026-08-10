@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { AlertTriangle, ArrowDownToLine, Check, ChevronDown, Clock3, FileText, Layers3, LockKeyhole, Sparkles } from "lucide-react";
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
 import type { AnalysisResponse } from "@/lib/contracts";
 import { ReviewWorkspace } from "@/components/review/review-workspace";
@@ -74,14 +74,28 @@ function TermList({ items, label, limit, reduceMotion }: TermListProps) {
 
 export function ResultsDashboard({ result, stale, reporting, analysisKey, onDownload }: ResultsDashboardProps) {
   const reduceMotion = useReducedMotion();
+  const resultsRef = useRef<HTMLElement>(null);
   const date = new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(result.metadata.analyzed_at));
   const categorized = result.categories.filter((category) => category.category !== "Uncategorized");
   const isFocused = result.analysis_mode === "Skills-focused analysis";
 
+  useEffect(() => {
+    const results = resultsRef.current;
+    if (!results) return;
+
+    results.focus({ preventScroll: true });
+    results.scrollIntoView({
+      behavior: reduceMotion ? "auto" : "smooth",
+      block: "start",
+    });
+  }, [analysisKey, reduceMotion]);
+
   return (
     <motion.section
+      ref={resultsRef}
       className="results shell"
       aria-labelledby="results-title"
+      tabIndex={-1}
       initial={reduceMotion ? false : "hidden"}
       animate="visible"
       variants={{ visible: { transition: { staggerChildren: reduceMotion ? 0 : 0.07 } } }}

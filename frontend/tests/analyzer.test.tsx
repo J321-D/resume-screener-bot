@@ -41,7 +41,7 @@ describe("Analyzer", () => {
     expect(button).toBeEnabled();
   });
 
-  it("renders successful analysis and normalized terms", async () => {
+  it("renders successful analysis, focuses its results region, and scrolls it into view", async () => {
     const user = userEvent.setup();
     vi.spyOn(globalThis, "fetch").mockImplementation(() => jsonResponse());
     render(<Analyzer />);
@@ -51,6 +51,10 @@ describe("Analyzer", () => {
     await user.click(screen.getByRole("button", { name: /run keyword scan/i }));
 
     expect(await screen.findByRole("heading", { name: "Your lexical coverage map" })).toBeInTheDocument();
+    const results = screen.getByRole("region", { name: "Your lexical coverage map" });
+    expect(results).toHaveAttribute("tabindex", "-1");
+    expect(results).toHaveFocus();
+    expect(Element.prototype.scrollIntoView).toHaveBeenCalledWith({ behavior: "smooth", block: "start" });
     expect(screen.getByRole("img", { name: "66.7% keyword coverage" })).toBeInTheDocument();
     expect(screen.getAllByText("quality control").length).toBeGreaterThan(0);
     expect(screen.getByText("CATEGORIZED GAPS")).toBeInTheDocument();
@@ -146,6 +150,8 @@ describe("Analyzer", () => {
 
     await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("The PDF is corrupted."));
     expect(document.body).not.toHaveTextContent("Traceback");
+    expect(screen.queryByRole("region", { name: "Your lexical coverage map" })).not.toBeInTheDocument();
+    expect(Element.prototype.scrollIntoView).not.toHaveBeenCalled();
   });
 
   it("validates empty and oversized files before submission", async () => {
