@@ -53,4 +53,4 @@ It does **not** measure candidate quality, predict applicant-tracking-system dec
 
 ## Future vision
 
-Version 2.1 will improve review ergonomics without changing the engine. Later releases may add saved comparisons, recruiter workflows, and carefully bounded AI-assisted rewriting. Persistence, authentication, collaboration, AI, and plugins remain approval-gated architectural changes. See [ROADMAP.md](ROADMAP.md).
+Version 2.1 improves review ergonomics without changing the engine through session-local opportunity statuses, filters, search, progress, stale-input clearing, and Markdown checklist export. Later releases may add saved comparisons, recruiter workflows, and carefully bounded AI-assisted rewriting. Persistence, authentication, collaboration, AI, and plugins remain approval-gated architectural changes. See [ROADMAP.md](ROADMAP.md).

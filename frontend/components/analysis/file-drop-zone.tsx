@@ -3,7 +3,7 @@
 import { FileText, Plus, ShieldCheck, Trash2, UploadCloud } from "lucide-react";
 import { useId, useState } from "react";
 
-import { MAX_FILE_BYTES, readableSize } from "@/lib/formatting";
+import { readableSize, validateFile } from "@/lib/formatting";
 
 interface FileDropZoneProps {
   files: File[];
@@ -52,22 +52,25 @@ export function FileDropZone({ files, multiple = false, onFiles, label, descript
       </label>
       {files.length > 0 && (
         <ul className="file-list" aria-label={`${label} selected files`}>
-          {files.map((file, index) => (
-            <li key={`${file.name}-${file.lastModified}-${index}`}>
-              <span className="file-type"><FileText size={17} /></span>
-              <span className="file-copy">
-                <strong>{file.name}</strong>
-                <small className={file.size === 0 || file.size > MAX_FILE_BYTES ? "is-invalid" : undefined}>
-                  {readableSize(file.size)} · {file.size === 0 ? "Empty file" : file.size > MAX_FILE_BYTES ? "Exceeds 10 MB" : "Ready to scan"}
-                </small>
-              </span>
-              <button
-                type="button"
-                aria-label={`Remove ${file.name}`}
-                onClick={() => onFiles(files.filter((_, candidate) => candidate !== index))}
-              ><Trash2 size={16} /></button>
-            </li>
-          ))}
+          {files.map((file, index) => {
+            const validation = validateFile(file);
+            return (
+              <li key={`${file.name}-${file.lastModified}-${index}`}>
+                <span className="file-type"><FileText size={17} /></span>
+                <span className="file-copy">
+                  <strong>{file.name}</strong>
+                  <small className={validation.error ? "is-invalid" : undefined}>
+                    {readableSize(file.size)} · {validation.status}
+                  </small>
+                </span>
+                <button
+                  type="button"
+                  aria-label={`Remove ${file.name}`}
+                  onClick={() => onFiles(files.filter((_, candidate) => candidate !== index))}
+                ><Trash2 size={16} /></button>
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>

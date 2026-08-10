@@ -31,7 +31,7 @@ and separate from the stable Streamlit application.
 - ✅ Robust upload validation and user-friendly errors
 - 🧪 84 automated unittest tests
 
-### Local Version 2 additions
+### Version 2 release-candidate additions
 
 - Responsive Next.js client over the FastAPI application boundary.
 - Session-local review of every coverage opportunity using **Add to résumé**,
@@ -330,8 +330,8 @@ The v1.1.2 release includes **84 automated unittest tests** covering analysis, n
 ### Version 2 verification
 
 The locally complete Version 2 milestone contains **97 deterministic Python
-unittest tests**, **17 frontend unit, interaction, formatting, and accessibility
-tests**, and **6 Playwright desktop/mobile checks**: **120 checks total**.
+unittest tests**, **18 frontend unit, interaction, formatting, and accessibility
+tests**, and **6 Playwright desktop/mobile checks**: **121 checks total**.
 
 ```bash
 MPLCONFIGDIR=/private/tmp/resume-screener-matplotlib-tests \
@@ -429,6 +429,7 @@ Résumés often contain sensitive personal information.
 
 - When run locally, document processing occurs in the local application process.
 - In the hosted demo, document processing occurs within the Streamlit application runtime.
+- The private Vercel Preview sends submitted résumé and job-description data to the configured Render API for in-memory processing of the current request; the application does not persist that content.
 - Résumé content is not sent to an external AI, embedding, or résumé-analysis API.
 - Uploaded content is not intentionally persisted by the application.
 - Protect `.env` files and credentials.
@@ -476,7 +477,7 @@ Version 2.0 is complete, including the additive FastAPI boundary, Next.js fronte
 premium responsive interface, and repository operating documentation. Its private
 Vercel/Render Preview has passed hosted verification, but it remains unpublished,
 unpromoted, and is not the primary application. The current repository-level
-verification count is **120 checks**: 97 Python tests, 17 frontend
+verification count is **121 checks**: 97 Python tests, 18 frontend
 unit/accessibility tests, and 6 Playwright tests.
 
 Future work may include independent candidate comparison, weighted requirements,

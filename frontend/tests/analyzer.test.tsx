@@ -157,4 +157,19 @@ describe("Analyzer", () => {
     expect(screen.getByText("0 B · Empty file")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /run keyword scan/i })).toBeDisabled();
   });
+
+  it("labels unsupported files as invalid instead of ready to scan", async () => {
+    const user = userEvent.setup({ applyAccept: false });
+    render(<Analyzer />);
+
+    await user.upload(
+      screen.getByLabelText("Résumé files"),
+      new File(["synthetic fixture"], "resume.exe", { type: "application/octet-stream" }),
+    );
+
+    expect(screen.getByRole("alert")).toHaveTextContent("resume.exe must be a PDF, DOCX, or TXT file");
+    expect(screen.getByText("17 B · Unsupported file type")).toBeInTheDocument();
+    expect(screen.queryByText(/17 B · Ready to scan/i)).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /run keyword scan/i })).toBeDisabled();
+  });
 });

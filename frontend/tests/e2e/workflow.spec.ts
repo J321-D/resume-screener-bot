@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { readFile } from "node:fs/promises";
 
 const payload = {
   analysis_mode: "Skills-focused analysis",
@@ -60,7 +61,18 @@ test("reviews ordered opportunities and clears decisions when inputs become stal
   await page.getByLabel("Review status for SQL").selectOption("add");
   await page.getByLabel("Review status for GMP").selectOption("later");
   await expect(page.getByText("2 of 4")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Download Markdown checklist" })).toBeEnabled();
+  const checklistButton = page.getByRole("button", { name: "Download Markdown checklist" });
+  await expect(checklistButton).toBeEnabled();
+  const downloadPromise = page.waitForEvent("download");
+  await checklistButton.click();
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toBe("resume-action-checklist.md");
+  const downloadPath = await download.path();
+  expect(downloadPath).not.toBeNull();
+  const checklist = await readFile(downloadPath!, "utf8");
+  expect(checklist).toContain("# Résumé action checklist");
+  expect(checklist).toContain("- [ ] SQL");
+  expect(checklist).not.toContain("- [ ] GMP");
 
   await page.getByRole("radio", { name: "Review later" }).check();
   await expect(reviewList.getByRole("article")).toHaveCount(1);
