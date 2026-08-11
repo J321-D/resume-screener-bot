@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Resume Keyword Screener is a private, deterministic lexical analysis tool. It compares résumé content with a job description and explains which requested terms are represented, missing, or normalized through documented rules.
+Resume Keyword Screener is a privacy-conscious, deterministic lexical analysis tool. It compares résumé content with a job description and explains which requested terms are represented, missing, or normalized through documented rules.
 
 It does **not** measure candidate quality, predict applicant-tracking-system decisions, infer employability, or make hiring recommendations.
 
@@ -60,9 +60,10 @@ It does **not** measure candidate quality, predict applicant-tracking-system dec
 
 ## Future vision
 
-The public Version 2 baseline includes the review workspace. The current
-unreleased hardening work refines navigation, demo/onboarding, resilience,
-security boundaries, responsive presentation, and repository operations without
-changing the engine. Persistence, authentication, collaboration, AI, source
-highlighting, and public result sharing remain outside the current product
-contract. See [ROADMAP.md](ROADMAP.md).
+The public V2.x release includes the review workspace plus verified navigation,
+demo/onboarding, resilience, security-boundary, responsive-presentation, and
+repository-operation hardening without changing the engine. This release is
+feature-frozen. Persistence, authentication, collaboration, AI, source
+highlighting, public result sharing, and other new capabilities belong to a new
+milestone with their own product, privacy, and verification decisions. See
+[ROADMAP.md](ROADMAP.md).

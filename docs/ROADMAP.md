@@ -27,15 +27,15 @@ Priorities: **P0** release-critical, **P1** next planned work, **P2** valuable f
 
 Approval gate: preserve engine calculations and API contracts; approve any new dependency before implementation.
 
-## Version 2 public release candidate
+## Version 2 public release — Complete
 
-- [x] **P0** Define the Render FastAPI and Vercel Next.js release-candidate topology
+- [x] **P0** Define the Render FastAPI and Vercel Next.js release topology
 - [x] **P0** Add runtime pins, health checks, exact-origin CORS guidance, and rollback documentation
 - [x] **P0** Keep automatic backend deploys off and preserve the stable Streamlit deployment
 - [x] **P0** Connect external accounts and verify protected preview services after explicit approval
 - [x] **P0** Validate hosted analysis, upload errors, responsive behavior, and PDF download
 - [x] **P0** Promote the verified frontend to the permanent public Vercel origin
-- [x] **P0** Restrict Render CORS to the exact public frontend origin
+- [x] **P0** Restrict Render CORS to the exact public and stable protected Preview origins
 - [x] **P0** Preserve the Streamlit v1.1.2 deployment as a legacy rollback demo
 - [x] **P1** Create the annotated `v2.0.0` Git tag
 - [ ] **P1** Decide whether to create a GitHub Release separately
@@ -44,15 +44,24 @@ Approval gate: no provider login, repository connection, service creation,
 credential or environment-variable write, deployment, domain change, or public
 promotion occurs without explicit user approval.
 
-## Version 2.2 — Workflow continuity
+## V2.x hardening — Complete
 
 - [x] **P1** Add a clearer responsive menu, navigation model, Help, and synthetic demo
 - [x] **P1** Harden request lifecycle, stale results, retry/cancel, and New analysis
 - [x] **P1** Consolidate the restrained futuristic visual/motion system
 - [x] **P1** Add input/archive/cache/indexing/security boundaries and CI operations
+
+The public V2.x feature scope is now frozen. Any further capability or visual idea
+starts a new milestone rather than extending this release.
+
+## Next milestone candidates
+
 - [ ] **P2** Expand the review workspace only where richer guided flows have
   demonstrated user value
 - [ ] **P1** Add a customer Q&A and feedback path with explicit privacy boundaries
+- [ ] **P2** Deepen menu/navigation only where validated workflows require it
+- [ ] **P2** Apply further restrained futuristic Apple/Tesla/cyberpunk refinement
+  without excessive neon, gaming aesthetics, or reduced accessibility
 - [ ] **P2** Design saved analyses only after explicit privacy and retention rules
 - [ ] **P1** Compare multiple analyses without introducing candidate-quality ranking
 - [ ] **P2** Add a recruiter review workflow with transparent lexical evidence
@@ -69,12 +78,26 @@ Approval gate: persistence, authentication, and data migration require separate 
 
 Approval gate: no AI, external service, enterprise data path, or plugin execution may begin without explicit product, security, and privacy decisions.
 
-## Future candidates
+## Operational watch items
 
-Add proposals here only after documenting user value, scope, privacy impact, contract impact, verification strategy, and dependencies.
+These accepted risks are not current release blockers. Reevaluate them only when
+their trigger occurs:
 
-- Restrained futuristic Apple/Tesla/cyberpunk visual refinement without excessive
-  neon, gaming aesthetics, or reduced accessibility
+- Content Security Policy: revisit when executable/content sources expand, a
+  security review identifies a concrete injection path, or a nonce/hash rollout
+  can be verified with Next.js and Vercel Analytics without breaking the app.
+- Python CVE tooling: add a vetted scanner only after a dependency/tool approval or
+  when Dependabot/provider advisories identify a Python package concern; `pip
+  check` validates compatibility, not vulnerabilities.
+- Provider/API rate limiting: revisit if abuse, capacity, cost, or latency evidence
+  appears; do not add stateful infrastructure speculatively.
+- GitHub Actions runtime notices: move to maintained action majors when available
+  and verified. The current green run reports Node 20 action-metadata deprecation
+  while GitHub forces those actions onto Node 24, plus upstream `punycode`,
+  `url.parse()`, legacy ESLint configuration, and PyMuPDF `fitz` notices.
+
+Add proposals only after documenting user value, scope, privacy impact, contract
+impact, verification strategy, and dependencies.
 
 ## Repository automation candidates
 

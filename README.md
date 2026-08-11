@@ -1,6 +1,6 @@
 # Resume Keyword Screener
 
-[![Version](https://img.shields.io/badge/version-v2.0.0-53E5FF)](https://github.com/J321-D/resume-screener-bot/releases/tag/v2.0.0)
+[![Version](https://img.shields.io/badge/version-v2.0.0-53E5FF)](https://github.com/J321-D/resume-screener-bot/tree/v2.0.0)
 [![Verification](https://img.shields.io/badge/checks-156%20passing-34D399)](#verification)
 [![License](https://img.shields.io/badge/license-MIT-A9B3C8)](LICENSE)
 [![Live Demo](https://img.shields.io/badge/demo-live-53E5FF)](https://resume-keyword-screener.vercel.app)
@@ -15,11 +15,13 @@ It supports PDF, DOCX, and TXT uploads, ATS-aware technical tokenization, phrase
 
 The reported scores measure **lexical overlap only**. They are **not** assessments of candidate quality, experience, job performance, hiring suitability, or the behavior of a specific applicant-tracking system.
 
-The tagged [v2.0.0 release candidate](https://github.com/J321-D/resume-screener-bot/releases/tag/v2.0.0)
-pairs a responsive Next.js client with a
-narrow FastAPI boundary over the same deterministic Python engine. The Streamlit
-v1.1.2 deployment is preserved as a legacy demo and rollback path; Streamlit may
-require authentication before displaying it.
+The tagged [v2.0.0 baseline](https://github.com/J321-D/resume-screener-bot/tree/v2.0.0)
+introduced a responsive Next.js client and a narrow FastAPI boundary over the
+same deterministic Python engine. The current public V2.x deployment includes
+verified post-tag hardening at commit
+[`e8e638b`](https://github.com/J321-D/resume-screener-bot/commit/e8e638b971e94f2156e61c3e33e31ccbc00e159d).
+The Streamlit v1.1.2 deployment is preserved as a legacy demo and fallback;
+Streamlit may require authentication before displaying it.
 
 ---
 
@@ -40,7 +42,7 @@ require authentication before displaying it.
 - 🧭 Responsive navigation, synthetic demo, Help, and resilient timeout/retry/cancel states
 - 🛡️ No-store analysis responses, bounded inputs, archive safety checks, and Preview noindex controls
 
-### Version 2 release-candidate additions
+### Version 2 additions
 
 - Responsive Next.js client over the FastAPI application boundary.
 - Session-local review of every coverage opportunity using **Add to résumé**,
@@ -313,7 +315,7 @@ resume_screener/           Established deterministic analysis and PDF engine
 tests/                     Python engine and API contract tests
 ```
 
-The repository contains release-candidate configuration for the public Vercel
+The repository contains verified release configuration for the public Vercel
 frontend and Render API. [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) records the
 exact settings, environment boundaries, public origin, and rollback plan. The
 Streamlit v1.1.2 application remains online as the legacy interface.
@@ -345,7 +347,7 @@ The v1.1.2 release includes **84 automated unittest tests** covering analysis, n
 
 ### Version 2 verification
 
-The final automated check inventory for this unreleased hardening work is derived
+The final automated check inventory for the current public V2.x baseline is derived
 from the fresh verification run below; historical badge counts are not treated as
 a substitute for current test evidence.
 
@@ -479,8 +481,13 @@ Résumés often contain sensitive personal information.
 
 ## Project status
 
-**Resume Keyword Screener [v2.0.0](https://github.com/J321-D/resume-screener-bot/releases/tag/v2.0.0)** is the current public release candidate.
-The tagged v1.1.2 Streamlit release is preserved as the legacy demo.
+**Resume Keyword Screener V2.x** is the current public release. The
+[`v2.0.0`](https://github.com/J321-D/resume-screener-bot/tree/v2.0.0) tag marks
+the original public baseline; Production currently runs verified post-tag
+hardening at commit
+[`e8e638b`](https://github.com/J321-D/resume-screener-bot/commit/e8e638b971e94f2156e61c3e33e31ccbc00e159d).
+No later semantic-version tag or GitHub Release has been created. The tagged
+v1.1.2 Streamlit release is preserved as the legacy demo.
 
 The legacy v1.1.2 release includes:
 
@@ -500,9 +507,10 @@ The legacy v1.1.2 release includes:
 - robust upload validation
 - 84 automated unittest tests
 
-Version 2.0 is complete, including the additive FastAPI boundary, Next.js frontend,
-premium responsive interface, review workspace, and repository operating
-documentation. The Vercel/Render release candidate is public at the Live Demo URL.
+The V2.x release is complete and feature-frozen, including the additive FastAPI
+boundary, Next.js frontend, premium responsive interface, review workspace,
+release hardening, and repository operating documentation. The Vercel/Render
+release is public at the Live Demo URL.
 The current repository-level verification count is **156 checks**: 101 Python
 tests, 39 frontend unit/accessibility tests, and 16 Playwright checks across
 desktop and mobile projects.

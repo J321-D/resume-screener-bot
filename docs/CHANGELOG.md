@@ -24,6 +24,14 @@ All notable changes are documented here. This project follows [Keep a Changelog]
   ambient loops while preserving the final score and engine-provided ordering.
 - Added factual source metadata, review-visible counts, completion language, and
   confirmed New analysis semantics.
+- Deployed the complete V2.x hardening baseline at commit
+  `e8e638b971e94f2156e61c3e33e31ccbc00e159d` to the public Production frontend,
+  protected Preview, and Render API without changing the deterministic engine.
+- Restored the stable Preview alias to the Preview target, restricted Render CORS
+  to the exact public and stable protected Preview origins, and verified the
+  previous Production deployment as an available rollback build.
+- Closed and feature-froze the V2.x scope after live reconciliation. No post-v2.0
+  semantic-version tag or GitHub Release has been created yet.
 
 ### Security
 

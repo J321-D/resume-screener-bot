@@ -51,6 +51,18 @@ Do not install or upgrade packages during routine verification.
   environment provides those engines. Record any unavailable browser as a coverage
   limitation rather than claiming it passed.
 
+## Supported runtimes and browsers
+
+- Production backend: Python 3.12 on Render. The Streamlit compatibility code
+  remains Python 3.9-compatible, while CI validates Python 3.12.
+- Production frontend: Node.js 24.x with pnpm 11.16.0 on Vercel.
+- Automated browser projects: Playwright Desktop Chrome on Chromium and iPhone 13
+  emulation on WebKit.
+- Support target: current evergreen Chrome, Edge, Safari, and Firefox plus modern
+  narrow mobile layouts. A browser is not claimed as manually release-smoked when
+  that engine was unavailable; automated Chromium/WebKit coverage is the current
+  reproducible baseline.
+
 ## Security and performance
 
 - Confirm no secrets, credentials, résumé data, or other PII entered tracked files
@@ -98,7 +110,7 @@ Capture representative desktop and 390 px mobile states when UI changes. Review 
 
 No deployment proceeds unless every applicable item passes, protected diffs are authorized, documentation is current, repository status is understood, and the user explicitly approves the release operation.
 
-## Public release-candidate deployment
+## Public release deployment
 
 Before committing deployment configuration or requesting another provider change:
 
@@ -114,11 +126,12 @@ Before committing deployment configuration or requesting another provider change
   Vercel's non-secret `ENABLE_EXPERIMENTAL_COREPACK=1` build switch.
 - Confirm `https://resume-keyword-screener.vercel.app` resolves publicly to the
   approved Production deployment, raw deployment and Preview URLs remain
-  access-protected, Render allows only that exact public origin, and automatic
-  Render deploys remain off.
+  access-protected, Render allows only that exact public origin plus the exact
+  stable protected Preview origin, deployment-specific origins remain denied,
+  and automatic Render deploys remain off.
 - Recheck health, both analysis modes, uploads, review state, Markdown/PDF export,
   structured errors, provider-log privacy, and desktop/mobile overflow against
-  the hosted public release candidate.
+  the hosted public release.
 - Follow [DEPLOYMENT.md](DEPLOYMENT.md) for hosted smoke tests and rollback.
 
 The current fresh inventory is **156 automated checks**: 101 Python tests, 39
@@ -126,6 +139,16 @@ frontend unit/accessibility tests, and 16 Playwright checks across desktop and
 mobile projects. The historical public baseline was 126 checks; recalculate this
 inventory whenever suites change rather than preserving a number for presentation
 continuity.
+
+The authoritative CI evidence for the current public baseline is successful
+[GitHub Actions run 31532357547](https://github.com/J321-D/resume-screener-bot/actions/runs/31532357547)
+at commit `e8e638b971e94f2156e61c3e33e31ccbc00e159d`.
+
+Current non-blocking CI notices are tracked rather than hidden: GitHub forces
+actions that still declare Node 20 onto Node 24; upstream tooling also reports
+`punycode`, `url.parse()`, legacy ESLint configuration, and PyMuPDF `fitz`
+deprecations. Reevaluate when maintained replacements are available or a notice
+becomes a failing/security condition.
 
 ## Browser lifecycle and repeated use
 

@@ -148,13 +148,14 @@ provider request metadata is governed by external retention policies.
 adding Docker without a runtime need; wildcard CORS; introducing persistence;
 replacing Streamlit before the release candidate is verified.
 
-## ADR-014: Public Version 2 release candidate with legacy rollback
+## ADR-014: Public Version 2 release with legacy rollback
 
 **Decision:** Serve the verified Version 2 frontend publicly at
 `https://resume-keyword-screener.vercel.app`, keep the FastAPI service on Render,
-and allow only that exact frontend origin through CORS. Preserve the Streamlit
-v1.1.2 deployment as a separate legacy demo and rollback path. Keep Preview and
-raw deployment URLs access-protected.
+and allow only that exact frontend origin plus the exact stable access-protected
+Preview origin through CORS. Preserve the Streamlit v1.1.2 deployment as a
+separate legacy demo and fallback. Keep Preview and raw deployment URLs
+access-protected and deny deployment-specific origins.
 
 **Reason:** The verified Next.js workflow becomes the primary public experience
 without discarding the stable compatibility interface or weakening the API's
@@ -248,3 +249,23 @@ supply-chain infrastructure.
 **Trade-offs:** Python vulnerability auditing requires a separate trusted audit
 tool beyond `pip check`; installation is handled under the normal dependency
 approval boundary.
+
+## ADR-020: Close V2.x on one verified production baseline
+
+**Decision:** Treat commit
+`e8e638b971e94f2156e61c3e33e31ccbc00e159d` and the matching Vercel Production,
+protected Preview, and Render deployments recorded in
+[DEPLOYMENT.md](DEPLOYMENT.md) as the authoritative V2.x release baseline. Freeze
+feature scope after release reconciliation. A later version tag, GitHub Release,
+asset refresh, or product capability is a separately approved milestone.
+
+**Reason:** A single evidence-backed baseline keeps code, CI, provider routing,
+privacy controls, rollback evidence, and public documentation aligned without
+extending the release merely for presentation completeness.
+
+**Trade-offs:** The existing `v2.0.0` tag remains the original public baseline,
+while the deployed hardening commit is newer and untagged. GitHub release metadata
+and screenshots can lag until their separate approval gates are completed.
+
+**Alternatives rejected:** Retagging published history; adding more features before
+closure; changing providers; treating optional polish as a release blocker.
