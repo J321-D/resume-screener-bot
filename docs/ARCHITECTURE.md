@@ -38,10 +38,14 @@ These modules are protected because small changes can alter scores, ordering, co
 
 `api/` exposes versioned HTTP routes for health, analysis, and reporting. Pydantic models in `api/schemas.py` define the public contract. Services validate transport inputs, invoke the existing engine, and map results into ordered responses. Public exceptions are concise and do not expose stack traces or document contents.
 
-The API does not reimplement analysis rules. It bounds file count, individual and
-combined upload size, pasted-text length, and suspicious DOCX archive expansion;
-it parses documents in memory and emits `Cache-Control: no-store` on analysis and
-report responses, including public errors.
+The API does not reimplement analysis rules. An ASGI boundary rejects declared or
+streamed request bodies above 28 MB before multipart parsing. The document service
+then bounds file count, individual and combined upload size, pasted/extracted text,
+file signatures, and suspicious DOCX archive expansion. Larger bounded multipart
+bodies may be spooled to request-scoped temporary storage by the framework and
+are closed when the request completes. Analysis/report work runs off the event
+loop, and every sensitive response—including public errors—uses
+`Cache-Control: no-store`.
 
 ## Next.js client
 
@@ -50,6 +54,7 @@ report responses, including public errors.
 - `app/`: routes, metadata, and global visual system
 - `components/analysis/`: inputs, upload controls, readiness, and progress
 - `components/results/`: coverage, ordered findings, categories, explanations, and export
+- `components/help/`: searchable, categorized, deep-linked assistance and glossary
 - `components/shell/`: navigation and hero
 - `components/analytics/`: production page-analytics mounting and the fixed-path
   privacy filter, with no custom events
@@ -92,7 +97,8 @@ The server reuses analysis output and the protected reporting engine. Reports pr
 - Python unit and characterization tests: engine rules, parsing, reports, models, and Streamlit behavior
 - API contract tests: schemas, validation, errors, precedence, aggregation, and report bytes
 - Frontend unit tests: components, accessibility, runtime contracts, state, and stale protection
-- Playwright: desktop/mobile workflow and responsive behavior
+- Playwright: Chromium/Firefox desktop, WebKit mobile, workflow, accessibility
+  preferences, and responsive behavior
 - Manual screenshots: hierarchy, clipping, motion, and breakpoint quality
 
 Mandatory commands are in [VERIFICATION.md](VERIFICATION.md). Architectural decisions are recorded in [DECISIONS.md](DECISIONS.md).
@@ -108,11 +114,12 @@ origins are denied. Automatic Render deploys remain disabled. Vercel Preview and
 raw deployment URLs remain access-protected, while the Streamlit v1.1.2
 deployment remains an independent legacy interface and fallback.
 
-The hosting boundary does not add persistence. Documents are processed in memory
-and application code does not log their contents. Platform request metadata and
-provider retention remain external privacy considerations that must be reviewed
-before real résumé data is used. Exact settings and rollback steps are in
-[DEPLOYMENT.md](DEPLOYMENT.md).
+The hosting boundary does not add application persistence. Documents are processed
+for the current request; framework multipart handling may use bounded temporary
+spooling and closes upload resources on completion. Application code does not log
+document contents. Platform request metadata and provider retention remain
+external privacy considerations that must be reviewed before real résumé data is
+used. Exact settings and rollback steps are in [DEPLOYMENT.md](DEPLOYMENT.md).
 
 The public frontend mounts Vercel Web Analytics in production only. Its
 `beforeSend` filter accepts only the public production origin with `/`,
@@ -133,10 +140,12 @@ non-transmitting development mode with debug output disabled.
 - Documents: supported containers are read in memory; DOCX files are never
   extracted to filesystem paths and external relationships/macros are not
   executed or fetched. DOCM is unsupported.
-- Resource controls: 10 MB per file, 25 MB combined uploads, five résumés,
-  200,000 characters per text field, a bounded client request timeout, manual
-  retry, and cancellation. A hard server CPU deadline for pathological PDF
-  parsing requires infrastructure-level isolation and remains a documented risk.
+- Resource controls: 28 MB whole request, 10 MB per file, 25 MB combined uploads,
+  five résumés, 200,000 characters per pasted/extracted text, signature checks,
+  DOCX archive bounds, a 45-second client timeout, slow-service notice, manual
+  retry, and cancellation. A hard server CPU deadline for pathological native
+  parsing requires process isolation and is intentionally not simulated with an
+  unsafe thread timeout.
 - Caching/indexing: sensitive API responses are `no-store`; public static content
   remains cacheable. Preview builds emit noindex controls while Production stays
   canonical and indexable.

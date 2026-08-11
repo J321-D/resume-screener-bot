@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Annotated
 
 from fastapi import APIRouter, File, Form, UploadFile
+from starlette.concurrency import run_in_threadpool
 
 from api.schemas import AnalysisResponse
 from api.services.analysis_service import analyze_documents
@@ -29,4 +30,4 @@ async def analyze(
         resume_text,
         job_description_text,
     )
-    return analyze_documents(documents, analysis_mode)
+    return await run_in_threadpool(analyze_documents, documents, analysis_mode)

@@ -12,6 +12,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from api.config import allowed_origins
 from api.errors import PublicApiError
+from api.middleware import RequestBodyLimitMiddleware
 from api.routes.analysis import router as analysis_router
 from api.routes.health import router as health_router
 from api.routes.reports import router as reports_router
@@ -36,6 +37,7 @@ class SensitiveResponseCacheMiddleware(BaseHTTPMiddleware):
 
 
 app.add_middleware(SensitiveResponseCacheMiddleware)
+app.add_middleware(RequestBodyLimitMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins(),

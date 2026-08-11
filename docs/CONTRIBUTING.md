@@ -6,7 +6,7 @@ Read [../AGENTS.md](../AGENTS.md), [ARCHITECTURE.md](ARCHITECTURE.md), and [VERI
 
 Requirements:
 
-- Python 3.9 or newer
+- Python 3.10 or newer
 - Node.js 24
 - pnpm 11
 

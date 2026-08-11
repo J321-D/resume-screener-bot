@@ -86,7 +86,9 @@
 
 **Reason:** Supports focused review and a distinctive engineering-product identity.
 
-**Trade-offs:** Theme support requires future token and contrast work.
+**Trade-offs:** The product maintains one fully verified dark visual system rather
+than two partially tested themes. Forced-colors, visible focus, and reduced-motion
+preferences remain supported.
 
 **Alternatives rejected:** Bright marketing gradients; terminal or gaming aesthetics.
 
@@ -162,9 +164,10 @@ without discarding the stable compatibility interface or weakening the API's
 origin boundary.
 
 **Trade-offs:** The public browser submits document content to the Render service
-for in-memory processing, provider request metadata remains subject to provider
-policies, and the free Render service may cold-start. The public API origin remains
-embedded at frontend build time.
+for request-scoped processing; bounded multipart handling may use temporary
+spooling. Provider request metadata remains subject to provider policies, and the
+free Render service may cold-start. The public API origin remains embedded at
+frontend build time.
 
 **Alternatives rejected:** Wildcard CORS; retiring Streamlit during promotion;
 making Preview deployments public; introducing persistence; changing application
@@ -269,3 +272,45 @@ and screenshots can lag until their separate approval gates are completed.
 
 **Alternatives rejected:** Retagging published history; adding more features before
 closure; changing providers; treating optional polish as a release blocker.
+
+## ADR-021: Searchable assistance without application persistence
+
+**Decision:** Provide server-rendered, client-enhanced searchable Help with
+categories, deep links, contextual explanations, troubleshooting, glossary,
+synthetic examples, and a transparent external GitHub issue link. Store no
+questions, votes, histories, or feedback in the application.
+
+**Reason:** Users need interpretation and recovery guidance, while a persistent
+support/community system would require identity, moderation, retention, consent,
+spam controls, and a different privacy architecture.
+
+**Trade-offs:** GitHub feedback follows GitHub's policies and users are explicitly
+warned never to include résumé content or PII. A fake local “Was this helpful?”
+vote is excluded because it would not reach maintainers.
+
+## ADR-022: Pre-parser bounds and focused dependency surface
+
+**Decision:** Bound complete analysis/report request bodies before multipart
+parsing, validate file signatures and archive structure, cap extracted text, run
+synchronous parser/report work off the event loop, and close upload resources on
+all paths. Use FastAPI 0.141.1 and python-multipart 0.0.32; remove unused OpenAI
+and dotenv dependencies.
+
+**Reason:** These controls limit memory/decompression abuse, close published
+multipart risks, and keep the repository consistent with its deterministic no-AI
+capability boundary.
+
+**Trade-offs:** Native PDF/DOCX work has no pretend thread-kill timeout; safe hard
+deadlines require isolated worker processes. The supported Python floor is 3.10.
+
+## ADR-023: Terminal product disposition
+
+**Decision:** Reconcile every recovered product concept as implemented, rejected
+for a concrete reason, or externally blocked in
+[COMPLETENESS.md](COMPLETENESS.md). Do not maintain a generic idea backlog.
+
+**Reason:** Terminal states prevent capability inflation, silent deferral, and
+scope extension after the verified product program is complete.
+
+**Trade-offs:** A rejected concept reopens only with concrete new evidence or a
+separately approved architecture/provider/data decision.

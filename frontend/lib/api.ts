@@ -2,6 +2,7 @@ import { analysisResponseSchema, type AnalysisInputs, type AnalysisResponse, typ
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 export const REQUEST_TIMEOUT_MS = 45_000;
+export const SLOW_REQUEST_NOTICE_MS = 6_000;
 
 export function buildAnalysisForm(inputs: AnalysisInputs): FormData {
   const form = new FormData();
@@ -19,6 +20,18 @@ async function publicError(response: Response): Promise<PublicError> {
     if (payload?.error?.message) return payload.error as PublicError;
   } catch {
     // A generic message is safer than exposing transport internals.
+  }
+  if (response.status === 429) {
+    return {
+      code: "service_busy",
+      message: "The analysis service is receiving too many requests. Wait a moment and retry.",
+    };
+  }
+  if ([502, 503, 504].includes(response.status)) {
+    return {
+      code: "service_unavailable",
+      message: "The analysis service is temporarily unavailable. Your inputs are still available; retry in a moment.",
+    };
   }
   return { code: "request_failed", message: "The request could not be completed. Try again." };
 }
@@ -71,11 +84,11 @@ export async function analyze(inputs: AnalysisInputs, signal?: AbortSignal): Pro
   }
 }
 
-export async function createReport(inputs: AnalysisInputs): Promise<Blob> {
+export async function createReport(inputs: AnalysisInputs, signal?: AbortSignal): Promise<Blob> {
   const response = await request("/api/v1/report", {
     method: "POST",
     body: buildAnalysisForm(inputs),
-  });
+  }, signal);
   if (!response.ok) throw await publicError(response);
   if (!response.headers.get("content-type")?.toLowerCase().startsWith("application/pdf")) {
     throw {

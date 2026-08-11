@@ -1,12 +1,15 @@
 import type { BeforeSendEvent } from "@vercel/analytics";
 
 const ANALYTICS_PATHS = new Set(["/", "/methodology", "/privacy"]);
-const ANALYTICS_ORIGIN = "https://resume-keyword-screener.vercel.app";
+export const ANALYTICS_ORIGIN = "https://resume-keyword-screener.vercel.app";
 
 export function analyticsModeForEnvironment(
   environment: string | undefined,
+  origin: string | undefined,
 ): "development" | "production" {
-  return environment === "production" ? "production" : "development";
+  return environment === "production" && origin === ANALYTICS_ORIGIN
+    ? "production"
+    : "development";
 }
 
 export function filterAnalyticsEvent(event: BeforeSendEvent): BeforeSendEvent | null {

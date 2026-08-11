@@ -76,6 +76,9 @@ describe("Analyzer", () => {
     expect(screen.getAllByText("quality control").length).toBeGreaterThan(0);
     expect(screen.getByText("CATEGORIZED GAPS")).toBeInTheDocument();
     expect(screen.getByText("Coverage opportunities")).toBeInTheDocument();
+    expect(screen.getByText("Uncategorized lexical coverage")).toBeInTheDocument();
+    expect(screen.getByText("N/A — no applicable concepts")).toBeInTheDocument();
+    expect(screen.getByText(/excluded from the primary categorized score/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /download pdf report/i })).toBeEnabled();
   });
 
@@ -147,6 +150,7 @@ describe("Analyzer", () => {
 
     await user.type(resume, " MATLAB");
     expect(screen.getByText(/inputs changed after this scan/i)).toBeInTheDocument();
+    expect(screen.queryByText("Results ready")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: /download pdf report/i })).toBeDisabled();
     expect(screen.getByText(/review decisions were cleared/i)).toBeInTheDocument();
     expect(screen.getByLabelText("Review status for SQL")).toHaveValue("");
@@ -243,13 +247,77 @@ describe("Analyzer", () => {
     await screen.findByRole("heading", { name: "Your lexical coverage map" });
 
     await user.click(screen.getByRole("button", { name: "New analysis" }));
+    const clearButton = screen.getByRole("button", { name: "Clear and start new" });
     expect(screen.getByRole("alertdialog")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Keep current analysis" }));
+    expect(clearButton).toHaveFocus();
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(screen.getByRole("button", { name: "New analysis" })).toHaveFocus());
     expect(screen.getByLabelText("Résumé text")).toHaveValue("Python");
     await user.click(screen.getByRole("button", { name: "New analysis" }));
     await user.click(screen.getByRole("button", { name: "Clear and start new" }));
     expect(screen.getByLabelText("Résumé text")).toHaveValue("");
     expect(screen.queryByRole("heading", { name: "Your lexical coverage map" })).not.toBeInTheDocument();
+  });
+
+  it("shows report failures beside export without clearing successful results", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(globalThis, "fetch")
+      .mockImplementationOnce(() => jsonResponse())
+      .mockResolvedValueOnce(new Response("upstream unavailable", { status: 503 }));
+    render(<Analyzer />);
+    await user.type(screen.getByLabelText("Résumé text"), "Python");
+    await user.type(screen.getByLabelText("Job-description text"), "Python SQL");
+    await user.click(screen.getByRole("button", { name: /run keyword scan/i }));
+    await screen.findByRole("heading", { name: "Your lexical coverage map" });
+
+    await user.click(screen.getByRole("button", { name: /download pdf report/i }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("PDF report not created");
+    expect(screen.getByRole("alert")).toHaveTextContent("temporarily unavailable");
+    expect(screen.getByRole("heading", { name: "Your lexical coverage map" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /download pdf report/i })).toBeEnabled();
+  });
+
+  it("offers a native print action without changing the current analysis", async () => {
+    const user = userEvent.setup();
+    const print = vi.spyOn(window, "print").mockImplementation(() => undefined);
+    vi.spyOn(globalThis, "fetch").mockImplementation(() => jsonResponse());
+    render(<Analyzer />);
+    await user.type(screen.getByLabelText("Résumé text"), "Python");
+    await user.type(screen.getByLabelText("Job-description text"), "Python SQL");
+    await user.click(screen.getByRole("button", { name: /run keyword scan/i }));
+    await screen.findByRole("heading", { name: "Your lexical coverage map" });
+
+    await user.click(screen.getByRole("button", { name: "Print results" }));
+
+    expect(print).toHaveBeenCalledOnce();
+    expect(screen.getByRole("heading", { name: "Your lexical coverage map" })).toBeInTheDocument();
+  });
+
+  it("aborts an in-flight report when New analysis purges the session", async () => {
+    const user = userEvent.setup();
+    let reportAborted = false;
+    vi.spyOn(globalThis, "fetch")
+      .mockImplementationOnce(() => jsonResponse())
+      .mockImplementationOnce((_url, init) => new Promise((_, reject) => {
+        init?.signal?.addEventListener("abort", () => {
+          reportAborted = true;
+          reject(new DOMException("Aborted", "AbortError"));
+        });
+      }));
+    render(<Analyzer />);
+    await user.type(screen.getByLabelText("Résumé text"), "Python");
+    await user.type(screen.getByLabelText("Job-description text"), "Python SQL");
+    await user.click(screen.getByRole("button", { name: /run keyword scan/i }));
+    await screen.findByRole("heading", { name: "Your lexical coverage map" });
+    await user.click(screen.getByRole("button", { name: /download pdf report/i }));
+
+    await user.click(screen.getByRole("button", { name: "New analysis" }));
+    await user.click(screen.getByRole("button", { name: "Clear and start new" }));
+
+    expect(reportAborted).toBe(true);
+    expect(screen.queryByRole("heading", { name: "Your lexical coverage map" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
   it("validates empty and oversized files before submission", async () => {
@@ -275,5 +343,20 @@ describe("Analyzer", () => {
     expect(screen.getByText("17 B · Unsupported file type")).toBeInTheDocument();
     expect(screen.queryByText(/17 B · Ready to scan/i)).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: /run keyword scan/i })).toBeDisabled();
+  });
+
+  it("allows the same document to be selected again after removal", async () => {
+    const user = userEvent.setup();
+    render(<Analyzer />);
+    const input = screen.getByLabelText("Résumé files");
+    const file = new File(["Python"], "resume.txt", { type: "text/plain" });
+
+    await user.upload(input, file);
+    await user.click(screen.getByRole("button", { name: "Remove resume.txt" }));
+    expect(screen.queryByText("resume.txt")).not.toBeInTheDocument();
+
+    await user.upload(input, file);
+    expect(screen.getByText("resume.txt")).toBeInTheDocument();
+    expect(screen.getByText("6 B · Ready to scan")).toBeInTheDocument();
   });
 });

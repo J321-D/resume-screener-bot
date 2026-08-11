@@ -69,4 +69,25 @@ describe("API request resilience", () => {
       message: "The report service returned an unexpected response. Try the download again.",
     });
   });
+
+  it.each([
+    [429, "service_busy", "too many requests"],
+    [502, "service_unavailable", "temporarily unavailable"],
+    [503, "service_unavailable", "temporarily unavailable"],
+    [504, "service_unavailable", "temporarily unavailable"],
+  ])("maps generic provider status %i to actionable public copy", async (status, code, message) => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response("provider response", { status }));
+
+    await expect(analyze(inputs)).rejects.toMatchObject({ code, message: expect.stringContaining(message) });
+  });
+
+  it("allows report requests to be canceled by the caller", async () => {
+    vi.spyOn(globalThis, "fetch").mockImplementation((_url, init) => abortablePendingRequest(init));
+    const controller = new AbortController();
+    const request = createReport(inputs, controller.signal);
+
+    controller.abort();
+
+    await expect(request).rejects.toMatchObject({ name: "AbortError" });
+  });
 });

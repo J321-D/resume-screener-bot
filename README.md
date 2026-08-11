@@ -1,7 +1,7 @@
 # Resume Keyword Screener
 
 [![Version](https://img.shields.io/badge/version-v2.0.0-53E5FF)](https://github.com/J321-D/resume-screener-bot/tree/v2.0.0)
-[![Verification](https://img.shields.io/badge/checks-156%20passing-34D399)](#verification)
+[![Verification](https://img.shields.io/badge/checks-190%20passing-34D399)](#verification)
 [![License](https://img.shields.io/badge/license-MIT-A9B3C8)](LICENSE)
 [![Live Demo](https://img.shields.io/badge/demo-live-53E5FF)](https://resume-keyword-screener.vercel.app)
 
@@ -9,7 +9,7 @@
 
 🧰 **Legacy v1.1.2 demo:** https://resume-keyword-screener.streamlit.app
 
-Resume Keyword Screener is an ATS-style résumé keyword analysis tool that compares one or more résumés with a job description to measure deterministic lexical keyword coverage.
+Resume Keyword Screener is a deterministic lexical-analysis tool that compares one or more résumés with a job description to measure deterministic lexical keyword coverage.
 
 It supports PDF, DOCX, and TXT uploads, ATS-aware technical tokenization, phrase and synonym normalization, category-level coverage, interactive visualizations, and Unicode-safe PDF report generation.
 
@@ -39,7 +39,7 @@ Streamlit may require authentication before displaying it.
 - 🔒 No external AI or résumé-analysis API calls
 - ✅ Robust upload validation and user-friendly errors
 - 📉 Anonymous aggregate page analytics with no document or form content
-- 🧭 Responsive navigation, synthetic demo, Help, and resilient timeout/retry/cancel states
+- 🧭 Responsive navigation, synthetic demo, searchable Help, and resilient timeout/retry/cancel states
 - 🛡️ No-store analysis responses, bounded inputs, archive safety checks, and Preview noindex controls
 
 ### Version 2 additions
@@ -222,10 +222,11 @@ Characters unavailable in the font are replaced with `?` instead of causing repo
 
 ## Requirements
 
-- Python 3.9 or newer
+- Python 3.10 or newer
 - A local virtual environment is recommended
 
-The application is tested in both Python 3.9 and Python 3.12 environments.
+The application targets Python 3.10 or newer and is verified on Python 3.12 in
+CI and production.
 
 ---
 
@@ -242,15 +243,8 @@ python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
-The application does not require an API key.
-
-An example environment file remains available for possible future integrations:
-
-```bash
-cp .env.example .env
-```
-
-Never commit `.env` files or credentials to Git.
+The application does not require an API key. Never commit local environment
+files or credentials to Git.
 
 ---
 
@@ -300,6 +294,7 @@ the API and renders the returned ordered contract.
 - [Changelog](docs/CHANGELOG.md)
 - [Contributing guide](docs/CONTRIBUTING.md)
 - [Security policy](SECURITY.md)
+- [Requirement-to-evidence matrix](docs/COMPLETENESS.md)
 
 ### Version 2 architecture
 
@@ -451,7 +446,11 @@ Upload representative PDF, DOCX, and UTF-8 TXT files and confirm:
 Résumés often contain sensitive personal information.
 
 - When run locally, document processing occurs in the local application process.
-- In the public Version 2 demo, the Vercel frontend sends submitted résumé and job-description data to the configured Render API for in-memory processing of the current request; the application does not intentionally persist that content.
+- In the public Version 2 demo, the Vercel frontend sends submitted résumé and
+  job-description data to the configured Render API for request-scoped
+  processing. The application does not intentionally persist that content;
+  framework multipart handling may spool bounded larger uploads to temporary
+  storage and closes upload resources when the request completes.
 - The Version 2 frontend is configured to use Vercel Web Analytics for anonymous aggregate page views,
   referrers, approximate region, browser, operating system, and device category.
   Analytics receives only the exact public origin and fixed page path; query strings, document
@@ -502,7 +501,7 @@ The legacy v1.1.2 release includes:
 - normalized-match explanations
 - improved categorized matched/missing charting
 - Unicode-safe PDF reports
-- Python 3.9 deployment compatibility
+- Python 3.10+ compatibility, with Python 3.12 used in CI and production
 - responsive desktop and mobile layouts
 - robust upload validation
 - 84 automated unittest tests
@@ -511,11 +510,13 @@ The V2.x release is complete and feature-frozen, including the additive FastAPI
 boundary, Next.js frontend, premium responsive interface, review workspace,
 release hardening, and repository operating documentation. The Vercel/Render
 release is public at the Live Demo URL.
-The current repository-level verification count is **156 checks**: 101 Python
-tests, 39 frontend unit/accessibility tests, and 16 Playwright checks across
-desktop and mobile projects.
+The current integrated verification inventory is **190 checks**: 107 Python/API
+tests, 53 frontend unit/accessibility tests, and 30 Playwright checks across
+Chromium desktop, Firefox desktop, and WebKit mobile projects.
 
-Future work includes restrained futuristic Apple/Tesla/cyberpunk visual polish,
-a fuller menu and navigation system, richer review workflows, and customer Q&A
-and feedback. Other candidates include independent comparison, richer exports,
-OCR, project history, authentication, and carefully bounded optional AI features.
+The full historical product program—including visual polish, navigation, review
+ergonomics, assistance/feedback, privacy, security, resilience, public assets,
+and rejected capability proposals—is reconciled in the
+[requirement-to-evidence matrix](docs/COMPLETENESS.md). There is no generic
+“future” bucket; unimplemented concepts have a concrete rejection or external
+blocker.

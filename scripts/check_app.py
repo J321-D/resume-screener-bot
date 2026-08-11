@@ -17,11 +17,9 @@ REQUIRED_MODULES = {
     "docx2txt": "docx2txt",
     "fpdf2": "fpdf",
     "matplotlib": "matplotlib",
-    "openai": "openai",
     "pandas": "pandas",
     "plotly": "plotly",
     "PyMuPDF": "fitz",
-    "python-dotenv": "dotenv",
     "streamlit": "streamlit",
 }
 

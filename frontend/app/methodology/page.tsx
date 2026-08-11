@@ -23,10 +23,17 @@ export default function MethodologyPage() {
         phrase list, stop-word list, and synonym map. Full lexical mode preserves
         the original unique-token comparison.
       </p>
-      <h2>What the result means</h2>
+      <h2 id="coverage">What the result means</h2>
       <p>
         Keyword Coverage describes overlap in lexical terms. It does not measure
         candidate quality, predict hiring outcomes, or reproduce a specific ATS.
+      </p>
+      <p>
+        Full lexical coverage gives every unique job-description token equal
+        weight. Repeated occurrences affect the ordering of missing terms, not
+        the coverage score. Skills-focused coverage gives every categorized
+        job-description concept equal weight and reports Uncategorized concepts
+        separately.
       </p>
       <h2>Limitations</h2>
       <ul>

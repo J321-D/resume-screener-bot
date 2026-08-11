@@ -1,10 +1,10 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { AlertTriangle, ArrowDownToLine, Check, ChevronDown, Clipboard, Clock3, FileText, Layers3, LockKeyhole, RotateCcw, Sparkles } from "lucide-react";
+import { AlertTriangle, ArrowDownToLine, Check, ChevronDown, Clipboard, Clock3, FileText, Layers3, LockKeyhole, Printer, RotateCcw, Sparkles } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 
-import type { AnalysisResponse } from "@/lib/contracts";
+import type { AnalysisResponse, PublicError } from "@/lib/contracts";
 import { ReviewWorkspace } from "@/components/review/review-workspace";
 import { CoverageRing } from "./coverage-ring";
 
@@ -12,6 +12,7 @@ interface ResultsDashboardProps {
   result: AnalysisResponse;
   stale: boolean;
   reporting: boolean;
+  reportError: PublicError | null;
   analysisKey: string;
   onDownload: () => void;
   onNewAnalysis: () => void;
@@ -73,14 +74,17 @@ function TermList({ items, label, limit, reduceMotion }: TermListProps) {
   );
 }
 
-export function ResultsDashboard({ result, stale, reporting, analysisKey, onDownload, onNewAnalysis }: ResultsDashboardProps) {
+export function ResultsDashboard({ result, stale, reporting, reportError, analysisKey, onDownload, onNewAnalysis }: ResultsDashboardProps) {
   const reduceMotion = useReducedMotion();
   const resultsRef = useRef<HTMLElement>(null);
   const date = new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(result.metadata.analyzed_at));
   const categorized = result.categories.filter((category) => category.category !== "Uncategorized");
+  const uncategorized = result.categories.find((category) => category.category === "Uncategorized");
   const isFocused = result.analysis_mode === "Skills-focused analysis";
   const [copyState, setCopyState] = useState<"idle" | "copied" | "error">("idle");
   const [confirmingNew, setConfirmingNew] = useState(false);
+  const newAnalysisTriggerRef = useRef<HTMLButtonElement>(null);
+  const newAnalysisConfirmRef = useRef<HTMLButtonElement>(null);
 
   async function copySummary() {
     const summary = [
@@ -110,6 +114,20 @@ export function ResultsDashboard({ result, stale, reporting, analysisKey, onDown
     });
   }, [analysisKey, reduceMotion]);
 
+  useEffect(() => {
+    setCopyState("idle");
+    setConfirmingNew(false);
+  }, [analysisKey]);
+
+  useEffect(() => {
+    if (confirmingNew) newAnalysisConfirmRef.current?.focus();
+  }, [confirmingNew]);
+
+  function keepCurrentAnalysis() {
+    setConfirmingNew(false);
+    requestAnimationFrame(() => newAnalysisTriggerRef.current?.focus());
+  }
+
   return (
     <motion.section
       ref={resultsRef}
@@ -138,7 +156,7 @@ export function ResultsDashboard({ result, stale, reporting, analysisKey, onDown
           <div className="coverage-copy">
             <p className="mono-label">{result.analysis_mode.toUpperCase()}</p>
             <h3>{result.coverage.label}</h3>
-            <p>Lexical overlap across the supplied résumé content and role description.</p>
+            <p>Lexical overlap across the supplied résumé content and role description. <a className="context-link" href="/methodology#coverage">What does this mean?</a></p>
             <div className="result-meta"><FileText size={15} /><span>{result.metadata.resume_label}</span></div>
             <div className="result-meta"><Layers3 size={15} /><span>{result.metadata.input_mode.replaceAll("_", " ")}</span></div>
             <div className="result-meta"><Clock3 size={15} /><time dateTime={result.metadata.analyzed_at}>{date}</time></div>
@@ -173,9 +191,9 @@ export function ResultsDashboard({ result, stale, reporting, analysisKey, onDown
         </motion.article>
       </div>
 
-      {categorized.length > 0 && (
+      {(categorized.length > 0 || uncategorized) && (
         <motion.article className="insight-card" variants={cardVariants}>
-          <header><div><span className="result-icon"><Layers3 size={16} /></span><div><h3>Category coverage</h3><p>Coverage across the curated relevance taxonomy.</p></div></div></header>
+          <header><div><span className="result-icon"><Layers3 size={16} /></span><div><h3>Category coverage</h3><p>Coverage across the curated relevance taxonomy. <a className="context-link" href="/help#categories">How categories work</a></p></div></div></header>
           <div className="category-bars">
             {categorized.map((category) => (
               <div className="category-row" key={category.category}>
@@ -186,6 +204,15 @@ export function ResultsDashboard({ result, stale, reporting, analysisKey, onDown
               </div>
             ))}
           </div>
+          {uncategorized && (
+            <div className="uncategorized-coverage">
+              <div>
+                <span>Uncategorized lexical coverage</span>
+                <strong>{uncategorized.display_value}</strong>
+              </div>
+              <p>Visible for review and reported separately; excluded from the primary categorized score.</p>
+            </div>
+          )}
         </motion.article>
       )}
 
@@ -214,21 +241,30 @@ export function ResultsDashboard({ result, stale, reporting, analysisKey, onDown
 
       <motion.article className="export-card" variants={cardVariants}>
         <div className="report-thumbnail" aria-hidden="true"><span>RKS</span><div /><div /><div /></div>
-        <div className="export-copy"><p className="mono-label">CURRENT INPUT SIGNATURE</p><h3>Export your analysis</h3><p>Download a recruiter-ready PDF generated by the existing Unicode-safe Python report engine.</p><span><LockKeyhole size={14} /> Generated privately for the current scan</span></div>
-        <button className="button button-primary" type="button" disabled={stale || reporting} onClick={onDownload}>
-          <ArrowDownToLine size={17} /> {reporting ? "Preparing PDF…" : "Download PDF report"}
-        </button>
+        <div className="export-copy"><p className="mono-label">CURRENT INPUT SIGNATURE</p><h3>Export your analysis</h3><p>Download a recruiter-ready PDF generated by the existing Unicode-safe Python report engine. <a className="context-link" href="/help#exports">Export guide</a></p><span><LockKeyhole size={14} /> Generated on request; not intentionally persisted</span></div>
+        <div className="export-actions">
+          <button className="button button-primary" type="button" disabled={stale || reporting} onClick={onDownload}>
+            <ArrowDownToLine size={17} /> {reporting ? "Preparing PDF…" : "Download PDF report"}
+          </button>
+          <button className="button button-quiet" type="button" onClick={() => window.print()}><Printer size={16} /> Print results</button>
+        </div>
       </motion.article>
+      {reportError && (
+        <div className="export-error" role="alert">
+          <AlertTriangle size={17} aria-hidden="true" />
+          <span><strong>PDF report not created.</strong> {reportError.message} Your current results remain available.</span>
+        </div>
+      )}
 
       <div className="results-next-actions">
         <a className="button button-quiet" href="#workspace">Edit current inputs</a>
         {!confirmingNew ? (
-          <button className="button button-quiet" type="button" onClick={() => setConfirmingNew(true)}><RotateCcw size={16} /> New analysis</button>
+          <button ref={newAnalysisTriggerRef} className="button button-quiet" type="button" onClick={() => setConfirmingNew(true)}><RotateCcw size={16} /> New analysis</button>
         ) : (
-          <div className="new-analysis-confirmation" role="alertdialog" aria-labelledby="new-analysis-title">
+          <div className="new-analysis-confirmation" role="alertdialog" aria-labelledby="new-analysis-title" onKeyDown={(event) => { if (event.key === "Escape") keepCurrentAnalysis(); }}>
             <strong id="new-analysis-title">Clear current inputs, results, and review decisions?</strong>
-            <button type="button" onClick={onNewAnalysis}>Clear and start new</button>
-            <button type="button" onClick={() => setConfirmingNew(false)}>Keep current analysis</button>
+            <button ref={newAnalysisConfirmRef} type="button" onClick={onNewAnalysis}>Clear and start new</button>
+            <button type="button" onClick={keepCurrentAnalysis}>Keep current analysis</button>
           </div>
         )}
       </div>

@@ -19,9 +19,17 @@ export default function PrivacyPage() {
       <h1>Your documents are used only for the current request.</h1>
       <p>
         Résumé and job-description content is sent only to the configured Resume
-        Keyword Screener API. The service processes uploads in memory, does not
-        intentionally persist them, and does not transmit them to AI providers or
-        third-party résumé-processing services.
+        Keyword Screener API for the current request. The application has no
+        document database or persistent disk, does not intentionally retain the
+        content, and does not transmit it to AI providers or third-party
+        résumé-processing services.
+      </p>
+      <p>
+        Multipart infrastructure may temporarily spool larger uploads while a
+        request is active. The API bounds the complete request before document
+        parsing and closes framework-managed upload resources after processing.
+        Hosting-provider operational metadata remains governed by the providers&apos;
+        own policies.
       </p>
       <p>
         This Version 2 frontend is configured to use Vercel Web Analytics for

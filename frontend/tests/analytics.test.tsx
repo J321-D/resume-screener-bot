@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { render, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { analyticsModeForEnvironment, filterAnalyticsEvent } from "@/components/analytics/privacy";
@@ -16,18 +16,19 @@ vi.mock("@vercel/analytics/next", () => ({
 describe("privacy-safe Web Analytics", () => {
   beforeEach(() => analyticsSpy.mockClear());
 
-  it("uses the non-transmitting mode outside production", () => {
-    expect(analyticsModeForEnvironment("development")).toBe("development");
-    expect(analyticsModeForEnvironment("test")).toBe("development");
-    expect(analyticsModeForEnvironment(undefined)).toBe("development");
-    expect(analyticsModeForEnvironment("production")).toBe("production");
+  it("uses the non-transmitting mode outside the exact public production origin", async () => {
+    expect(analyticsModeForEnvironment("development", "https://resume-keyword-screener.vercel.app")).toBe("development");
+    expect(analyticsModeForEnvironment("test", "https://resume-keyword-screener.vercel.app")).toBe("development");
+    expect(analyticsModeForEnvironment(undefined, undefined)).toBe("development");
+    expect(analyticsModeForEnvironment("production", "http://localhost:3000")).toBe("development");
+    expect(analyticsModeForEnvironment("production", "https://resume-keyword-screener.vercel.app")).toBe("production");
 
     render(<WebAnalytics />);
-    expect(analyticsSpy).toHaveBeenCalledWith(expect.objectContaining({
+    await waitFor(() => expect(analyticsSpy).toHaveBeenLastCalledWith(expect.objectContaining({
       beforeSend: filterAnalyticsEvent,
       debug: false,
       mode: "development",
-    }));
+    })));
   });
 
   it.each(["/", "/methodology", "/privacy"])(

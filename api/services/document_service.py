@@ -9,6 +9,7 @@ from pathlib import PurePath
 from zipfile import BadZipFile, ZipFile
 
 from fastapi import UploadFile
+from starlette.concurrency import run_in_threadpool
 
 from api.errors import PublicApiError
 from resume_screener.models import ExtractedDocument
@@ -25,6 +26,7 @@ from resume_screener.parsing import (
 MAX_RESUME_UPLOADS = 5
 MAX_TOTAL_UPLOAD_SIZE_BYTES = 25 * 1024 * 1024
 MAX_TEXT_CHARACTERS = 200_000
+MAX_EXTRACTED_TEXT_CHARACTERS = 200_000
 MAX_DOCX_ENTRIES = 2_048
 MAX_DOCX_UNCOMPRESSED_BYTES = 50 * 1024 * 1024
 MAX_DOCX_ENTRY_BYTES = 20 * 1024 * 1024
@@ -143,8 +145,10 @@ def _detect_media_type(content: bytes) -> str | None:
         except BadZipFile:
             return None
     try:
-        content.decode("utf-8")
+        decoded = content.decode("utf-8")
     except UnicodeDecodeError:
+        return None
+    if "\x00" in decoded:
         return None
     return TXT_MEDIA_TYPE
 
@@ -220,11 +224,33 @@ def _parse_buffered(
     field: str,
 ) -> ExtractedDocument:
     try:
-        return parse_uploaded_document(
+        document = parse_uploaded_document(
             BufferedUpload(content=content, name=filename, type=media_type)
         )
     except DocumentParsingError as error:
         raise PublicApiError(422, error.code.value, error.user_message, field) from error
+    if len(document.text) > MAX_EXTRACTED_TEXT_CHARACTERS:
+        raise PublicApiError(
+            413,
+            "extracted_text_too_large",
+            (
+                f"{filename} contains more than "
+                f"{MAX_EXTRACTED_TEXT_CHARACTERS:,} extracted characters."
+            ),
+            field,
+        )
+    return document
+
+
+async def _close_uploads(
+    resume_uploads: list[UploadFile],
+    job_description_upload: UploadFile | None,
+) -> None:
+    """Close framework-managed upload resources on every early rejection path."""
+    for upload in resume_uploads:
+        await upload.close()
+    if job_description_upload is not None:
+        await job_description_upload.close()
 
 
 async def prepare_documents(
@@ -239,6 +265,7 @@ async def prepare_documents(
         (job_description_text, "job_description_text"),
     ):
         if len(value) > MAX_TEXT_CHARACTERS:
+            await _close_uploads(resume_uploads, job_description_upload)
             raise PublicApiError(
                 413,
                 "text_too_large",
@@ -246,8 +273,7 @@ async def prepare_documents(
                 field,
             )
     if len(resume_uploads) > MAX_RESUME_UPLOADS:
-        for upload in resume_uploads:
-            await upload.close()
+        await _close_uploads(resume_uploads, job_description_upload)
         raise PublicApiError(
             422,
             "too_many_resumes",
@@ -270,7 +296,9 @@ async def prepare_documents(
                 content, display_name, upload.content_type, "resumes"
             )
             resumes.append(
-                _parse_buffered(content, display_name, media_type, "resumes")
+                await run_in_threadpool(
+                    _parse_buffered, content, display_name, media_type, "resumes"
+                )
             )
         except PublicApiError as error:
             warnings.append(error)
@@ -298,8 +326,12 @@ async def prepare_documents(
                 job_description_upload.content_type,
                 "job_description_file",
             )
-            job_document = _parse_buffered(
-                content, display_name, media_type, "job_description_file"
+            job_document = await run_in_threadpool(
+                _parse_buffered,
+                content,
+                display_name,
+                media_type,
+                "job_description_file",
             )
         except PublicApiError as error:
             if job_description_text.strip():

@@ -11,7 +11,7 @@ const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono"
 export const metadata: Metadata = {
   title: "Resume Keyword Screener",
   description:
-    "Private lexical résumé-to-job comparison with matched terms, coverage opportunities, and Unicode PDF reports.",
+    "Privacy-conscious lexical résumé-to-job comparison with matched terms, coverage opportunities, and Unicode PDF reports.",
   metadataBase: new URL("https://resume-keyword-screener.vercel.app"),
   icons: {
     icon: "/favicon.svg",

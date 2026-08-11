@@ -78,6 +78,15 @@ Long ordered lists show a useful initial subset and disclose the remaining count
 
 Opportunity review is a focused editing workflow, not a survey or ranking system. Present one compact decision control per term, retain engine order, and keep progress and status totals factual. Use cyan for Add to résumé, emerald for Already represented, neutral treatment for Not relevant, and amber for Review later. Filters and search may narrow the view but never rerank it. Reset requires explicit confirmation, and stale analyses expose no prior decisions.
 
+## Assistance system
+
+Help is task-oriented rather than an accordion wall. Search, category filters,
+deep links, contextual result links, troubleshooting, glossary definitions, and
+synthetic examples share the same information hierarchy. No-results states offer
+a direct reset. Feedback links disclose that GitHub is external and forbid
+document or personal data. Assistance must never imply AI, coaching, candidate
+assessment, templates, or a persistent support channel.
+
 ## Responsive behavior
 
 The same workflow must remain clear at desktop, tablet, and mobile widths. Preserve score prominence, natural chip wrapping, compact export actions, usable navigation, and zero horizontal overflow. Validate the breakpoint matrix in [VERIFICATION.md](VERIFICATION.md).

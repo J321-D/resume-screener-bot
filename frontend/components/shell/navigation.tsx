@@ -51,7 +51,7 @@ export function Navigation() {
           {open ? <X size={19} /> : <Menu size={19} />}
         </button>
         <div ref={menuRef} id="primary-menu" className={`nav-actions ${open ? "is-open" : ""}`}>
-          <span className="privacy-pill"><ShieldCheck size={14} /> In-memory processing</span>
+          <span className="privacy-pill"><ShieldCheck size={14} /> Request-scoped processing</span>
           {destinations.map((item) => (
             <Link
               key={item.href}

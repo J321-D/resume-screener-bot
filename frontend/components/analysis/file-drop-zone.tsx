@@ -26,7 +26,7 @@ export function FileDropZone({ files, multiple = false, onFiles, label, descript
     <div className="file-field">
       <div className="field-heading">
         <div><label htmlFor={inputId}>{label}</label><p>{description}</p></div>
-        <span><ShieldCheck size={13} /> Private</span>
+        <span><ShieldCheck size={13} /> Validated</span>
       </div>
       <label
         className={`drop-zone ${dragging ? "is-dragging" : ""}`}
@@ -46,7 +46,10 @@ export function FileDropZone({ files, multiple = false, onFiles, label, descript
           type="file"
           accept=".pdf,.docx,.txt"
           multiple={multiple}
-          onChange={(event) => addFiles(Array.from(event.target.files ?? []))}
+          onChange={(event) => {
+            addFiles(Array.from(event.target.files ?? []));
+            event.currentTarget.value = "";
+          }}
         />
         <span className="drop-icon" aria-hidden="true"><UploadCloud size={22} /></span>
         <span><strong>Drop {multiple ? "résumés" : "a document"} here</strong><small>or choose PDF, DOCX, TXT · 10 MB each</small></span>

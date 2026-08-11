@@ -71,14 +71,16 @@ Vercel: frontend/ (Next.js)
   │ multipart HTTPS
   ▼
 Render: api.main:app (FastAPI)
-  │ in-memory request processing
+  │ request-scoped processing
   ▼
 Protected deterministic Python engine
 ```
 
 No database, persistent disk, background worker, or external analysis service is
-required. Uploaded documents are validated and processed in memory. The checked-in
-Vercel frontend uses enabled anonymous aggregate Web Analytics for three fixed
+required. Uploaded documents are validated and processed for the current request;
+bounded multipart handling may spool larger uploads to temporary storage and
+closes those resources when the request completes. The checked-in Vercel frontend
+uses enabled anonymous aggregate Web Analytics for three fixed
 public paths; it does not send document or form content and defines no custom
 interaction events.
 Application code does not log document contents, but the hosting providers may
@@ -225,8 +227,8 @@ Because Version 2 has no persistence, rollback requires no data migration.
 
 - Render runs Python 3.12; Vercel builds/runs the frontend with Node 24.x and pnpm
   11.16.0.
-- CI validates Python 3.12 plus Playwright Desktop Chrome on Chromium and iPhone
-  13 emulation on WebKit.
+- CI validates Python 3.12 plus Playwright desktop projects on Chromium and
+  Firefox and iPhone 13 emulation on WebKit.
 - Current evergreen Chrome, Edge, Safari, and Firefox are the support target.
   Unavailable manual engines are recorded as coverage limits rather than claimed
   as tested.
@@ -240,15 +242,17 @@ Because Version 2 has no persistence, rollback requires no data migration.
   control and must be reviewed before using real résumé data.
 - `NEXT_PUBLIC_API_URL` is build-time configuration; a stale value requires a new
   verified frontend build.
-- Browser upload limits do not replace provider request-size or timeout limits.
+- Browser upload limits do not replace provider request-size or timeout limits;
+  the API independently enforces a 28 MB whole-body cap, per-file/aggregate
+  limits, and post-extraction text bounds.
 - There is no application/provider rate limiter beyond current provider controls;
   revisit only if abuse, capacity, latency, or cost evidence appears.
 - No Content Security Policy is currently shipped. Reevaluate if content/script
   sources expand or a verified nonce/hash policy can be introduced without
   breaking Next.js or Vercel Analytics.
-- `pip check` validates dependency compatibility, not Python CVEs. A dedicated
-  scanner remains separately gated; Dependabot/provider advisories are the current
-  watch path.
+- The repository's approved Python set resolves to FastAPI 0.141.1 and
+  python-multipart 0.0.32; a fresh-environment `pip check` and OSV package audit
+  are release checks. Provider advisories remain a watch path.
 - The green GitHub Actions run reports upstream Node 20 action-metadata,
   `punycode`, `url.parse()`, legacy ESLint configuration, and PyMuPDF `fitz`
   deprecation notices. They are non-blocking until a maintained replacement is

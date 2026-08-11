@@ -15,6 +15,13 @@ All notable changes are documented here. This project follows [Keep a Changelog]
   identity, and neutral cold-start guidance.
 - Added CI, weekly Dependabot checks, a synthetic public smoke tool, a security
   policy, and an accurate architecture SVG.
+- Added searchable categorized Help with deep links, contextual explanations,
+  troubleshooting, glossary, synthetic guidance, and a transparent privacy-safe
+  feedback path.
+- Added pre-parser whole-request limits, post-extraction limits, upload-resource
+  cleanup, signature validation, and Chromium/Firefox/WebKit browser coverage.
+- Added a terminal requirement-to-evidence matrix covering the complete V2.x
+  product program.
 
 ### Changed
 
@@ -32,6 +39,8 @@ All notable changes are documented here. This project follows [Keep a Changelog]
   previous Production deployment as an available rollback build.
 - Closed and feature-froze the V2.x scope after live reconciliation. No post-v2.0
   semantic-version tag or GitHub Release has been created yet.
+- Raised the supported Python floor to 3.10, updated FastAPI to 0.141.1 and
+  python-multipart to 0.0.32, and removed unused OpenAI/dotenv dependencies.
 
 ### Security
 
@@ -45,6 +54,8 @@ All notable changes are documented here. This project follows [Keep a Changelog]
   anti-sniffing, framing, referrer, and browser-capability headers.
 - Patched frontend transitive advisories through narrow pnpm overrides without a
   major framework migration.
+- Verified the clean resolved Python environment with 107 tests, `pip check`, and
+  an OSV package/version audit with no known findings.
 
 ## Version 2 public release candidate — 2026-08-10
 

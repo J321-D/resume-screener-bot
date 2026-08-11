@@ -1,115 +1,69 @@
-# Roadmap
+# Roadmap and terminal dispositions
 
-Priorities: **P0** release-critical, **P1** next planned work, **P2** valuable follow-up, **P3** exploratory.
+The V2.x product program is complete. This document records the terminal state
+of previously proposed work so ideas are not silently deferred or accidentally
+presented as promises. Evidence links point to the authoritative
+[completeness matrix](COMPLETENESS.md).
 
-## Version 2.0 — Complete
+## Shipped product program
 
-- [x] **P0** Preserve the deterministic Python engine
-- [x] **P0** Add the FastAPI application boundary and typed contracts
-- [x] **P0** Add the responsive Next.js workflow
-- [x] **P0** Verify parity, uploads, errors, PDF export, and stale-result protection
-- [x] **P1** Establish the premium visual system and results hierarchy
-- [x] **P1** Add accessible progressive disclosure and reduced-motion behavior
-- [x] **P1** Create the repository operating system
+- [x] Preserve the deterministic Python engine and Full lexical compatibility.
+- [x] Add the versioned FastAPI boundary and typed browser contract.
+- [x] Add the responsive Next.js workflow, premium technical design system, and
+  restrained motion language.
+- [x] Add Skills-focused and Full lexical workflows, upload/paste precedence,
+  ordered results, review decisions, search/filter, copy, Markdown, PDF, and
+  print utilities.
+- [x] Add synthetic demo/onboarding, responsive navigation, searchable Help,
+  Methodology, Privacy, contextual guidance, and transparent limitations.
+- [x] Harden file signatures, multipart/body/file/archive/text/extraction bounds,
+  stale/race/cancel/retry behavior, no-store responses, exact-origin CORS, and
+  private structured errors.
+- [x] Add anonymous aggregate Vercel page analytics with fixed public routes,
+  no custom events, no form/document data, and non-transmitting local behavior.
+- [x] Add Python/API, unit/accessibility, Chromium, Firefox, WebKit/mobile,
+  reduced-motion, forced-colors, print, zoom, and responsive verification.
+- [x] Publish V2 at the permanent Vercel URL, keep a protected Preview, preserve
+  the Streamlit v1.1.2 legacy fallback, and document rollback evidence.
+- [x] Add least-privilege CI, weekly dependency review, production smoke tooling,
+  security policy, repository operating documentation, and public portfolio assets.
 
-## Version 2.1 — Review workspace
+## Intentionally rejected
 
-- [x] **P1** Add a focused review workspace for moving between findings
-- [x] **P1** Add privacy-safe aggregate page analytics on the Vercel Hobby plan
-- [ ] **P2** Revisit low-cardinality workflow events only after a separately
-  approved paid-plan decision
-- [ ] **P2** Revisit exact source-context highlighting only if the engine exposes
-  occurrence data; approximate client highlighting is intentionally skipped
-- [ ] **P2** Revisit a theme switcher only if user need outweighs the cost of
-  maintaining two complete accessible systems
-- [x] **P1** Add portable PDF, Markdown checklist, print, and copy utilities
-- [x] **P2** Expand browser coverage for review-state interactions
+These are closed product decisions, not an unprioritized backlog:
 
-Approval gate: preserve engine calculations and API contracts; approve any new dependency before implementation.
+| Proposal | Terminal reason |
+| --- | --- |
+| Generative-AI rewriting, coaching, ATS prediction, embeddings, fuzzy matching, or opaque weighting | Conflicts with deterministic explainability, capability-boundary clarity, and the current privacy promise. |
+| Approximate source highlighting | The engine does not return occurrence spans; reconstructing them in the client could misattribute a match. |
+| Independent candidate ranking or multiple-résumé scoring | Changes the protected résumé-union contract and risks implying candidate assessment. |
+| Accounts, saved analyses, histories, collaboration, public sharing, comments, voting, or community Q&A | Requires identity, persistence, retention/deletion, moderation, abuse controls, and a materially different threat model. |
+| Persistent in-product feedback collection | Requires storage, identity/consent, moderation, retention, and spam infrastructure. Help instead provides a transparent GitHub issue path with a warning not to include document content or PII. |
+| Fake local “Was this helpful?” control | A non-persistent vote would not reach maintainers and would misleadingly imply feedback was received. |
+| OCR | Adds heavy document processing and dependencies while changing the accepted input/security boundary; image-only PDFs are rejected clearly. |
+| Theme switcher | A second complete accessible visual system adds ongoing contrast and regression cost without demonstrated product value; forced-colors and system accessibility preferences are supported. |
+| Motion/animation framework | Native CSS and existing browser APIs provide the restrained transitions required without another runtime dependency. |
+| Stateful application rate limiter | Per-instance IP state would be privacy-sensitive and ineffective across free-tier instances; exact bounds and provider controls remain the appropriate current boundary. |
+| Speculative Content Security Policy | A nonce/hash rollout across Next.js and Vercel Analytics would add breakage risk without a demonstrated injection path; unsafe user HTML is never rendered. |
+| Custom analytics events | Standard aggregate page views answer the accepted usage question without workflow surveillance or a paid-plan expansion. |
+| Custom domain | The permanent `vercel.app` URL is clean, stable, and functional; DNS and provider changes add operational surface without product value. |
+| Streamlit retirement | It remains a useful independent v1.1.2 compatibility and rollback demo. |
 
-## Version 2 public release — Complete
+## Externally blocked actions
 
-- [x] **P0** Define the Render FastAPI and Vercel Next.js release topology
-- [x] **P0** Add runtime pins, health checks, exact-origin CORS guidance, and rollback documentation
-- [x] **P0** Keep automatic backend deploys off and preserve the stable Streamlit deployment
-- [x] **P0** Connect external accounts and verify protected preview services after explicit approval
-- [x] **P0** Validate hosted analysis, upload errors, responsive behavior, and PDF download
-- [x] **P0** Promote the verified frontend to the permanent public Vercel origin
-- [x] **P0** Restrict Render CORS to the exact public and stable protected Preview origins
-- [x] **P0** Preserve the Streamlit v1.1.2 deployment as a legacy rollback demo
-- [x] **P1** Create the annotated `v2.0.0` Git tag
-- [ ] **P1** Decide whether to create a GitHub Release separately
+These items are complete as decisions but cannot be performed as ordinary
+repository work:
 
-Approval gate: no provider login, repository connection, service creation,
-credential or environment-variable write, deployment, domain change, or public
-promotion occurs without explicit user approval.
+| Action | Exact blocker |
+| --- | --- |
+| Stage, commit, push, tag, GitHub Release, or deploy this integrated worktree | Explicit Git/provider authorization gate. |
+| Enable Dependabot security updates/alerts or scheduled external monitoring | GitHub/provider write and permissions approval. |
+| Dispose of the excluded nested `resume-screener-bot/` repository | Separate destructive scope and ownership decision. |
+| Add provider-side rate limiting or paid security controls | Provider configuration and possible billing/privacy decision; no current abuse evidence. |
 
-## V2.x hardening — Complete
+## Re-evaluation triggers
 
-- [x] **P1** Add a clearer responsive menu, navigation model, Help, and synthetic demo
-- [x] **P1** Harden request lifecycle, stale results, retry/cancel, and New analysis
-- [x] **P1** Consolidate the restrained futuristic visual/motion system
-- [x] **P1** Add input/archive/cache/indexing/security boundaries and CI operations
-
-The public V2.x feature scope is now frozen. Any further capability or visual idea
-starts a new milestone rather than extending this release.
-
-## Next milestone candidates
-
-- [ ] **P2** Expand the review workspace only where richer guided flows have
-  demonstrated user value
-- [ ] **P1** Add a customer Q&A and feedback path with explicit privacy boundaries
-- [ ] **P2** Deepen menu/navigation only where validated workflows require it
-- [ ] **P2** Apply further restrained futuristic Apple/Tesla/cyberpunk refinement
-  without excessive neon, gaming aesthetics, or reduced accessibility
-- [ ] **P2** Design saved analyses only after explicit privacy and retention rules
-- [ ] **P1** Compare multiple analyses without introducing candidate-quality ranking
-- [ ] **P2** Add a recruiter review workflow with transparent lexical evidence
-- [ ] **P2** Define export and deletion controls for persisted data
-
-Approval gate: persistence, authentication, and data migration require separate architecture and threat-model review.
-
-## Version 3 — Exploratory platform
-
-- [ ] **P2** AI-assisted rewriting with user-controlled suggestions and provenance
-- [ ] **P2** Enterprise deployment and governance mode
-- [ ] **P3** Collaboration and review comments
-- [ ] **P3** Plugin architecture with capability boundaries
-
-Approval gate: no AI, external service, enterprise data path, or plugin execution may begin without explicit product, security, and privacy decisions.
-
-## Operational watch items
-
-These accepted risks are not current release blockers. Reevaluate them only when
-their trigger occurs:
-
-- Content Security Policy: revisit when executable/content sources expand, a
-  security review identifies a concrete injection path, or a nonce/hash rollout
-  can be verified with Next.js and Vercel Analytics without breaking the app.
-- Python CVE tooling: add a vetted scanner only after a dependency/tool approval or
-  when Dependabot/provider advisories identify a Python package concern; `pip
-  check` validates compatibility, not vulnerabilities.
-- Provider/API rate limiting: revisit if abuse, capacity, cost, or latency evidence
-  appears; do not add stateful infrastructure speculatively.
-- GitHub Actions runtime notices: move to maintained action majors when available
-  and verified. The current green run reports Node 20 action-metadata deprecation
-  while GitHub forces those actions onto Node 24, plus upstream `punycode`,
-  `url.parse()`, legacy ESLint configuration, and PyMuPDF `fitz` notices.
-
-Add proposals only after documenting user value, scope, privacy impact, contract
-impact, verification strategy, and dependencies.
-
-## Repository automation candidates
-
-These are documented future operations improvements, not implemented automation:
-
-- Nightly locked-dependency build and full test run
-- Scheduled dependency and license review
-- Scheduled security and secret-scanning review
-- Cross-browser screenshot-regression review
-- README and verification-count drift check
-- Issue-triage assistance with human-owned prioritization
-- Deployment-health checks after an explicitly approved deployment
-
-Each automation requires separate approval of permissions, runtime, reporting,
-failure handling, and any external service before implementation.
+Rejected decisions reopen only with concrete new evidence: a verified security
+defect, measurable abuse/capacity problem, a protected-engine contract proposal,
+or a separately approved persistence/identity/provider architecture. Routine
+ideas do not extend the completed V2.x release.

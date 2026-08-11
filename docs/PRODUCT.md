@@ -42,9 +42,10 @@ It does **not** measure candidate quality, predict applicant-tracking-system dec
 - Streamlit compatibility interface
 - FastAPI boundary and responsive Next.js interface
 - Session-local opportunity review with status filters, search, progress, reset, and a Markdown action checklist
-- A synthetic demonstration, responsive navigation, Help, manual retry/cancel, stale-result protection, and explicit New analysis reset
+- A synthetic demonstration, responsive navigation, searchable Help, manual retry/cancel, stale-result protection, and explicit New analysis reset
 - Copyable factual result summaries and explicitly selected opportunity terms
-- Local processing without document persistence or external résumé transmission
+- Request-scoped processing without application persistence or external
+  résumé-analysis services
 - Anonymous aggregate Vercel page analytics limited to the fixed public routes;
   no document content, form input, filenames, query strings, or custom interaction
   events are collected by the application analytics integration
@@ -58,12 +59,16 @@ It does **not** measure candidate quality, predict applicant-tracking-system dec
 - Coverage is lexical evidence, not evidence of competency or experience
 - Curated analysis is English-first; Unicode remains safe but multilingual semantic understanding is not claimed
 
-## Future vision
+## Product boundary
 
-The public V2.x release includes the review workspace plus verified navigation,
-demo/onboarding, resilience, security-boundary, responsive-presentation, and
-repository-operation hardening without changing the engine. This release is
-feature-frozen. Persistence, authentication, collaboration, AI, source
-highlighting, public result sharing, and other new capabilities belong to a new
-milestone with their own product, privacy, and verification decisions. See
-[ROADMAP.md](ROADMAP.md).
+The V2.x product includes the review workspace, searchable assistance,
+demo/onboarding, resilience, bounded document handling, cross-browser responsive
+presentation, and repository operations without changing the protected engine.
+It is intentionally a deterministic lexical instrument, not an AI writer,
+candidate-ranking system, coaching service, résumé template library, peer-review
+network, or ATS predictor.
+
+Persistence, accounts, collaboration, approximate source highlighting, OCR,
+candidate comparison, and custom analytics have been evaluated and closed with
+specific reasons in [ROADMAP.md](ROADMAP.md) and
+[COMPLETENESS.md](COMPLETENESS.md); they are not silently deferred promises.

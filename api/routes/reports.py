@@ -6,6 +6,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, File, Form, UploadFile
 from fastapi.responses import Response
+from starlette.concurrency import run_in_threadpool
 
 from api.services.document_service import prepare_documents
 from api.services.report_service import generate_report_for_documents
@@ -29,7 +30,9 @@ async def report(
         resume_text,
         job_description_text,
     )
-    pdf_bytes = generate_report_for_documents(documents, analysis_mode)
+    pdf_bytes = await run_in_threadpool(
+        generate_report_for_documents, documents, analysis_mode
+    )
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",

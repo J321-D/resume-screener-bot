@@ -52,9 +52,20 @@ test("reflows without horizontal overflow at 200 percent zoom", async ({ page })
   expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(false);
 });
 
+test("keeps core controls visible in forced-colors mode", async ({ page }) => {
+  await page.emulateMedia({ forcedColors: "active" });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+
+  await expect(page.getByRole("heading", { name: "Map your résumé to the role." })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Run Keyword Scan" })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(false);
+});
+
 test("loads the synthetic demo through the real workflow and clears URL state", async ({ page }) => {
   await page.route("**/api/v1/analyze", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(reviewPayload) }));
-  await page.goto("/?demo=1#workspace");
+  await page.goto("/");
+  await page.getByRole("link", { name: "Try synthetic demo" }).click();
   await expect(page.getByText("Synthetic demo loaded.")).toBeVisible();
   await expect(page).not.toHaveURL(/demo=1/);
   await page.getByRole("button", { name: "Run Keyword Scan" }).click();
@@ -74,6 +85,19 @@ test("keeps responsive navigation keyboard accessible at 320 pixels", async ({ p
   await expect(page.getByRole("navigation", { name: "Primary navigation" }).getByRole("link", { name: "Help" })).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(menu).toBeFocused();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(false);
+});
+
+test("keeps searchable help task-oriented and usable at mobile width", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/help");
+  await page.waitForLoadState("networkidle");
+
+  await expect(page.getByRole("heading", { name: "Clear answers for a transparent lexical tool." })).toBeVisible();
+  await page.getByRole("searchbox", { name: "Search help" }).fill("66.7");
+  await expect(page.getByRole("heading", { name: "What does 66.7% coverage mean?" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Which documents can I use?" })).toHaveCount(0);
+  await expect(page.getByText(/does not mean a 66.7% chance/i)).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(false);
 });
 

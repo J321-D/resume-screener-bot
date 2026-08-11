@@ -53,15 +53,15 @@ Do not install or upgrade packages during routine verification.
 
 ## Supported runtimes and browsers
 
-- Production backend: Python 3.12 on Render. The Streamlit compatibility code
-  remains Python 3.9-compatible, while CI validates Python 3.12.
+- Production backend: Python 3.12 on Render. The supported Python floor is 3.10,
+  while CI validates Python 3.12.
 - Production frontend: Node.js 24.x with pnpm 11.16.0 on Vercel.
-- Automated browser projects: Playwright Desktop Chrome on Chromium and iPhone 13
-  emulation on WebKit.
+- Automated browser projects: Playwright Desktop Chrome on Chromium, Desktop
+  Firefox, and iPhone 13 emulation on WebKit.
 - Support target: current evergreen Chrome, Edge, Safari, and Firefox plus modern
   narrow mobile layouts. A browser is not claimed as manually release-smoked when
-  that engine was unavailable; automated Chromium/WebKit coverage is the current
-  reproducible baseline.
+  that engine was unavailable; automated Chromium/Firefox/WebKit coverage is the
+  current reproducible baseline.
 
 ## Security and performance
 
@@ -80,8 +80,9 @@ Do not install or upgrade packages during routine verification.
   methods fail normally.
 - Confirm Preview builds are noindex, Production remains canonical/indexable, and
   the sitemap lists only real public routes.
-- Run `pnpm audit --prod`; distinguish `pip check` compatibility from a dedicated
-  Python CVE audit and record when the latter tool is unavailable.
+- Run `pnpm audit --prod`. For Python, verify a fresh resolved environment with
+  `pip check` and query the package/version inventory against the OSV API without
+  uploading source or document content. Record the exact resolved versions.
 
 ## Repository integrity
 
@@ -134,10 +135,10 @@ Before committing deployment configuration or requesting another provider change
   the hosted public release.
 - Follow [DEPLOYMENT.md](DEPLOYMENT.md) for hosted smoke tests and rollback.
 
-The current fresh inventory is **156 automated checks**: 101 Python tests, 39
-frontend unit/accessibility tests, and 16 Playwright checks across desktop and
-mobile projects. The historical public baseline was 126 checks; recalculate this
-inventory whenever suites change rather than preserving a number for presentation
+The current fresh inventory is **190 automated checks**: 107 Python/API tests, 53
+frontend unit/accessibility tests, and 30 Playwright checks across Chromium
+desktop, Firefox desktop, and WebKit mobile projects. Recalculate this inventory
+whenever suites change rather than preserving a number for presentation
 continuity.
 
 The authoritative CI evidence for the current public baseline is successful

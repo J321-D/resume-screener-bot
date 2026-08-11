@@ -112,7 +112,7 @@ export function ReviewWorkspace({ opportunities, stale, reducedMotion }: ReviewW
         <div>
           <p className="eyebrow"><span /> Decision workspace</p>
           <h3 id="review-title">Turn opportunities into an editing plan</h3>
-          <p>Classify each term based on your actual experience. Decisions stay in this page only.</p>
+          <p>Classify each term based on your actual experience. Decisions stay in this page only. <a className="context-link" href="/help#review-workspace">Review guide</a></p>
         </div>
         <div className="review-progress" role="status" aria-live="polite">
           <strong>{summary.reviewed} of {summary.total}</strong>

@@ -2,17 +2,30 @@
 
 from __future__ import annotations
 
+import asyncio
 import unittest
 from io import BytesIO
+from os import environ
 from unittest.mock import patch
 from zipfile import ZIP_DEFLATED, ZipFile
 
 import fitz
+from fastapi import UploadFile
 from fastapi.testclient import TestClient
 
+from api.config import allowed_origins
+from api.errors import PublicApiError
 from api.main import app
-from api.services.document_service import MAX_RESUME_UPLOADS, MAX_TEXT_CHARACTERS, safe_filename, unique_labels
-from resume_screener.models import AnalysisMode
+from api.middleware import MAX_REQUEST_BODY_BYTES, RequestBodyLimitMiddleware
+from api.services.document_service import (
+    MAX_EXTRACTED_TEXT_CHARACTERS,
+    MAX_RESUME_UPLOADS,
+    MAX_TEXT_CHARACTERS,
+    prepare_documents,
+    safe_filename,
+    unique_labels,
+)
+from resume_screener.models import AnalysisMode, ExtractedDocument
 
 
 class ApiContractTests(unittest.TestCase):
@@ -240,6 +253,78 @@ class ApiContractTests(unittest.TestCase):
         self.assertEqual(response.json()["error"]["code"], "text_too_large")
         self.assertEqual(response.headers["cache-control"], "no-store")
 
+    def test_post_extraction_limit_and_binary_text_are_rejected(self) -> None:
+        oversized_text = self.client.post(
+            "/api/v1/analyze",
+            data={"job_description_text": "Python"},
+            files={
+                "resumes": (
+                    "resume.txt",
+                    b"x" * (MAX_EXTRACTED_TEXT_CHARACTERS + 1),
+                    "text/plain",
+                )
+            },
+        )
+        binary_text = self.client.post(
+            "/api/v1/analyze",
+            data={"job_description_text": "Python"},
+            files={"resumes": ("resume.txt", b"Python\x00binary", "text/plain")},
+        )
+
+        self.assertEqual(oversized_text.status_code, 413)
+        self.assertEqual(
+            oversized_text.json()["error"]["code"], "extracted_text_too_large"
+        )
+        self.assertEqual(binary_text.status_code, 415)
+        self.assertEqual(
+            binary_text.json()["error"]["code"], "unsupported_file_type"
+        )
+
+    def test_post_extraction_limit_is_shared_by_every_supported_media_type(self) -> None:
+        oversized = ExtractedDocument(
+            text="x" * (MAX_EXTRACTED_TEXT_CHARACTERS + 1),
+            source_name="synthetic",
+        )
+        with patch(
+            "api.services.document_service.parse_uploaded_document",
+            return_value=oversized,
+        ):
+            for suffix, media_type, content in (
+                ("pdf", "application/pdf", b"%PDF-synthetic"),
+                (
+                    "docx",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    b"PK-synthetic",
+                ),
+                ("txt", "text/plain", b"synthetic"),
+            ):
+                with self.subTest(suffix=suffix):
+                    from api.services.document_service import _parse_buffered
+
+                    with self.assertRaises(PublicApiError) as caught:
+                        _parse_buffered(
+                            content,
+                            f"resume.{suffix}",
+                            media_type,
+                            "resumes",
+                        )
+                    self.assertEqual(caught.exception.code, "extracted_text_too_large")
+
+    def test_early_text_rejection_closes_all_framework_upload_handles(self) -> None:
+        resume = UploadFile(filename="resume.txt", file=BytesIO(b"Python"))
+        job = UploadFile(filename="job.txt", file=BytesIO(b"Python"))
+
+        with self.assertRaises(PublicApiError):
+            asyncio.run(prepare_documents(
+                [resume],
+                job,
+                "x" * (MAX_TEXT_CHARACTERS + 1),
+                "Python",
+            ))
+
+        self.assertTrue(resume.file.closed)
+        self.assertTrue(job.file.closed)
+
     def test_docx_archive_with_suspicious_compression_is_rejected(self) -> None:
         buffer = BytesIO()
         with ZipFile(buffer, "w", compression=ZIP_DEFLATED) as archive:
@@ -288,6 +373,88 @@ class ApiContractTests(unittest.TestCase):
         self.assertNotEqual(allowed.headers.get("access-control-allow-credentials"), "true")
         self.assertNotEqual(denied.headers.get("access-control-allow-origin"), "*")
         self.assertIsNone(denied.headers.get("access-control-allow-origin"))
+
+    def test_declared_request_body_limit_runs_before_multipart_parsing(self) -> None:
+        response = self.client.post(
+            "/api/v1/analyze",
+            content=b"not-a-multipart-body",
+            headers={
+                "content-type": "multipart/form-data; boundary=fixture",
+                "content-length": str(MAX_REQUEST_BODY_BYTES + 1),
+                "origin": "http://localhost:3000",
+            },
+        )
+
+        self.assertEqual(response.status_code, 413)
+        self.assertEqual(response.json()["error"]["code"], "request_body_too_large")
+        self.assertEqual(response.headers["cache-control"], "no-store")
+        self.assertEqual(
+            response.headers["access-control-allow-origin"], "http://localhost:3000"
+        )
+
+    def test_streamed_request_body_limit_stops_before_downstream_parsing(self) -> None:
+        sent: list[dict[str, object]] = []
+        downstream_called = False
+        incoming = iter(
+            [
+                {"type": "http.request", "body": b"123", "more_body": True},
+                {"type": "http.request", "body": b"456", "more_body": False},
+            ]
+        )
+
+        async def downstream(scope, receive, send) -> None:  # type: ignore[no-untyped-def]
+            del scope, receive, send
+            nonlocal downstream_called
+            downstream_called = True
+
+        async def receive() -> dict[str, object]:
+            return next(incoming)
+
+        async def send(message: dict[str, object]) -> None:
+            sent.append(message)
+
+        middleware = RequestBodyLimitMiddleware(downstream, max_body_bytes=5)
+        asyncio.run(
+            middleware(
+                {
+                    "type": "http",
+                    "path": "/api/v1/analyze",
+                    "headers": [],
+                },
+                receive,  # type: ignore[arg-type]
+                send,  # type: ignore[arg-type]
+            )
+        )
+
+        self.assertFalse(downstream_called)
+        self.assertEqual(sent[0]["status"], 413)
+        body = sent[1]["body"]
+        self.assertIn(b"request_body_too_large", body)
+
+    def test_configured_cors_origins_fail_closed_and_deduplicate(self) -> None:
+        with patch.dict(
+            environ,
+            {
+                "RESUME_SCREENER_ALLOWED_ORIGINS": (
+                    "https://resume-keyword-screener.vercel.app,"
+                    "https://resume-keyword-screener.vercel.app"
+                )
+            },
+            clear=False,
+        ):
+            self.assertEqual(
+                allowed_origins(),
+                ["https://resume-keyword-screener.vercel.app"],
+            )
+
+        for invalid in ("*", "https://example.com/path", "javascript:alert(1)"):
+            with self.subTest(invalid=invalid), patch.dict(
+                environ,
+                {"RESUME_SCREENER_ALLOWED_ORIGINS": invalid},
+                clear=False,
+            ):
+                with self.assertRaises(RuntimeError):
+                    allowed_origins()
 
     def test_malformed_and_empty_pdfs_map_existing_parser_errors(self) -> None:
         malformed = self.client.post(

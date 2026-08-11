@@ -5,10 +5,10 @@ export function Hero() {
   return (
     <section className="hero shell" aria-labelledby="hero-title">
       <div className="hero-copy">
-        <p className="eyebrow"><span /> Private résumé intelligence</p>
+        <p className="eyebrow"><span /> Deterministic lexical analysis</p>
         <h1 id="hero-title">Map your résumé<br />to the role.</h1>
         <p className="hero-deck">
-          Run a private lexical analysis and identify matched language, missing
+          Run a privacy-conscious lexical analysis and identify matched language, missing
           concepts, and coverage opportunities.
         </p>
         <p className="hero-disclaimer">
@@ -22,9 +22,11 @@ export function Hero() {
           <Link className="button button-quiet" href="/methodology">
             <BookOpen size={16} /> View methodology
           </Link>
-          <Link className="button button-quiet" href="/?demo=1#workspace">
+          {/* A document navigation guarantees that same-route demo query state is consumed. */}
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+          <a className="button button-quiet" href="/?demo=1#workspace">
             <FlaskConical size={16} /> Try synthetic demo
-          </Link>
+          </a>
         </div>
       </div>
       <div className="hero-visual" role="img" aria-label="Illustration of a résumé keyword scan">
