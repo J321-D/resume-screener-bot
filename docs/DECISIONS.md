@@ -147,3 +147,24 @@ provider request metadata is governed by external retention policies.
 **Alternatives rejected:** Rewriting the engine for a serverless frontend runtime;
 adding Docker without a runtime need; wildcard CORS; introducing persistence;
 replacing Streamlit before the release candidate is verified.
+
+## ADR-014: Public Version 2 release candidate with legacy rollback
+
+**Decision:** Serve the verified Version 2 frontend publicly at
+`https://resume-keyword-screener.vercel.app`, keep the FastAPI service on Render,
+and allow only that exact frontend origin through CORS. Preserve the Streamlit
+v1.1.2 deployment as a separate legacy demo and rollback path. Keep Preview and
+raw deployment URLs access-protected.
+
+**Reason:** The verified Next.js workflow becomes the primary public experience
+without discarding the stable compatibility interface or weakening the API's
+origin boundary.
+
+**Trade-offs:** The public browser submits document content to the Render service
+for in-memory processing, provider request metadata remains subject to provider
+policies, and the free Render service may cold-start. The public API origin remains
+embedded at frontend build time.
+
+**Alternatives rejected:** Wildcard CORS; retiring Streamlit during promotion;
+making Preview deployments public; introducing persistence; changing application
+behavior as part of the release-state transition.

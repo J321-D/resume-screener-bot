@@ -25,7 +25,7 @@ It does **not** measure candidate quality, predict applicant-tracking-system dec
 
 1. Choose Skills-focused or Full lexical analysis.
 2. Upload or paste résumé content and a job description.
-3. Run the private server-side comparison.
+3. Run the deterministic server-side comparison.
 4. Review coverage, matched terms, opportunities, categories, and normalization explanations.
 5. Download the server-generated PDF report when useful.
 
@@ -53,4 +53,11 @@ It does **not** measure candidate quality, predict applicant-tracking-system dec
 
 ## Future vision
 
-Version 2.1 improves review ergonomics without changing the engine through session-local opportunity statuses, filters, search, progress, stale-input clearing, and Markdown checklist export. Later releases may add saved comparisons, recruiter workflows, and carefully bounded AI-assisted rewriting. Persistence, authentication, collaboration, AI, and plugins remain approval-gated architectural changes. See [ROADMAP.md](ROADMAP.md).
+The public Version 2 release candidate includes the Version 2.1 review workspace
+without changing the engine: session-local opportunity statuses, filters, search,
+progress, stale-input clearing, and Markdown checklist export. Planned work keeps
+the same deterministic boundary while exploring restrained futuristic
+Apple/Tesla/cyberpunk polish, clearer menu and navigation, richer review flows,
+and customer Q&A and feedback. Persistence, authentication, collaboration, AI,
+and plugins remain approval-gated architectural changes. See
+[ROADMAP.md](ROADMAP.md).

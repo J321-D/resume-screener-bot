@@ -1,24 +1,26 @@
-# Private Preview Deployment
+# Public Version 2 Deployment
 
-Version 2 has an access-protected release-candidate Preview with the FastAPI
-boundary on Render and the Next.js client on Vercel. It has not been promoted,
-published, assigned a custom domain, or made the primary application. The
-published Streamlit application remains the stable interface.
+Version 2 is available as a public release candidate with the FastAPI boundary on
+Render and the Next.js client on Vercel. The Streamlit v1.1.2 deployment remains
+online as the legacy demo and rollback interface, although its provider access
+policy may require Streamlit authentication.
 
-## Current release-candidate status
+## Current public status
 
-- Vercel Preview: `https://resume-screener-bot-preview-ilivb7qjm-j321-ds-projects.vercel.app`
-- Vercel deployment: `dpl_9YxJRtCPBoSwbG4bWZ1kXcp7bYTW`, Ready, target `preview`
+- Public frontend: `https://resume-keyword-screener.vercel.app`
+- Vercel Production deployment: `dpl_BHCdDRhRCyBbWLR31sn5sSPVJFff`, Ready,
+  promoted from verified commit `ff3f75bfd8c28051a0d5a1cd104a6cbda31e363a`
 - Render API: `https://resume-keyword-screener-api-preview.onrender.com`
 - Render service: `srv-d9qjaciju40c73bc2ptg`, Free plan, automatic deploys off
-- CORS: exact Vercel Preview origin only; no wildcard
+- CORS: exact public Vercel origin only; no wildcard
 - Persistence: none
-- Stable public application: existing Streamlit deployment, unchanged
+- Legacy demo: `https://resume-keyword-screener.streamlit.app`, unchanged
 
 Hosted verification covered both analysis modes, uploads, ordered results, all
 four review statuses, filters and search, stale-input clearing, Markdown and PDF
 downloads, structured errors, provider-log privacy, and 1440 px/390 px responsive
-layouts without horizontal overflow. Provider access protection remains enabled.
+layouts without horizontal overflow. Preview and raw deployment URLs remain
+access-protected; the permanent public alias is unauthenticated.
 
 ## Deployment topology
 
@@ -63,17 +65,16 @@ service:
 The running Render service uses this required environment variable:
 
 ```text
-RESUME_SCREENER_ALLOWED_ORIGINS=https://resume-screener-bot-preview-ilivb7qjm-j321-ds-projects.vercel.app
+RESUME_SCREENER_ALLOWED_ORIGINS=https://resume-keyword-screener.vercel.app
 ```
 
 The value is a comma-separated allowlist when more than one exact HTTPS origin
-is needed. Do not use `*`, and do not include paths or a trailing slash. A new
-Vercel preview URL must be added explicitly before that preview can call the API
-from a browser.
+is needed. Do not use `*`, and do not include paths or a trailing slash. Protected
+Preview deployments are not currently allowed to call the API from a browser.
 
 ## Vercel frontend
 
-The Vercel Preview uses these settings:
+The public Vercel deployment uses these settings:
 
 | Setting | Value |
 | --- | --- |
@@ -82,7 +83,7 @@ The Vercel Preview uses these settings:
 | Install command | `pnpm install --frozen-lockfile` |
 | Build command | `pnpm build` |
 | Node.js | 24.x |
-| Deployment target | Preview until release approval |
+| Deployment target | Production, promoted from the verified Preview build |
 
 No `vercel.json` is required: Vercel detects the Next.js framework and the
 standard output from the selected root directory. The checked-in
@@ -98,10 +99,10 @@ build time. It must contain the Render HTTPS origin with no trailing slash. A
 change requires a new frontend build. `ENABLE_EXPERIMENTAL_COREPACK` instructs
 Vercel to honor the checked-in package-manager version; it is not a secret.
 
-## Completed Preview sequence
+## Completed release sequence
 
-The private release candidate was created through separately approved provider
-actions in this order:
+The release candidate was created and promoted through separately approved
+provider actions in this order:
 
 1. Connect the GitHub repository to Render and Vercel.
 2. Create the Render Blueprint service without enabling automatic deploys.
@@ -115,31 +116,40 @@ actions in this order:
    failure handling, stale-result protection, and PDF download through the hosted
    frontend.
 7. Kept the Streamlit deployment online.
+8. Promoted the verified commit without rebuilding from another revision, assigned
+   `resume-keyword-screener.vercel.app`, and kept Preview/raw URLs protected.
+9. Replaced the Preview CORS origin with the exact public origin and verified both
+   preflight and browser-style analysis requests.
 
-Promotion, custom domains, public release, automatic deployment, or Streamlit
-replacement still require separate explicit approval.
+Automatic deployment, a custom domain, a GitHub release/tag, or Streamlit
+retirement still require separate explicit approval.
 
-## Release-candidate verification
+## Public release-candidate verification
 
 Run the complete commands in [`VERIFICATION.md`](VERIFICATION.md). For the hosted
-Preview, additionally verify:
+public release candidate, additionally verify:
 
 ```bash
 curl --fail --show-error https://resume-keyword-screener-api-preview.onrender.com/api/v1/health
 ```
 
-Then run one Skills-focused and one Full lexical analysis through the Vercel
-preview, download and open a Unicode PDF, exercise invalid and oversized uploads,
+Then run one Skills-focused and one Full lexical analysis through the public
+frontend, download and open a Unicode PDF, exercise invalid and oversized uploads,
 and inspect both provider logs to confirm no document text is emitted.
 
 ## Rollback
 
-- Frontend: remove or disable the Vercel project/preview alias. The stable
-  Streamlit application is unaffected.
-- Backend: suspend the Render service or roll back to the prior successful deploy.
-- Access: remove the Vercel origin from
-  `RESUME_SCREENER_ALLOWED_ORIGINS` and rotate any provider credentials if their
-  exposure is suspected.
+- Immediate user-facing fallback: use the unchanged Streamlit v1.1.2 legacy demo
+  while the Version 2 issue is investigated, after confirming its provider access
+  policy is appropriate for the intended users.
+- Frontend: reassign `resume-keyword-screener.vercel.app` to the previously
+  verified Vercel deployment selected for rollback. Keeping the same public origin
+  means the Render CORS value does not need to widen.
+- Backend: roll back the existing Render service to its prior successful deploy;
+  do not add a second origin or wildcard as a shortcut.
+- Access: if the public frontend is taken offline, remove its exact origin from
+  `RESUME_SCREENER_ALLOWED_ORIGINS`. Rotate provider credentials only if exposure
+  is suspected.
 - Repository: deployment configuration can be reverted with a normal follow-up
   commit; do not rewrite published Git history.
 
@@ -148,9 +158,10 @@ Because Version 2 has no persistence, rollback requires no data migration.
 ## Known release risks
 
 - Render free services can cold-start and may have changing plan limitations.
-- Vercel preview URLs can vary, while CORS intentionally requires exact origins.
+- Vercel deployment URLs can vary, while CORS intentionally admits only the stable
+  public origin.
 - Provider platform logs and retention are outside the application's direct
   control and must be reviewed before using real résumé data.
-- `NEXT_PUBLIC_API_URL` is build-time configuration; a stale value requires a
-  rebuilt preview.
+- `NEXT_PUBLIC_API_URL` is build-time configuration; a stale value requires a new
+  verified frontend build.
 - Browser upload limits do not replace provider request-size or timeout limits.

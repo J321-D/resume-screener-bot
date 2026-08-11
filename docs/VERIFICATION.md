@@ -88,7 +88,7 @@ Capture representative desktop and 390 px mobile states when UI changes. Review 
 
 No deployment proceeds unless every applicable item passes, protected diffs are authorized, documentation is current, repository status is understood, and the user explicitly approves the release operation.
 
-## Deployment configuration and private Preview
+## Public release-candidate deployment
 
 Before committing deployment configuration or requesting another provider change:
 
@@ -102,13 +102,18 @@ Before committing deployment configuration or requesting another provider change
 - Confirm the only required runtime values are the exact-origin
   `RESUME_SCREENER_ALLOWED_ORIGINS`, public build-time `NEXT_PUBLIC_API_URL`, and
   Vercel's non-secret `ENABLE_EXPERIMENTAL_COREPACK=1` build switch.
-- Confirm the Vercel deployment is a Preview rather than Production, access
-  protection remains enabled, Render allows only the exact Preview origin, and
-  automatic Render deploys remain off.
+- Confirm `https://resume-keyword-screener.vercel.app` resolves publicly to the
+  approved Production deployment, raw deployment and Preview URLs remain
+  access-protected, Render allows only that exact public origin, and automatic
+  Render deploys remain off.
 - Recheck health, both analysis modes, uploads, review state, Markdown/PDF export,
   structured errors, provider-log privacy, and desktop/mobile overflow against
-  the hosted release candidate.
+  the hosted public release candidate.
 - Follow [DEPLOYMENT.md](DEPLOYMENT.md) for hosted smoke tests and rollback.
+
+The current repository baseline comprises **121 checks**: 97 Python unittest
+tests, 18 frontend unit/accessibility tests, and 6 Playwright tests. Update these
+counts only when the corresponding suites change.
 
 ## Verification handoff
 

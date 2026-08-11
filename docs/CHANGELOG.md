@@ -4,7 +4,14 @@ All notable changes are documented here. This project follows [Keep a Changelog]
 
 ## [Unreleased]
 
-### Version 2 private Preview deployment milestone
+No pending product changes are documented.
+
+## Version 2 public release candidate — 2026-08-10
+
+The Version 2 application is publicly deployed. A Version 2 Git tag and GitHub
+release have not yet been created.
+
+### Version 2 public release-candidate milestone
 
 #### Added
 
@@ -17,12 +24,18 @@ All notable changes are documented here. This project follows [Keep a Changelog]
 - Verified both analysis modes, uploads, review state, Markdown and PDF downloads,
   exact-origin CORS, structured errors, provider-log privacy, and responsive layouts.
 
+#### Changed
+
+- Promoted the verified Version 2 frontend to the permanent public Vercel origin.
+- Restricted Render CORS to the exact public frontend origin while preserving
+  protected Preview deployments and the Streamlit v1.1.2 legacy demo.
+
 #### Security
 
 - Kept document processing non-persistent, required exact frontend CORS origins,
   and documented provider request-metadata risk.
-- Preserved the stable Streamlit deployment and kept Version 2 unpromoted,
-  unpublished, and separate from the primary application.
+- Preserved the Streamlit v1.1.2 deployment as a separate legacy and rollback
+  interface.
 
 ### Repository operating-system autonomy milestone
 
@@ -51,7 +64,7 @@ All notable changes are documented here. This project follows [Keep a Changelog]
 
 - Repository operating manual and contributor documentation.
 
-### Version 2 local milestone — complete, unreleased
+### Version 2 application milestone — complete
 
 #### Added
 

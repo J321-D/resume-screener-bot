@@ -82,13 +82,15 @@ The server reuses analysis output and the protected reporting engine. Reports pr
 
 Mandatory commands are in [VERIFICATION.md](VERIFICATION.md). Architectural decisions are recorded in [DECISIONS.md](DECISIONS.md).
 
-## Preview hosting boundary
+## Public hosting boundary
 
-The private release-candidate topology hosts `frontend/` on a Vercel Preview and
-`api.main:app` on Render. The browser receives a build-time public API origin;
-the API admits only the explicitly configured Preview origin. Automatic Render
-deploys remain disabled, Vercel access protection remains enabled, and the
-existing Streamlit deployment remains independent.
+The public release-candidate topology hosts `frontend/` on Vercel at
+`https://resume-keyword-screener.vercel.app` and `api.main:app` on Render. The
+browser receives the Render API origin at build time; the API admits only the
+exact public Vercel origin through `RESUME_SCREENER_ALLOWED_ORIGINS`. Automatic
+Render deploys remain disabled. Vercel Preview and raw deployment URLs remain
+access-protected, while the Streamlit v1.1.2 deployment remains an independent
+legacy interface and rollback option.
 
 The hosting boundary does not add persistence. Documents are processed in memory
 and application code does not log their contents. Platform request metadata and

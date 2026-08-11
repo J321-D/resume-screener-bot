@@ -1,6 +1,8 @@
 # Resume Keyword Screener
 
-🚀 **Live Demo:** https://resume-keyword-screener.streamlit.app
+🚀 **Live Demo (Version 2):** https://resume-keyword-screener.vercel.app
+
+🧰 **Legacy v1.1.2 demo:** https://resume-keyword-screener.streamlit.app
 
 Resume Keyword Screener is an ATS-style résumé keyword analysis tool that compares one or more résumés with a job description to measure deterministic lexical keyword coverage.
 
@@ -8,11 +10,10 @@ It supports PDF, DOCX, and TXT uploads, ATS-aware technical tokenization, phrase
 
 The reported scores measure **lexical overlap only**. They are **not** assessments of candidate quality, experience, job performance, hiring suitability, or the behavior of a specific applicant-tracking system.
 
-The published v1.1.2 release uses the stable Streamlit interface. An additive
-Version 2 release candidate pairs a responsive Next.js client with a narrow
-FastAPI boundary over the same deterministic Python engine. It has been verified
-as an access-protected Vercel/Render Preview, but remains unreleased, unpromoted,
-and separate from the stable Streamlit application.
+The public Version 2 release candidate pairs a responsive Next.js client with a
+narrow FastAPI boundary over the same deterministic Python engine. The Streamlit
+v1.1.2 deployment is preserved as a legacy demo and rollback path; Streamlit may
+require authentication before displaying it.
 
 ---
 
@@ -29,7 +30,7 @@ and separate from the stable Streamlit application.
 - 📱 Responsive desktop and mobile interface
 - 🔒 No external AI or résumé-analysis API calls
 - ✅ Robust upload validation and user-friendly errors
-- 🧪 84 automated unittest tests
+- 🧪 121 automated repository checks
 
 ### Version 2 release-candidate additions
 
@@ -296,11 +297,10 @@ resume_screener/           Established deterministic analysis and PDF engine
 tests/                     Python engine and API contract tests
 ```
 
-The repository contains release-candidate configuration for a Vercel frontend and
-Render API. [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) records the exact settings,
-environment boundaries, verified private Preview, and rollback plan. Version 2
-has not been promoted or published, and the existing Streamlit application remains
-the stable release.
+The repository contains release-candidate configuration for the public Vercel
+frontend and Render API. [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) records the
+exact settings, environment boundaries, public origin, and rollback plan. The
+Streamlit v1.1.2 application remains online as the legacy interface.
 
 ---
 
@@ -329,7 +329,7 @@ The v1.1.2 release includes **84 automated unittest tests** covering analysis, n
 
 ### Version 2 verification
 
-The locally complete Version 2 milestone contains **97 deterministic Python
+The current Version 2 repository contains **97 deterministic Python
 unittest tests**, **18 frontend unit, interaction, formatting, and accessibility
 tests**, and **6 Playwright desktop/mobile checks**: **121 checks total**.
 
@@ -428,8 +428,8 @@ Upload representative PDF, DOCX, and UTF-8 TXT files and confirm:
 Résumés often contain sensitive personal information.
 
 - When run locally, document processing occurs in the local application process.
-- In the hosted demo, document processing occurs within the Streamlit application runtime.
-- The private Vercel Preview sends submitted résumé and job-description data to the configured Render API for in-memory processing of the current request; the application does not persist that content.
+- In the public Version 2 demo, the Vercel frontend sends submitted résumé and job-description data to the configured Render API for in-memory processing of the current request; the application does not intentionally persist that content.
+- In the legacy v1.1.2 demo, document processing occurs within the Streamlit application runtime.
 - Résumé content is not sent to an external AI, embedding, or résumé-analysis API.
 - Uploaded content is not intentionally persisted by the application.
 - Protect `.env` files and credentials.
@@ -453,9 +453,10 @@ Résumés often contain sensitive personal information.
 
 ## Project status
 
-**Resume Keyword Screener v1.1.2** is a stable portfolio release.
+**Resume Keyword Screener Version 2** is the current public release candidate.
+The tagged v1.1.2 Streamlit release is preserved as the legacy demo.
 
-The current release includes:
+The legacy v1.1.2 release includes:
 
 - PDF, DOCX, and TXT parsing
 - ATS-aware technical tokenization
@@ -474,12 +475,12 @@ The current release includes:
 - 84 automated unittest tests
 
 Version 2.0 is complete, including the additive FastAPI boundary, Next.js frontend,
-premium responsive interface, and repository operating documentation. Its private
-Vercel/Render Preview has passed hosted verification, but it remains unpublished,
-unpromoted, and is not the primary application. The current repository-level
-verification count is **121 checks**: 97 Python tests, 18 frontend
-unit/accessibility tests, and 6 Playwright tests.
+premium responsive interface, review workspace, and repository operating
+documentation. The Vercel/Render release candidate is public at the Live Demo URL.
+The current repository-level verification count is **121 checks**: 97 Python
+tests, 18 frontend unit/accessibility tests, and 6 Playwright tests.
 
-Future work may include independent candidate comparison, weighted requirements,
-semantic matching, richer exports, OCR, project history, accessibility
-improvements, authentication, or optional AI-assisted features.
+Future work includes restrained futuristic Apple/Tesla/cyberpunk visual polish,
+a fuller menu and navigation system, richer review workflows, and customer Q&A
+and feedback. Other candidates include independent comparison, richer exports,
+OCR, project history, authentication, and carefully bounded optional AI features.

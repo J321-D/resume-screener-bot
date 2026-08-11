@@ -22,14 +22,17 @@ Priorities: **P0** release-critical, **P1** next planned work, **P2** valuable f
 
 Approval gate: preserve engine calculations and API contracts; approve any new dependency before implementation.
 
-## Version 2 deployment preparation
+## Version 2 public release candidate
 
 - [x] **P0** Define the Render FastAPI and Vercel Next.js release-candidate topology
 - [x] **P0** Add runtime pins, health checks, exact-origin CORS guidance, and rollback documentation
 - [x] **P0** Keep automatic backend deploys off and preserve the stable Streamlit deployment
-- [x] **P0** Connect external accounts and create private preview services after explicit approval
+- [x] **P0** Connect external accounts and verify protected preview services after explicit approval
 - [x] **P0** Validate hosted analysis, upload errors, responsive behavior, and PDF download
-- [ ] **P0** Approve any public promotion, domain, release tag, or Streamlit retirement separately
+- [x] **P0** Promote the verified frontend to the permanent public Vercel origin
+- [x] **P0** Restrict Render CORS to the exact public frontend origin
+- [x] **P0** Preserve the Streamlit v1.1.2 deployment as a legacy rollback demo
+- [ ] **P1** Decide whether to create a Version 2 Git tag or GitHub release separately
 
 Approval gate: no provider login, repository connection, service creation,
 credential or environment-variable write, deployment, domain change, or public
@@ -37,6 +40,9 @@ promotion occurs without explicit user approval.
 
 ## Version 2.2 — Workflow continuity
 
+- [ ] **P1** Add a clearer menu and navigation model
+- [ ] **P1** Expand the review workspace with richer guided review flows
+- [ ] **P1** Add a customer Q&A and feedback path with explicit privacy boundaries
 - [ ] **P1** Design saved analyses with explicit privacy and retention rules
 - [ ] **P1** Compare multiple analyses without introducing candidate-quality ranking
 - [ ] **P2** Add a recruiter review workflow with transparent lexical evidence
@@ -56,6 +62,9 @@ Approval gate: no AI, external service, enterprise data path, or plugin executio
 ## Future candidates
 
 Add proposals here only after documenting user value, scope, privacy impact, contract impact, verification strategy, and dependencies.
+
+- Restrained futuristic Apple/Tesla/cyberpunk visual refinement without excessive
+  neon, gaming aesthetics, or reduced accessibility
 
 ## Repository automation candidates
 
