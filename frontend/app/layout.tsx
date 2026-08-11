@@ -1,5 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+
+import { WebAnalytics } from "@/components/analytics/web-analytics";
+
 import "./globals.css";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
@@ -26,7 +29,10 @@ export const viewport: Viewport = { colorScheme: "dark", themeColor: "#070B14" }
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${geist.variable} ${geistMono.variable}`}>
-      <body>{children}</body>
+      <body>
+        {children}
+        <WebAnalytics />
+      </body>
     </html>
   );
 }

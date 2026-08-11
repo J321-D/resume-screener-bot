@@ -168,3 +168,23 @@ embedded at frontend build time.
 **Alternatives rejected:** Wildcard CORS; retiring Streamlit during promotion;
 making Preview deployments public; introducing persistence; changing application
 behavior as part of the release-state transition.
+
+## ADR-015: Privacy-safe aggregate Web Analytics on Hobby
+
+**Decision:** Mount Vercel Web Analytics only in the production Next.js client,
+allow page views only for the exact public origin at `/`, `/methodology`, and
+`/privacy`, remove query strings and fragments before transmission, and define no
+custom interaction events.
+
+**Reason:** Aggregate visitors, page views, referrers, approximate region, browser,
+operating system, and device category provide useful product visibility without
+transmitting submitted document or form content. Development and tests use the
+package's non-transmitting mode.
+
+**Trade-offs:** Vercel receives anonymous aggregate request-derived metadata under
+its own retention policies. The Hobby plan cannot measure analysis, review, or
+export funnels because custom events require a paid plan.
+
+**Alternatives rejected:** Adding a second analytics provider; session replay;
+free-form event properties; encoding state in URLs; upgrading the plan without a
+separate billing decision.

@@ -4,7 +4,16 @@ All notable changes are documented here. This project follows [Keep a Changelog]
 
 ## [Unreleased]
 
-No pending product changes are documented.
+### Added
+
+- Added anonymous aggregate Vercel Web Analytics for the three fixed public pages.
+- Added a defensive path filter that strips queries and rejects unapproved paths,
+  with local development and tests kept on the non-transmitting mode.
+
+### Security
+
+- Analytics excludes document content, filenames, extracted terms, report data,
+  form input, query strings, and custom interaction events.
 
 ## Version 2 public release candidate — 2026-08-10
 

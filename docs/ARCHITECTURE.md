@@ -46,6 +46,8 @@ The API does not reimplement analysis rules.
 - `components/analysis/`: inputs, upload controls, readiness, and progress
 - `components/results/`: coverage, ordered findings, categories, explanations, and export
 - `components/shell/`: navigation and hero
+- `components/analytics/`: production page-analytics mounting and the fixed-path
+  privacy filter, with no custom events
 - `lib/`: API client, runtime contract validation, and presentation formatting
 
 The client owns presentation state only. Stale results remain visible but cannot be exported as if they represented changed inputs.
@@ -97,3 +99,12 @@ and application code does not log their contents. Platform request metadata and
 provider retention remain external privacy considerations that must be reviewed
 before real résumé data is used. Exact settings and rollback steps are in
 [DEPLOYMENT.md](DEPLOYMENT.md).
+
+The public frontend mounts Vercel Web Analytics in production only. Its
+`beforeSend` filter accepts only the public production origin with `/`,
+`/methodology`, or `/privacy`, strips query strings and fragments, and rejects
+every other origin or path. The integration records
+anonymous aggregate page traffic and deliberately defines no custom events; it
+never receives multipart request bodies, document contents, filenames, extracted
+terms, reports, or form input. Local development and tests use the package's
+non-transmitting development mode with debug output disabled.

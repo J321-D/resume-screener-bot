@@ -54,8 +54,10 @@ Do not install or upgrade packages during routine verification.
 
 - Confirm no secrets, credentials, résumé data, or other PII entered tracked files
   or command output intended for publication.
-- Confirm the change adds no unsafe HTML, unnecessary persistence, external data
-  transmission, permissions, or telemetry.
+- Confirm the change adds no unsafe HTML, unnecessary persistence, or unapproved
+  external data transmission, permissions, or telemetry. For approved analytics,
+  verify the exact-origin and fixed-path allowlist, non-production suppression,
+  query removal, and the absence of document/form content and custom events.
 - Confirm dependency and lockfile changes are absent unless explicitly approved.
 - Review rerenders, list bounds, network requests, and bundle impact for frontend
   changes; avoid duplicate parsing or score computation.
@@ -111,8 +113,8 @@ Before committing deployment configuration or requesting another provider change
   the hosted public release candidate.
 - Follow [DEPLOYMENT.md](DEPLOYMENT.md) for hosted smoke tests and rollback.
 
-The current repository baseline comprises **121 checks**: 97 Python unittest
-tests, 18 frontend unit/accessibility tests, and 6 Playwright tests. Update these
+The current repository baseline comprises **126 checks**: 97 Python unittest
+tests, 23 frontend unit/accessibility tests, and 6 Playwright tests. Update these
 counts only when the corresponding suites change.
 
 ## Verification handoff

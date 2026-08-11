@@ -42,6 +42,9 @@ It does **not** measure candidate quality, predict applicant-tracking-system dec
 - FastAPI boundary and responsive Next.js interface
 - Session-local opportunity review with status filters, search, progress, reset, and a Markdown action checklist
 - Local processing without document persistence or external résumé transmission
+- Anonymous aggregate Vercel page analytics limited to the fixed public routes;
+  no document content, form input, filenames, query strings, or custom interaction
+  events are collected by the application analytics integration
 
 ## Current limitations
 

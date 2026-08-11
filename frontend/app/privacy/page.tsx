@@ -12,6 +12,14 @@ export default function PrivacyPage() {
         intentionally persist them, and does not transmit them to AI providers or
         third-party résumé-processing services.
       </p>
+      <p>
+        This Version 2 frontend is configured to use Vercel Web Analytics for
+        anonymous aggregate page views, referrers, approximate region, browser,
+        operating system, and device category. Analytics receives only the fixed
+        public page path—never document text, filenames, extracted terms, report
+        contents, or form input—and does not use analytics cookies or custom
+        interaction events.
+      </p>
     </main>
   );
 }

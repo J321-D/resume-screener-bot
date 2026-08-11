@@ -37,12 +37,14 @@ Render: api.main:app (FastAPI)
 Protected deterministic Python engine
 ```
 
-No database, persistent disk, background worker, external analysis service, or
-telemetry provider is required. Uploaded documents are validated and processed
-in memory. Application code does not log document contents, but the hosting
-providers may retain request metadata such as timestamps, paths, status codes,
-IP addresses, and user agents according to their own logging and retention
-policies.
+No database, persistent disk, background worker, or external analysis service is
+required. Uploaded documents are validated and processed in memory. The checked-in
+Vercel frontend is configured to use anonymous aggregate Web Analytics for three
+fixed public paths; it does not send document or form content and defines no
+custom interaction events. Collection begins only after this code is deployed.
+Application code does not log document contents, but the hosting providers may
+retain request metadata such as timestamps, paths, status codes, IP addresses,
+and user agents according to their own logging and retention policies.
 
 ## Render backend
 

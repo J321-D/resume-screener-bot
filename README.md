@@ -1,7 +1,7 @@
 # Resume Keyword Screener
 
 [![Version](https://img.shields.io/badge/version-v2.0.0-53E5FF)](https://github.com/J321-D/resume-screener-bot/releases/tag/v2.0.0)
-[![Verification](https://img.shields.io/badge/checks-121%20passing-34D399)](#verification)
+[![Verification](https://img.shields.io/badge/checks-126%20passing-34D399)](#verification)
 [![License](https://img.shields.io/badge/license-MIT-A9B3C8)](LICENSE)
 [![Live Demo](https://img.shields.io/badge/demo-live-53E5FF)](https://resume-keyword-screener.vercel.app)
 
@@ -36,7 +36,8 @@ require authentication before displaying it.
 - 📱 Responsive desktop and mobile interface
 - 🔒 No external AI or résumé-analysis API calls
 - ✅ Robust upload validation and user-friendly errors
-- 🧪 121 automated repository checks
+- 📉 Anonymous aggregate page analytics with no document or form content
+- 🧪 126 automated repository checks
 
 ### Version 2 release-candidate additions
 
@@ -336,8 +337,9 @@ The v1.1.2 release includes **84 automated unittest tests** covering analysis, n
 ### Version 2 verification
 
 The current Version 2 repository contains **97 deterministic Python
-unittest tests**, **18 frontend unit, interaction, formatting, and accessibility
-tests**, and **6 Playwright desktop/mobile checks**: **121 checks total**.
+unittest tests**, **23 frontend unit, interaction, formatting, analytics-privacy,
+and accessibility tests**, and **6 Playwright desktop/mobile checks**: **126
+checks total**.
 
 ```bash
 MPLCONFIGDIR=/private/tmp/resume-screener-matplotlib-tests \
@@ -435,6 +437,11 @@ Résumés often contain sensitive personal information.
 
 - When run locally, document processing occurs in the local application process.
 - In the public Version 2 demo, the Vercel frontend sends submitted résumé and job-description data to the configured Render API for in-memory processing of the current request; the application does not intentionally persist that content.
+- The Version 2 frontend is configured to use Vercel Web Analytics for anonymous aggregate page views,
+  referrers, approximate region, browser, operating system, and device category.
+  Analytics receives only the exact public origin and fixed page path; query strings, document
+  content, filenames, extracted terms, report contents, and form input are
+  excluded. No analytics cookies or custom interaction events are used.
 - In the legacy v1.1.2 demo, document processing occurs within the Streamlit application runtime.
 - Résumé content is not sent to an external AI, embedding, or résumé-analysis API.
 - Uploaded content is not intentionally persisted by the application.
@@ -483,8 +490,8 @@ The legacy v1.1.2 release includes:
 Version 2.0 is complete, including the additive FastAPI boundary, Next.js frontend,
 premium responsive interface, review workspace, and repository operating
 documentation. The Vercel/Render release candidate is public at the Live Demo URL.
-The current repository-level verification count is **121 checks**: 97 Python
-tests, 18 frontend unit/accessibility tests, and 6 Playwright tests.
+The current repository-level verification count is **126 checks**: 97 Python
+tests, 23 frontend unit/accessibility tests, and 6 Playwright tests.
 
 Future work includes restrained futuristic Apple/Tesla/cyberpunk visual polish,
 a fuller menu and navigation system, richer review workflows, and customer Q&A

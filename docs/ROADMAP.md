@@ -15,6 +15,9 @@ Priorities: **P0** release-critical, **P1** next planned work, **P2** valuable f
 ## Version 2.1 — Review workspace
 
 - [x] **P1** Add a focused review workspace for moving between findings
+- [x] **P1** Add privacy-safe aggregate page analytics on the Vercel Hobby plan
+- [ ] **P2** Revisit low-cardinality workflow events only after a separately
+  approved paid-plan decision
 - [ ] **P1** Highlight represented and missing résumé language without altering engine results
 - [ ] **P1** Add user-selectable theme support with accessible contrast
 - [ ] **P1** Add an export-readiness checklist
