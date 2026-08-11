@@ -32,7 +32,8 @@ Approval gate: preserve engine calculations and API contracts; approve any new d
 - [x] **P0** Promote the verified frontend to the permanent public Vercel origin
 - [x] **P0** Restrict Render CORS to the exact public frontend origin
 - [x] **P0** Preserve the Streamlit v1.1.2 deployment as a legacy rollback demo
-- [ ] **P1** Decide whether to create a Version 2 Git tag or GitHub release separately
+- [x] **P1** Create the annotated `v2.0.0` Git tag
+- [ ] **P1** Decide whether to create a GitHub Release separately
 
 Approval gate: no provider login, repository connection, service creation,
 credential or environment-variable write, deployment, domain change, or public

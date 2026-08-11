@@ -8,8 +8,8 @@ No pending product changes are documented.
 
 ## Version 2 public release candidate — 2026-08-10
 
-The Version 2 application is publicly deployed. A Version 2 Git tag and GitHub
-release have not yet been created.
+The Version 2 application is publicly deployed and tagged as `v2.0.0`. A GitHub
+Release has not yet been created.
 
 ### Version 2 public release-candidate milestone
 

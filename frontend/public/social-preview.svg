@@ -1,9 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640">
   <defs><linearGradient id="g" x1="0" x2="1"><stop stop-color="#070B14"/><stop offset="1" stop-color="#121B30"/></linearGradient></defs>
-  <rect width="1200" height="630" fill="url(#g)"/>
-  <path d="M0 126h1200M0 252h1200M0 378h1200M0 504h1200M240 0v630M480 0v630M720 0v630M960 0v630" stroke="#53E5FF" stroke-opacity=".06"/>
+  <rect width="1280" height="640" fill="url(#g)"/>
+  <path d="M0 128h1280M0 256h1280M0 384h1280M0 512h1280M256 0v640M512 0v640M768 0v640M1024 0v640" stroke="#53E5FF" stroke-opacity=".06"/>
   <rect x="90" y="90" width="64" height="64" rx="16" fill="#53E5FF"/><text x="111" y="135" font-family="Arial" font-size="34" font-weight="700" fill="#070B14">R</text>
-  <text x="90" y="290" font-family="Arial" font-size="74" font-weight="700" fill="#F6F8FC">Map your résumé to the role.</text>
-  <text x="90" y="365" font-family="Arial" font-size="30" fill="#A9B3C8">Private, deterministic lexical keyword coverage.</text>
-  <circle cx="1020" cy="315" r="112" fill="none" stroke="#23304d" stroke-width="20"/><path d="M1020 203a112 112 0 1 1-105 73" fill="none" stroke="#53E5FF" stroke-width="20" stroke-linecap="round"/><text x="958" y="330" font-family="Arial" font-size="44" font-weight="700" fill="#F6F8FC">78%</text>
+  <text x="90" y="235" font-family="Arial" font-size="28" font-weight="700" letter-spacing="3" fill="#53E5FF">RESUME KEYWORD SCREENER</text>
+  <text x="90" y="325" font-family="Arial" font-size="58" font-weight="700" fill="#F6F8FC">Map your résumé to the role.</text>
+  <text x="90" y="400" font-family="Arial" font-size="30" fill="#A9B3C8">Deterministic lexical keyword coverage.</text>
+  <circle cx="1090" cy="320" r="112" fill="none" stroke="#23304d" stroke-width="20"/><path d="M1090 208a112 112 0 1 1-105 73" fill="none" stroke="#53E5FF" stroke-width="20" stroke-linecap="round"/><text x="1028" y="335" font-family="Arial" font-size="44" font-weight="700" fill="#F6F8FC">78%</text>
 </svg>

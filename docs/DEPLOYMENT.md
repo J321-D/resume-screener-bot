@@ -121,8 +121,9 @@ provider actions in this order:
 9. Replaced the Preview CORS origin with the exact public origin and verified both
    preflight and browser-style analysis requests.
 
-Automatic deployment, a custom domain, a GitHub release/tag, or Streamlit
-retirement still require separate explicit approval.
+Automatic deployment, a custom domain, a GitHub Release, or Streamlit retirement
+still require separate explicit approval. The annotated `v2.0.0` tag already
+identifies this public release-candidate state.
 
 ## Public release-candidate verification
 

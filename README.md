@@ -1,5 +1,10 @@
 # Resume Keyword Screener
 
+[![Version](https://img.shields.io/badge/version-v2.0.0-53E5FF)](https://github.com/J321-D/resume-screener-bot/releases/tag/v2.0.0)
+[![Verification](https://img.shields.io/badge/checks-121%20passing-34D399)](#verification)
+[![License](https://img.shields.io/badge/license-MIT-A9B3C8)](LICENSE)
+[![Live Demo](https://img.shields.io/badge/demo-live-53E5FF)](https://resume-keyword-screener.vercel.app)
+
 🚀 **Live Demo (Version 2):** https://resume-keyword-screener.vercel.app
 
 🧰 **Legacy v1.1.2 demo:** https://resume-keyword-screener.streamlit.app
@@ -10,7 +15,8 @@ It supports PDF, DOCX, and TXT uploads, ATS-aware technical tokenization, phrase
 
 The reported scores measure **lexical overlap only**. They are **not** assessments of candidate quality, experience, job performance, hiring suitability, or the behavior of a specific applicant-tracking system.
 
-The public Version 2 release candidate pairs a responsive Next.js client with a
+The tagged [v2.0.0 release candidate](https://github.com/J321-D/resume-screener-bot/releases/tag/v2.0.0)
+pairs a responsive Next.js client with a
 narrow FastAPI boundary over the same deterministic Python engine. The Streamlit
 v1.1.2 deployment is preserved as a legacy demo and rollback path; Streamlit may
 require authentication before displaying it.
@@ -53,7 +59,7 @@ require authentication before displaying it.
 
 [![Mobile](docs/images/mobile.png)](docs/images/mobile.png)
 
-> The screenshots demonstrate the responsive application interface. Some v1.1.2 analysis controls and result visualizations appear below the initially visible input area.
+> The screenshots show the public Version 2 Next.js results and review experience using synthetic content.
 
 ---
 
@@ -453,7 +459,7 @@ Résumés often contain sensitive personal information.
 
 ## Project status
 
-**Resume Keyword Screener Version 2** is the current public release candidate.
+**Resume Keyword Screener [v2.0.0](https://github.com/J321-D/resume-screener-bot/releases/tag/v2.0.0)** is the current public release candidate.
 The tagged v1.1.2 Streamlit release is preserved as the legacy demo.
 
 The legacy v1.1.2 release includes:

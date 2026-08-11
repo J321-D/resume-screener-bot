@@ -9,7 +9,10 @@ export const metadata: Metadata = {
   title: "Resume Keyword Screener",
   description:
     "Private lexical résumé-to-job comparison with matched terms, coverage opportunities, and Unicode PDF reports.",
-  metadataBase: new URL("https://resume-keyword-screener.example"),
+  metadataBase: new URL("https://resume-keyword-screener.vercel.app"),
+  icons: {
+    icon: "/favicon.svg",
+  },
   openGraph: {
     title: "Resume Keyword Screener",
     description: "Map your résumé language to the role—privately and deterministically.",
