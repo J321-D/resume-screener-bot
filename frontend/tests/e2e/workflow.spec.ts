@@ -81,6 +81,7 @@ test("honors reduced-motion preferences without hiding results", async ({ page }
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.route("**/api/v1/analyze", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(payload) }));
   await page.goto("/");
+  await page.waitForLoadState("networkidle");
   await page.getByLabel("Résumé text").fill("QC Python");
   await page.getByLabel("Job-description text").fill("quality control Python SQL");
   await page.getByRole("button", { name: "Run Keyword Scan" }).click();
