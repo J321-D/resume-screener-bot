@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { CheckCircle2, ChevronDown, ClipboardCheck, Download, RotateCcw, Search } from "lucide-react";
+import { CheckCircle2, ChevronDown, Clipboard, ClipboardCheck, Download, RotateCcw, Search } from "lucide-react";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 
 import type { AnalysisResponse } from "@/lib/contracts";
@@ -39,6 +39,7 @@ export function ReviewWorkspace({ opportunities, stale, reducedMotion }: ReviewW
   const [query, setQuery] = useState("");
   const [expanded, setExpanded] = useState(false);
   const [confirmingReset, setConfirmingReset] = useState(false);
+  const [copyState, setCopyState] = useState<"idle" | "copied" | "error">("idle");
   const resetTriggerRef = useRef<HTMLButtonElement>(null);
   const resetConfirmRef = useRef<HTMLButtonElement>(null);
   const listId = useId();
@@ -84,7 +85,17 @@ export function ReviewWorkspace({ opportunities, stale, reducedMotion }: ReviewW
     anchor.href = url;
     anchor.download = "resume-action-checklist.md";
     anchor.click();
-    URL.revokeObjectURL(url);
+    window.setTimeout(() => URL.revokeObjectURL(url), 0);
+  }
+
+  async function copySelectedTerms() {
+    if (!addItems.length) return;
+    try {
+      await navigator.clipboard.writeText(addItems.map((item) => item.term).join("\n"));
+      setCopyState("copied");
+    } catch {
+      setCopyState("error");
+    }
   }
 
   if (!opportunities.length) return null;
@@ -143,6 +154,8 @@ export function ReviewWorkspace({ opportunities, stale, reducedMotion }: ReviewW
         </label>
       </div>
 
+      <p className="review-visible-count" role="status">Showing {filtered.length} of {opportunities.length} opportunities</p>
+
       <div id={listId} className="review-list" aria-label="Opportunity review list">
         <AnimatePresence initial={false}>
           {visible.map(({ opportunity, id, index }) => (
@@ -189,9 +202,16 @@ export function ReviewWorkspace({ opportunities, stale, reducedMotion }: ReviewW
         </div>
         <div className="checklist-action">
           <span><CheckCircle2 size={15} /> {addItems.length} item{addItems.length === 1 ? "" : "s"} ready for the checklist</span>
+          <button className="button button-quiet" type="button" disabled={!addItems.length} onClick={copySelectedTerms}><Clipboard size={16} /> Copy selected terms</button>
           <button className="button button-primary" type="button" disabled={stale || !addItems.length} onClick={downloadChecklist}><Download size={16} /> Download Markdown checklist</button>
         </div>
       </div>
+
+      <p className="copy-status" role="status" aria-live="polite">{copyState === "copied" ? "Selected terms copied." : copyState === "error" ? "Clipboard access failed. Select the terms in the action summary instead." : ""}</p>
+
+      {summary.total > 0 && summary.remaining === 0 && (
+        <div className="review-complete" role="status"><CheckCircle2 size={18} /><strong>All {summary.total} opportunities reviewed.</strong><span>Export your decisions, rerun the comparison, or start a new analysis.</span></div>
+      )}
 
       {addItems.length > 0 && (
         <div className="action-checklist" aria-labelledby="checklist-title">
@@ -201,6 +221,7 @@ export function ReviewWorkspace({ opportunities, stale, reducedMotion }: ReviewW
           <p>Future PDF integration should submit these term identifiers for server validation; browser review state is not authoritative.</p>
         </div>
       )}
+      <a className="back-link review-back" href="#summary">↑ Back to summary</a>
     </motion.section>
   );
 }

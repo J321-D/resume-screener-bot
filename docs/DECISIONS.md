@@ -188,3 +188,63 @@ export funnels because custom events require a paid plan.
 **Alternatives rejected:** Adding a second analytics provider; session replay;
 free-form event properties; encoding state in URLs; upgrading the plan without a
 separate billing decision.
+
+## ADR-016: Native, truthful interaction system
+
+**Decision:** Use semantic HTML, CSS/SVG, native browser behavior, the existing
+small motion layer, and shared visual/motion tokens. Scores are exposed at their
+final value immediately; only supporting surfaces and the ring arc may settle.
+Idle ambient loops, canvas UI, video backgrounds, fake telemetry, fake progress,
+fullscreen presentation mode, sound, and haptics are excluded.
+
+**Reason:** The product should feel advanced through real state, spatial
+continuity, accessibility, and precision—not decoration or fabricated engine
+activity.
+
+**Trade-offs:** The visual system intentionally uses fewer spectacular effects
+and retains a dark-only theme. Reduced-motion, forced-colors, print, selection,
+browser find, and native controls remain first-class fallbacks.
+
+## ADR-017: Bounded stateless request lifecycle
+
+**Decision:** Snapshot each submitted request, assign identity with its
+AbortController, reject late responses, time out client requests, retain inputs
+for manual retry, and make New analysis an explicit confirmed purge of current
+React state. Do not automatically retry POST requests or persist session data.
+
+**Reason:** Duplicate compute has no durable side effect, but automatic retries
+and stale responses create ambiguous UI. Manual retry is transparent; per-tab
+React state naturally isolates concurrent tabs without shared storage.
+
+**Trade-offs:** Browser duplication/BFCache may copy or restore ordinary browser
+memory. Application code can clear its references but cannot promise immediate
+runtime memory erasure.
+
+## ADR-018: Cache, indexing, and API compatibility boundaries
+
+**Decision:** Mark analysis/report responses `no-store`, keep public static pages
+cacheable, use the Production host as canonical, and emit noindex controls for
+Preview builds. Keep `/api/v1` stable across product UI versions; a future API v2
+requires an incompatible contract.
+
+**Reason:** User-derived responses should not be cached, Preview copies should not
+compete in search, and product marketing versions do not justify transport churn.
+
+**Trade-offs:** Environment-specific indexing is build-scoped and must be checked
+on Preview/Production. FastAPI OpenAPI remains intentionally public for
+transparency and contract inspection; it is not advertised as a supported
+third-party service.
+
+## ADR-019: Focused supply-chain and operational hardening
+
+**Decision:** Resolve known frontend advisories with narrow pnpm overrides, run
+least-privilege CI and weekly Dependabot checks, and provide a synthetic-only
+public smoke tool. Use lockfiles and audits rather than adding an SBOM platform.
+
+**Reason:** These controls improve reproducibility and detection without a major
+framework migration, deployment automation, private artifacts, or enterprise
+supply-chain infrastructure.
+
+**Trade-offs:** Python vulnerability auditing requires a separate trusted audit
+tool beyond `pip check`; installation is handled under the normal dependency
+approval boundary.

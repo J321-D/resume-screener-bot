@@ -1,7 +1,7 @@
 "use client";
 
 import { FileText, Plus, ShieldCheck, Trash2, UploadCloud } from "lucide-react";
-import { useId, useState } from "react";
+import { useId, useRef, useState } from "react";
 
 import { readableSize, validateFile } from "@/lib/formatting";
 
@@ -16,6 +16,7 @@ interface FileDropZoneProps {
 export function FileDropZone({ files, multiple = false, onFiles, label, description }: FileDropZoneProps) {
   const inputId = useId();
   const [dragging, setDragging] = useState(false);
+  const dragDepth = useRef(0);
 
   function addFiles(incoming: File[]) {
     onFiles(multiple ? [...files, ...incoming] : incoming.slice(0, 1));
@@ -30,11 +31,12 @@ export function FileDropZone({ files, multiple = false, onFiles, label, descript
       <label
         className={`drop-zone ${dragging ? "is-dragging" : ""}`}
         htmlFor={inputId}
-        onDragEnter={(event) => { event.preventDefault(); setDragging(true); }}
-        onDragLeave={() => setDragging(false)}
+        onDragEnter={(event) => { event.preventDefault(); dragDepth.current += 1; setDragging(true); }}
+        onDragLeave={(event) => { event.preventDefault(); dragDepth.current = Math.max(0, dragDepth.current - 1); if (!dragDepth.current) setDragging(false); }}
         onDragOver={(event) => event.preventDefault()}
         onDrop={(event) => {
           event.preventDefault();
+          dragDepth.current = 0;
           setDragging(false);
           addFiles(Array.from(event.dataTransfer.files));
         }}

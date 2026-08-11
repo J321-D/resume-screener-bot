@@ -1,31 +1,12 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import { useEffect, useState } from "react";
 
 export function CoverageRing({ score, reducedMotion }: { score: number | null; reducedMotion?: boolean }) {
   const systemReducedMotion = useReducedMotion();
   const reduceMotion = reducedMotion ?? systemReducedMotion;
   const normalized = Math.max(0, Math.min(score ?? 0, 100));
-  const [displayed, setDisplayed] = useState(reduceMotion ? normalized : 0);
   const circumference = 2 * Math.PI * 76;
-
-  useEffect(() => {
-    if (reduceMotion) {
-      setDisplayed(normalized);
-      return;
-    }
-    setDisplayed(0);
-    const start = performance.now();
-    let frame = 0;
-    const animate = (time: number) => {
-      const progress = Math.min((time - start) / 650, 1);
-      setDisplayed(normalized * (1 - Math.pow(1 - progress, 3)));
-      if (progress < 1) frame = requestAnimationFrame(animate);
-    };
-    frame = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(frame);
-  }, [normalized, reduceMotion]);
 
   return (
     <div className="coverage-ring" role="img" aria-label={score === null ? "Keyword coverage not applicable" : `${score}% keyword coverage`}>
@@ -42,7 +23,7 @@ export function CoverageRing({ score, reducedMotion }: { score: number | null; r
           style={{ strokeDasharray: circumference }}
         />
       </svg>
-      <div aria-hidden="true"><strong>{score === null ? "N/A" : `${displayed.toFixed(1)}%`}</strong><span>KEYWORD COVERAGE</span></div>
+      <div aria-hidden="true"><strong>{score === null ? "N/A" : `${score.toFixed(1)}%`}</strong><span>KEYWORD COVERAGE</span></div>
     </div>
   );
 }

@@ -1,12 +1,13 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { ArrowRight, FileSearch, LockKeyhole, ScanSearch } from "lucide-react";
-import { FormEvent, useMemo, useRef, useState } from "react";
+import { ArrowRight, FileSearch, FlaskConical, LockKeyhole, RotateCcw, ScanSearch } from "lucide-react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
 import { analyze, createReport } from "@/lib/api";
 import { analysisModes, type AnalysisInputs, type AnalysisMode, type AnalysisResponse, type PublicError } from "@/lib/contracts";
-import { inputSignature, validateFiles } from "@/lib/formatting";
+import { inputSignature, MAX_TEXT_CHARACTERS, validateFiles } from "@/lib/formatting";
+import { syntheticDemoInputs } from "@/components/demo/synthetic-demo";
 import { FileDropZone } from "./file-drop-zone";
 import { ProgressStatus, type ProgressStage } from "./progress-status";
 
@@ -23,6 +24,8 @@ const emptyInputs: AnalysisInputs = {
   jobText: "",
 };
 
+type AnalysisState = "idle" | "input_ready" | "submitting" | "processing" | "results" | "stale_results" | "error" | "canceled";
+
 export function Analyzer() {
   const [inputs, setInputs] = useState<AnalysisInputs>(emptyInputs);
   const [result, setResult] = useState<AnalysisResponse | null>(null);
@@ -30,6 +33,8 @@ export function Analyzer() {
   const [progress, setProgress] = useState<ProgressStage>("idle");
   const [error, setError] = useState<PublicError | null>(null);
   const [reporting, setReporting] = useState(false);
+  const [slowRequest, setSlowRequest] = useState(false);
+  const [demoLoaded, setDemoLoaded] = useState(false);
   const requestRef = useRef<AbortController | null>(null);
 
   const signature = useMemo(() => inputSignature(inputs), [inputs]);
@@ -42,31 +47,69 @@ export function Analyzer() {
     && !resumeError
     && !jobError,
   );
+  const analysisState: AnalysisState = stale
+    ? "stale_results"
+    : progress === "preparing"
+    ? "submitting"
+    : progress === "analyzing"
+    ? "processing"
+    : error?.code === "request_canceled"
+    ? "canceled"
+    : error
+    ? "error"
+    : result
+    ? "results"
+    : ready
+    ? "input_ready"
+    : "idle";
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("demo") !== "1") return;
+    setInputs(syntheticDemoInputs());
+    setDemoLoaded(true);
+    const url = new URL(window.location.href);
+    url.searchParams.delete("demo");
+    window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+  }, []);
+
+  useEffect(() => () => requestRef.current?.abort(), []);
 
   function update<T extends keyof AnalysisInputs>(key: T, value: AnalysisInputs[T]) {
     setInputs((current) => ({ ...current, [key]: value }));
     setError(null);
+    setDemoLoaded(false);
   }
 
-  async function submit(event: FormEvent) {
-    event.preventDefault();
-    if (!ready) return;
+  async function runAnalysis() {
+    if (!ready || progress === "analyzing") return;
     requestRef.current?.abort();
     const controller = new AbortController();
+    const submittedInputs: AnalysisInputs = {
+      ...inputs,
+      resumeFiles: [...inputs.resumeFiles],
+    };
+    const submittedSignature = signature;
     requestRef.current = controller;
     setError(null);
+    setSlowRequest(false);
     setProgress("preparing");
     await Promise.resolve();
     setProgress("analyzing");
+    const slowTimer = window.setTimeout(() => setSlowRequest(true), 6_000);
     try {
-      const response = await analyze(inputs, controller.signal);
+      const response = await analyze(submittedInputs, controller.signal);
+      if (requestRef.current !== controller) return;
       setResult(response);
-      setResultSignature(signature);
+      setResultSignature(submittedSignature);
       setProgress("complete");
     } catch (caught) {
       if (controller.signal.aborted) return;
       setError(caught as PublicError);
       setProgress("idle");
+    } finally {
+      window.clearTimeout(slowTimer);
+      if (requestRef.current === controller) setSlowRequest(false);
+      if (requestRef.current === controller) requestRef.current = null;
     }
   }
 
@@ -81,7 +124,7 @@ export function Analyzer() {
       anchor.href = url;
       anchor.download = "resume-keyword-report.pdf";
       anchor.click();
-      URL.revokeObjectURL(url);
+      window.setTimeout(() => URL.revokeObjectURL(url), 0);
     } catch (caught) {
       setError(caught as PublicError);
     } finally {
@@ -89,14 +132,58 @@ export function Analyzer() {
     }
   }
 
+  async function submit(event: FormEvent) {
+    event.preventDefault();
+    await runAnalysis();
+  }
+
+  function cancelAnalysis() {
+    requestRef.current?.abort();
+    requestRef.current = null;
+    setSlowRequest(false);
+    setProgress("idle");
+    setError({ code: "request_canceled", message: "Analysis canceled. Your inputs are still available." });
+  }
+
+  function clearDemo() {
+    requestRef.current?.abort();
+    setInputs(emptyInputs);
+    setResult(null);
+    setResultSignature(null);
+    setProgress("idle");
+    setError(null);
+    setDemoLoaded(false);
+  }
+
+  function startNewAnalysis() {
+    requestRef.current?.abort();
+    requestRef.current = null;
+    setInputs(emptyInputs);
+    setResult(null);
+    setResultSignature(null);
+    setProgress("idle");
+    setError(null);
+    setSlowRequest(false);
+    setDemoLoaded(false);
+    document.getElementById("workspace-title")?.focus({ preventScroll: true });
+    document.getElementById("workspace")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
   return (
     <>
-      <section id="workspace" className="workspace shell" aria-labelledby="workspace-title">
+      <section id="workspace" className="workspace shell" aria-labelledby="workspace-title" data-analysis-state={analysisState}>
         <div className="section-intro">
           <p className="eyebrow"><span /> Analysis workspace</p>
-          <h2 id="workspace-title">Two inputs. One precise lexical map.</h2>
+          <h2 id="workspace-title" tabIndex={-1}>Two inputs. One precise lexical map.</h2>
           <p>Files are validated by the API and processed only for this request.</p>
         </div>
+        {demoLoaded && (
+          <div className="demo-banner" role="status">
+            <FlaskConical size={17} aria-hidden="true" />
+            <span><strong>Synthetic demo loaded.</strong> These fictional inputs use the real deterministic engine.</span>
+            <button type="button" onClick={clearDemo}><RotateCcw size={14} /> Clear demo</button>
+          </div>
+        )}
         <form onSubmit={submit} noValidate>
           <fieldset className="mode-switcher">
             <legend>Analysis mode</legend>
@@ -136,8 +223,9 @@ export function Analyzer() {
                   onChange={(event) => update("resumeText", event.target.value)}
                   placeholder="Paste résumé text here…"
                   rows={10}
+                  maxLength={MAX_TEXT_CHARACTERS}
                 />
-                <small>{inputs.resumeText.length.toLocaleString()} characters</small>
+                <small>{inputs.resumeText.length.toLocaleString()} / {MAX_TEXT_CHARACTERS.toLocaleString()} characters</small>
               </label>
             </article>
 
@@ -161,8 +249,9 @@ export function Analyzer() {
                   onChange={(event) => update("jobText", event.target.value)}
                   placeholder="Paste the role responsibilities, requirements, and preferred qualifications…"
                   rows={10}
+                  maxLength={MAX_TEXT_CHARACTERS}
                 />
-                <small>{inputs.jobText.length.toLocaleString()} characters</small>
+                <small>{inputs.jobText.length.toLocaleString()} / {MAX_TEXT_CHARACTERS.toLocaleString()} characters</small>
               </label>
             </article>
           </div>
@@ -173,14 +262,21 @@ export function Analyzer() {
               {progress === "analyzing" ? "Analyzing…" : "Run Keyword Scan"}
               <ArrowRight size={17} />
             </button>
+            {progress === "analyzing" && (
+              <button className="button button-quiet cancel-analysis" type="button" onClick={cancelAnalysis}>Cancel</button>
+            )}
           </div>
           {!ready && <p className="readiness-note">Add résumé content and a job description to begin.</p>}
           <ProgressStatus stage={progress} />
+          {slowRequest && (
+            <p className="cold-start-note" role="status">Analysis service may take a moment to start. Your inputs will remain available if the request times out.</p>
+          )}
           {error && (
-            <div className="api-error" role="alert">
+            <div className="api-error" role={error.code === "request_canceled" ? "status" : "alert"}>
               <strong>We couldn’t complete that request.</strong>
               <span>{error.message}</span>
               {error.request_id && <small>Reference: {error.request_id}</small>}
+              {ready && <button className="button button-quiet" type="button" onClick={runAnalysis}>Retry analysis</button>}
             </div>
           )}
         </form>
@@ -193,6 +289,7 @@ export function Analyzer() {
           reporting={reporting}
           analysisKey={resultSignature ?? "unkeyed"}
           onDownload={downloadReport}
+          onNewAnalysis={startNewAnalysis}
         />
       )}
     </>

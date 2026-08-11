@@ -18,9 +18,11 @@ Priorities: **P0** release-critical, **P1** next planned work, **P2** valuable f
 - [x] **P1** Add privacy-safe aggregate page analytics on the Vercel Hobby plan
 - [ ] **P2** Revisit low-cardinality workflow events only after a separately
   approved paid-plan decision
-- [ ] **P1** Highlight represented and missing résumé language without altering engine results
-- [ ] **P1** Add user-selectable theme support with accessible contrast
-- [ ] **P1** Add an export-readiness checklist
+- [ ] **P2** Revisit exact source-context highlighting only if the engine exposes
+  occurrence data; approximate client highlighting is intentionally skipped
+- [ ] **P2** Revisit a theme switcher only if user need outweighs the cost of
+  maintaining two complete accessible systems
+- [x] **P1** Add portable PDF, Markdown checklist, print, and copy utilities
 - [x] **P2** Expand browser coverage for review-state interactions
 
 Approval gate: preserve engine calculations and API contracts; approve any new dependency before implementation.
@@ -44,10 +46,14 @@ promotion occurs without explicit user approval.
 
 ## Version 2.2 — Workflow continuity
 
-- [ ] **P1** Add a clearer menu and navigation model
-- [ ] **P1** Expand the review workspace with richer guided review flows
+- [x] **P1** Add a clearer responsive menu, navigation model, Help, and synthetic demo
+- [x] **P1** Harden request lifecycle, stale results, retry/cancel, and New analysis
+- [x] **P1** Consolidate the restrained futuristic visual/motion system
+- [x] **P1** Add input/archive/cache/indexing/security boundaries and CI operations
+- [ ] **P2** Expand the review workspace only where richer guided flows have
+  demonstrated user value
 - [ ] **P1** Add a customer Q&A and feedback path with explicit privacy boundaries
-- [ ] **P1** Design saved analyses with explicit privacy and retention rules
+- [ ] **P2** Design saved analyses only after explicit privacy and retention rules
 - [ ] **P1** Compare multiple analyses without introducing candidate-quality ranking
 - [ ] **P2** Add a recruiter review workflow with transparent lexical evidence
 - [ ] **P2** Define export and deletion controls for persisted data

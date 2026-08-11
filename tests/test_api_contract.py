@@ -3,13 +3,15 @@
 from __future__ import annotations
 
 import unittest
+from io import BytesIO
 from unittest.mock import patch
+from zipfile import ZIP_DEFLATED, ZipFile
 
 import fitz
 from fastapi.testclient import TestClient
 
 from api.main import app
-from api.services.document_service import MAX_RESUME_UPLOADS, safe_filename, unique_labels
+from api.services.document_service import MAX_RESUME_UPLOADS, MAX_TEXT_CHARACTERS, safe_filename, unique_labels
 from resume_screener.models import AnalysisMode
 
 
@@ -28,6 +30,28 @@ class ApiContractTests(unittest.TestCase):
                 "status": "ok",
                 "service": "resume-keyword-screener",
                 "api_version": "v1",
+            },
+        )
+
+    def test_openapi_documents_the_stable_v1_routes_and_response_shape(self) -> None:
+        response = self.client.get("/openapi.json")
+
+        self.assertEqual(response.status_code, 200)
+        schema = response.json()
+        self.assertEqual(set(schema["paths"]["/api/v1/analyze"]), {"post"})
+        self.assertEqual(set(schema["paths"]["/api/v1/report"]), {"post"})
+        properties = schema["components"]["schemas"]["AnalysisResponse"]["properties"]
+        self.assertEqual(
+            set(properties),
+            {
+                "analysis_mode",
+                "coverage",
+                "matched_terms",
+                "missing_terms",
+                "categories",
+                "normalized_matches",
+                "metadata",
+                "warnings",
             },
         )
 
@@ -53,6 +77,7 @@ class ApiContractTests(unittest.TestCase):
             [item["term"] for item in payload["missing_terms"]],
             ["matlab"],
         )
+        self.assertEqual(response.headers["cache-control"], "no-store")
 
     def test_focused_mode_reuses_categories_and_normalized_explanations(self) -> None:
         response = self.client.post(
@@ -202,6 +227,68 @@ class ApiContractTests(unittest.TestCase):
             unsupported.json()["error"]["code"], "unsupported_file_type"
         )
 
+    def test_text_limit_and_error_response_cache_policy_are_enforced(self) -> None:
+        response = self.client.post(
+            "/api/v1/analyze",
+            data={
+                "resume_text": "x" * (MAX_TEXT_CHARACTERS + 1),
+                "job_description_text": "Python",
+            },
+        )
+
+        self.assertEqual(response.status_code, 413)
+        self.assertEqual(response.json()["error"]["code"], "text_too_large")
+        self.assertEqual(response.headers["cache-control"], "no-store")
+
+    def test_docx_archive_with_suspicious_compression_is_rejected(self) -> None:
+        buffer = BytesIO()
+        with ZipFile(buffer, "w", compression=ZIP_DEFLATED) as archive:
+            archive.writestr("[Content_Types].xml", "types")
+            archive.writestr("word/document.xml", "A" * (2 * 1024 * 1024))
+        response = self.client.post(
+            "/api/v1/analyze",
+            data={"job_description_text": "Python"},
+            files={
+                "resumes": (
+                    "compressed.docx",
+                    buffer.getvalue(),
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                )
+            },
+        )
+
+        self.assertEqual(response.status_code, 422)
+        self.assertEqual(response.json()["error"]["code"], "unsafe_docx")
+
+    def test_method_content_type_and_negative_cors_contracts(self) -> None:
+        method = self.client.get("/api/v1/analyze")
+        allowed = self.client.options(
+            "/api/v1/analyze",
+            headers={
+                "Origin": "http://localhost:3000",
+                "Access-Control-Request-Method": "POST",
+            },
+        )
+        denied = self.client.options(
+            "/api/v1/analyze",
+            headers={
+                "Origin": "https://unrelated.example",
+                "Access-Control-Request-Method": "POST",
+            },
+        )
+
+        self.assertEqual(method.status_code, 405)
+        self.assertTrue(method.headers["content-type"].startswith("application/json"))
+        self.assertEqual(allowed.status_code, 200)
+        self.assertEqual(
+            allowed.headers.get("access-control-allow-origin"),
+            "http://localhost:3000",
+        )
+        self.assertNotEqual(allowed.headers.get("access-control-allow-origin"), "*")
+        self.assertNotEqual(allowed.headers.get("access-control-allow-credentials"), "true")
+        self.assertNotEqual(denied.headers.get("access-control-allow-origin"), "*")
+        self.assertIsNone(denied.headers.get("access-control-allow-origin"))
+
     def test_malformed_and_empty_pdfs_map_existing_parser_errors(self) -> None:
         malformed = self.client.post(
             "/api/v1/analyze",
@@ -235,7 +322,7 @@ class ApiContractTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 422)
         self.assertEqual(response.json()["error"]["code"], "too_many_resumes")
-        self.assertEqual(safe_filename("../../résumé\x00.txt"), "résumé.txt")
+        self.assertEqual(safe_filename("../../résumé\x00\u202e.txt"), "résumé.txt")
 
     def test_report_recomputes_inputs_and_returns_valid_pdf(self) -> None:
         response = self.client.post(

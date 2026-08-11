@@ -1,6 +1,8 @@
 import type { AnalysisInputs } from "./contracts";
 
 export const MAX_FILE_BYTES = 10 * 1024 * 1024;
+export const MAX_TOTAL_UPLOAD_BYTES = 25 * 1024 * 1024;
+export const MAX_TEXT_CHARACTERS = 200_000;
 export const MAX_RESUMES = 5;
 const allowedExtensions = new Set(["pdf", "docx", "txt"]);
 
@@ -34,6 +36,9 @@ export function validateFile(file: File): FileValidation {
 
 export function validateFiles(files: File[], maximum = MAX_RESUMES): string | null {
   if (files.length > maximum) return `Choose no more than ${maximum} résumé files.`;
+  if (files.reduce((total, file) => total + file.size, 0) > MAX_TOTAL_UPLOAD_BYTES) {
+    return "The combined upload size must be 25 MB or smaller.";
+  }
   for (const file of files) {
     const validation = validateFile(file);
     if (validation.error) return validation.error;

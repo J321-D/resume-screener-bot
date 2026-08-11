@@ -9,11 +9,34 @@ All notable changes are documented here. This project follows [Keep a Changelog]
 - Added anonymous aggregate Vercel Web Analytics for the three fixed public pages.
 - Added a defensive path filter that strips queries and rejects unapproved paths,
   with local development and tests kept on the non-transmitting mode.
+- Added a synthetic demo, responsive navigation and Help route, explicit session
+  reset, copy utilities, print output, and coherent 404/error recovery.
+- Added bounded request timeout, cancellation, manual retry, request-snapshot
+  identity, and neutral cold-start guidance.
+- Added CI, weekly Dependabot checks, a synthetic public smoke tool, a security
+  policy, and an accurate architecture SVG.
+
+### Changed
+
+- Consolidated the dark technical visual system around semantic spacing, motion,
+  focus, surface, and layering tokens with quieter mobile composition.
+- Removed fake hero counts, score count-up animation, and continuous decorative
+  ambient loops while preserving the final score and engine-provided ordering.
+- Added factual source metadata, review-visible counts, completion language, and
+  confirmed New analysis semantics.
 
 ### Security
 
 - Analytics excludes document content, filenames, extracted terms, report data,
   form input, query strings, and custom interaction events.
+- Analysis/report responses use `Cache-Control: no-store`; pasted text and total
+  uploads are bounded consistently at client/API boundaries.
+- DOCX requests now reject suspicious entry count, expansion size, compression
+  ratio, encryption, and unsafe archive paths before parsing.
+- Preview builds are noindex, Production remains canonical, and the frontend adds
+  anti-sniffing, framing, referrer, and browser-capability headers.
+- Patched frontend transitive advisories through narrow pnpm overrides without a
+  major framework migration.
 
 ## Version 2 public release candidate — 2026-08-10
 

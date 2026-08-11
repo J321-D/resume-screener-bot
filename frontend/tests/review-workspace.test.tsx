@@ -1,6 +1,6 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { ReviewWorkspace } from "@/components/review/review-workspace";
 import { actionChecklist, type ReviewDecisions } from "@/components/review/review-state";
@@ -83,6 +83,18 @@ describe("ReviewWorkspace", () => {
     expect(screen.getByRole("button", { name: /download markdown checklist/i })).toBeDisabled();
     expect(screen.getByText("0 of 4")).toBeInTheDocument();
   });
+
+  it("copies only explicitly selected terms as plain text", async () => {
+    const user = userEvent.setup();
+    const writeText = vi.spyOn(navigator.clipboard, "writeText").mockResolvedValue();
+    render(<ReviewWorkspace opportunities={opportunities} stale={false} />);
+    await user.selectOptions(screen.getByLabelText("Review status for SQL"), "add");
+    await user.selectOptions(screen.getByLabelText("Review status for GMP"), "later");
+    await user.click(screen.getByRole("button", { name: "Copy selected terms" }));
+
+    expect(writeText).toHaveBeenCalledWith("SQL");
+    expect(screen.getByText("Selected terms copied.")).toBeInTheDocument();
+  });
 });
 
 describe("actionChecklist", () => {
@@ -93,5 +105,14 @@ describe("actionChecklist", () => {
     expect(checklist).toContain("- [ ] SQL");
     expect(checklist).toContain("- [ ] cell-culture");
     expect(checklist).not.toContain("GMP");
+  });
+
+  it("keeps user-derived terms on one inert Markdown checklist line", () => {
+    const checklist = actionChecklist(
+      [{ term: "[term]\n# injected heading", count: 1, category: null }],
+      { "0": "add" },
+    );
+    expect(checklist).toContain("- [ ] \\[term\\] # injected heading");
+    expect(checklist).not.toContain("\n# injected heading");
   });
 });

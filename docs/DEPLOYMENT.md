@@ -8,8 +8,8 @@ policy may require Streamlit authentication.
 ## Current public status
 
 - Public frontend: `https://resume-keyword-screener.vercel.app`
-- Vercel Production deployment: `dpl_BHCdDRhRCyBbWLR31sn5sSPVJFff`, Ready,
-  promoted from verified commit `ff3f75bfd8c28051a0d5a1cd104a6cbda31e363a`
+- Vercel Production deployment: `dpl_14mo7BYpmkTchqfHi1ojMSBxZ3iH`, Ready,
+  built from verified commit `ce633cfee4124daa4c253f7b83d9e104608b86ef`
 - Render API: `https://resume-keyword-screener-api-preview.onrender.com`
 - Render service: `srv-d9qjaciju40c73bc2ptg`, Free plan, automatic deploys off
 - CORS: exact public Vercel origin only; no wildcard
@@ -39,9 +39,9 @@ Protected deterministic Python engine
 
 No database, persistent disk, background worker, or external analysis service is
 required. Uploaded documents are validated and processed in memory. The checked-in
-Vercel frontend is configured to use anonymous aggregate Web Analytics for three
-fixed public paths; it does not send document or form content and defines no
-custom interaction events. Collection begins only after this code is deployed.
+Vercel frontend uses enabled anonymous aggregate Web Analytics for three fixed
+public paths; it does not send document or form content and defines no custom
+interaction events.
 Application code does not log document contents, but the hosting providers may
 retain request metadata such as timestamps, paths, status codes, IP addresses,
 and user agents according to their own logging and retention policies.
@@ -146,7 +146,7 @@ and inspect both provider logs to confirm no document text is emitted.
   while the Version 2 issue is investigated, after confirming its provider access
   policy is appropriate for the intended users.
 - Frontend: reassign `resume-keyword-screener.vercel.app` to the previously
-  verified Vercel deployment selected for rollback. Keeping the same public origin
+  verified deployment `dpl_BHCdDRhRCyBbWLR31sn5sSPVJFff`. Keeping the same public origin
   means the Render CORS value does not need to widen.
 - Backend: roll back the existing Render service to its prior successful deploy;
   do not add a second origin or wildcard as a shortcut.

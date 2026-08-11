@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { AlertTriangle, ArrowDownToLine, Check, ChevronDown, Clock3, FileText, Layers3, LockKeyhole, Sparkles } from "lucide-react";
+import { AlertTriangle, ArrowDownToLine, Check, ChevronDown, Clipboard, Clock3, FileText, Layers3, LockKeyhole, RotateCcw, Sparkles } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 
 import type { AnalysisResponse } from "@/lib/contracts";
@@ -14,6 +14,7 @@ interface ResultsDashboardProps {
   reporting: boolean;
   analysisKey: string;
   onDownload: () => void;
+  onNewAnalysis: () => void;
 }
 
 const cardVariants = {
@@ -72,12 +73,31 @@ function TermList({ items, label, limit, reduceMotion }: TermListProps) {
   );
 }
 
-export function ResultsDashboard({ result, stale, reporting, analysisKey, onDownload }: ResultsDashboardProps) {
+export function ResultsDashboard({ result, stale, reporting, analysisKey, onDownload, onNewAnalysis }: ResultsDashboardProps) {
   const reduceMotion = useReducedMotion();
   const resultsRef = useRef<HTMLElement>(null);
   const date = new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(result.metadata.analyzed_at));
   const categorized = result.categories.filter((category) => category.category !== "Uncategorized");
   const isFocused = result.analysis_mode === "Skills-focused analysis";
+  const [copyState, setCopyState] = useState<"idle" | "copied" | "error">("idle");
+  const [confirmingNew, setConfirmingNew] = useState(false);
+
+  async function copySummary() {
+    const summary = [
+      "Resume Keyword Screener",
+      `Mode: ${result.analysis_mode}`,
+      `Keyword coverage: ${result.coverage.score === null ? "N/A" : `${result.coverage.score.toFixed(1)}%`}`,
+      `Matched: ${result.coverage.matched}`,
+      `Coverage opportunities: ${result.coverage.missing}`,
+      "Lexical comparison—not a candidate-performance assessment.",
+    ].join("\n");
+    try {
+      await navigator.clipboard.writeText(summary);
+      setCopyState("copied");
+    } catch {
+      setCopyState("error");
+    }
+  }
 
   useEffect(() => {
     const results = resultsRef.current;
@@ -100,6 +120,7 @@ export function ResultsDashboard({ result, stale, reporting, analysisKey, onDown
       animate="visible"
       variants={{ visible: { transition: { staggerChildren: reduceMotion ? 0 : 0.07 } } }}
     >
+      <p className="sr-only" role="status" aria-live="polite">Analysis complete. Lexical coverage {result.coverage.score === null ? "not applicable" : `${result.coverage.score.toFixed(1)}%`}. {result.coverage.matched} of {result.coverage.total} terms matched.</p>
       <div className="results-heading">
         <div><p className="eyebrow"><span /> Scan complete</p><h2 id="results-title">Your lexical coverage map</h2></div>
         <span className="scan-complete"><Check size={14} /> Analysis complete</span>
@@ -111,7 +132,7 @@ export function ResultsDashboard({ result, stale, reporting, analysisKey, onDown
         </div>
       )}
 
-      <div className="result-hero-grid">
+      <div id="summary" className="result-hero-grid">
         <motion.article className="coverage-card" variants={cardVariants}>
           <CoverageRing score={result.coverage.score} />
           <div className="coverage-copy">
@@ -119,7 +140,10 @@ export function ResultsDashboard({ result, stale, reporting, analysisKey, onDown
             <h3>{result.coverage.label}</h3>
             <p>Lexical overlap across the supplied résumé content and role description.</p>
             <div className="result-meta"><FileText size={15} /><span>{result.metadata.resume_label}</span></div>
+            <div className="result-meta"><Layers3 size={15} /><span>{result.metadata.input_mode.replaceAll("_", " ")}</span></div>
             <div className="result-meta"><Clock3 size={15} /><time dateTime={result.metadata.analyzed_at}>{date}</time></div>
+            <button className="copy-summary" type="button" onClick={copySummary}><Clipboard size={15} /> Copy summary</button>
+            <span className="copy-status" role="status" aria-live="polite">{copyState === "copied" ? "Summary copied." : copyState === "error" ? "Could not access the clipboard. Select and copy the visible results instead." : ""}</span>
           </div>
         </motion.article>
 
@@ -136,7 +160,7 @@ export function ResultsDashboard({ result, stale, reporting, analysisKey, onDown
         </div>
       </div>
 
-      <div className="terms-grid">
+      <div id="findings" className="terms-grid">
         <motion.article className="terms-card matched-terms" variants={cardVariants}>
           <header><div><span className="result-icon success"><Check size={16} /></span><div><h3>Skills already covered</h3><p>Language detected in both inputs.</p></div></div><strong>{result.matched_terms.length}</strong></header>
           <TermList items={result.matched_terms} label="Matched terms" limit={MATCHED_LIMIT} reduceMotion={reduceMotion} />
@@ -195,6 +219,19 @@ export function ResultsDashboard({ result, stale, reporting, analysisKey, onDown
           <ArrowDownToLine size={17} /> {reporting ? "Preparing PDF…" : "Download PDF report"}
         </button>
       </motion.article>
+
+      <div className="results-next-actions">
+        <a className="button button-quiet" href="#workspace">Edit current inputs</a>
+        {!confirmingNew ? (
+          <button className="button button-quiet" type="button" onClick={() => setConfirmingNew(true)}><RotateCcw size={16} /> New analysis</button>
+        ) : (
+          <div className="new-analysis-confirmation" role="alertdialog" aria-labelledby="new-analysis-title">
+            <strong id="new-analysis-title">Clear current inputs, results, and review decisions?</strong>
+            <button type="button" onClick={onNewAnalysis}>Clear and start new</button>
+            <button type="button" onClick={() => setConfirmingNew(false)}>Keep current analysis</button>
+          </div>
+        )}
+      </div>
 
       <p className="results-disclaimer">Lexical keyword comparison—not a candidate-performance assessment or hiring recommendation.</p>
     </motion.section>

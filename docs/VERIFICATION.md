@@ -33,6 +33,7 @@ pnpm typecheck
 pnpm test
 pnpm build
 pnpm test:e2e
+pnpm audit --prod
 ```
 
 Do not install or upgrade packages during routine verification.
@@ -44,7 +45,7 @@ Do not install or upgrade packages during routine verification.
 - Confirm stale results cannot be exported.
 - Test keyboard navigation, labels, focus states, status announcements, and disclosures.
 - Test reduced motion: animations are suppressed and final values render immediately.
-- Review 1600, 1440, 1280, 1024, 820, 768, 430, 390, and 360 px widths.
+- Review 1600, 1440, 1280, 1024, 820, 768, 430, 390, 360, and 320 px widths plus 200% zoom.
 - Confirm no overflow, clipping, hidden controls, or unreadable contrast.
 - Smoke-test the latest supported Chrome, Edge, Safari, and Firefox when the
   environment provides those engines. Record any unavailable browser as a coverage
@@ -62,6 +63,13 @@ Do not install or upgrade packages during routine verification.
 - Review rerenders, list bounds, network requests, and bundle impact for frontend
   changes; avoid duplicate parsing or score computation.
 - Confirm error paths do not expose stack traces or document contents.
+- Confirm analysis/report responses use `Cache-Control: no-store`, JSON/PDF
+  content types are correct, unauthorized CORS origins are denied, and unsupported
+  methods fail normally.
+- Confirm Preview builds are noindex, Production remains canonical/indexable, and
+  the sitemap lists only real public routes.
+- Run `pnpm audit --prod`; distinguish `pip check` compatibility from a dedicated
+  Python CVE audit and record when the latter tool is unavailable.
 
 ## Repository integrity
 
@@ -113,9 +121,30 @@ Before committing deployment configuration or requesting another provider change
   the hosted public release candidate.
 - Follow [DEPLOYMENT.md](DEPLOYMENT.md) for hosted smoke tests and rollback.
 
-The current repository baseline comprises **126 checks**: 97 Python unittest
-tests, 23 frontend unit/accessibility tests, and 6 Playwright tests. Update these
-counts only when the corresponding suites change.
+The current fresh inventory is **156 automated checks**: 101 Python tests, 39
+frontend unit/accessibility tests, and 16 Playwright checks across desktop and
+mobile projects. The historical public baseline was 126 checks; recalculate this
+inventory whenever suites change rather than preserving a number for presentation
+continuity.
+
+## Browser lifecycle and repeated use
+
+- Exercise analyze → review → export → New analysis at least three times with
+  synthetic data; old result DOM, review state, timers, and object URLs must not
+  accumulate.
+- Check cancellation, retry, a second request after cancellation, editing after a
+  result, background/foreground return, Back/Forward restoration, and unmount.
+- Open two independent tabs with different synthetic inputs. No local/session
+  storage or shared application state may transfer documents, results, review,
+  errors, export, or demo state across tabs.
+- Verify temporary download URLs are revoked and global keyboard listeners are
+  removed when their component closes/unmounts.
+
+For an already authorized deployed smoke only:
+
+```bash
+./venv/bin/python scripts/smoke_public.py
+```
 
 ## Verification handoff
 

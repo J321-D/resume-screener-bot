@@ -1,14 +1,14 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { CoverageRing } from "@/components/results/coverage-ring";
 
 describe("CoverageRing", () => {
-  it("announces the final score while the visual count-up settles on it", async () => {
+  it("exposes the final score immediately while only the ring arc settles", () => {
     render(<CoverageRing score={66.7} />);
 
     expect(screen.getByRole("img", { name: "66.7% keyword coverage" })).toBeInTheDocument();
-    await waitFor(() => expect(screen.getByText("66.7%")).toBeInTheDocument(), { timeout: 2500 });
+    expect(screen.getByText("66.7%")).toBeInTheDocument();
   });
 
   it("renders the final value immediately when reduced motion is requested", () => {

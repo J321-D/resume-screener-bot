@@ -46,6 +46,7 @@ describe("privacy-safe Web Analytics", () => {
   it("rejects unapproved and malformed URLs", () => {
     expect(filterAnalyticsEvent({ type: "pageview", url: "/results" })).toBeNull();
     expect(filterAnalyticsEvent({ type: "pageview", url: "http://localhost:3000/" })).toBeNull();
+    expect(filterAnalyticsEvent({ type: "pageview", url: "https://resume-screener-bot-preview-example.vercel.app/" })).toBeNull();
     expect(filterAnalyticsEvent({ type: "pageview", url: "https://example.com/privacy" })).toBeNull();
     expect(filterAnalyticsEvent({ type: "pageview", url: "https://[invalid" })).toBeNull();
   });

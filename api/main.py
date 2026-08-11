@@ -8,6 +8,7 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from api.config import allowed_origins
 from api.errors import PublicApiError
@@ -22,6 +23,19 @@ app = FastAPI(
     version="1.0.0",
     description="Private deterministic lexical résumé comparison API.",
 )
+
+
+class SensitiveResponseCacheMiddleware(BaseHTTPMiddleware):
+    """Prevent intermediaries and browsers from caching user-derived responses."""
+
+    async def dispatch(self, request: Request, call_next):  # type: ignore[no-untyped-def]
+        response = await call_next(request)
+        if request.url.path in {"/api/v1/analyze", "/api/v1/report"}:
+            response.headers["Cache-Control"] = "no-store"
+        return response
+
+
+app.add_middleware(SensitiveResponseCacheMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins(),

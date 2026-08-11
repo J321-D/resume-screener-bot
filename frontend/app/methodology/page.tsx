@@ -1,8 +1,19 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import { Footer } from "@/components/shell/footer";
+import { Navigation } from "@/components/shell/navigation";
+
+export const metadata: Metadata = {
+  title: "Methodology · Resume Keyword Screener",
+  description: "How the deterministic lexical comparison and its two analysis modes work.",
+  alternates: { canonical: "/methodology" },
+};
 
 export default function MethodologyPage() {
   return (
-    <main className="prose-page shell">
+    <>
+      <Navigation />
+      <main id="main-content"><article className="prose-page shell">
       <Link href="/" className="back-link">← Back to the screener</Link>
       <p className="eyebrow">Methodology</p>
       <h1>A deterministic lexical comparison—not an AI judgment.</h1>
@@ -23,6 +34,10 @@ export default function MethodologyPage() {
         <li>Scanned PDFs require OCR, which is not included.</li>
         <li>Multiple résumés are combined into one comparison.</li>
       </ul>
-    </main>
+      <h2 id="language">Language boundary</h2>
+      <p>The current rules and curated taxonomy are English-first. Unicode text is handled safely, but the analyzer does not claim multilingual semantic understanding.</p>
+      </article></main>
+      <Footer />
+    </>
   );
 }

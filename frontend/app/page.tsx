@@ -1,17 +1,21 @@
+import type { Metadata } from "next";
+
 import { Analyzer } from "@/components/analysis/analyzer";
 import { Hero } from "@/components/shell/hero";
+import { Footer } from "@/components/shell/footer";
 import { Navigation } from "@/components/shell/navigation";
+
+export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 export default function HomePage() {
   return (
-    <main>
+    <>
       <Navigation />
-      <Hero />
-      <Analyzer />
-      <footer className="site-footer shell">
-        <span>Resume Keyword Screener</span>
-        <span>Private lexical analysis · No external AI</span>
-      </footer>
-    </main>
+      <main id="main-content">
+        <Hero />
+        <Analyzer />
+      </main>
+      <Footer />
+    </>
   );
 }

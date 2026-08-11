@@ -16,6 +16,11 @@ The interface should feel like precise professional software: calm, technical, p
 
 Use a consistent spacing rhythm and a centered content grid. Related controls belong together; major workflow stages need deliberate separation. Desktop may use two balanced input columns. Narrow layouts stack without changing task order.
 
+The implementation uses semantic tokens for spacing, surfaces, borders,
+elevation, focus, motion, and layering. Layer values are limited to content,
+sticky navigation, and the responsive menu; arbitrary high z-index values are
+not part of the system.
+
 ## Card hierarchy
 
 1. Coverage summary: strongest scale and visual emphasis
@@ -39,7 +44,12 @@ Meaning must never depend on color alone.
 
 ## Motion
 
-Motion confirms state and guides attention. Hover feedback should be brief; result reveals and coverage animation should settle quickly. Do not add fake delays, constant spectacle, flashing, scroll hijacking, or motion required to understand content. Reduced-motion users receive final values immediately.
+Motion confirms state and guides attention. Shared fast, standard, and emphasis
+durations use one controlled easing curve. Hover feedback is brief; result cards
+resolve with restrained opacity/translation, and the coverage arc settles while
+the exact score text is available immediately. Idle ambient loops, count-up
+scores, fake percentage progress, flashing, and scroll hijacking are excluded.
+Reduced-motion users receive the same information with negligible transition.
 
 ## Accessibility
 
@@ -52,7 +62,9 @@ Motion confirms state and guides attention. Hover feedback should be brief; resu
 
 ## Hero
 
-The hero introduces privacy and lexical purpose. Atmosphere may use restrained depth, technical geometry, and slow ambient movement, but copy remains dominant and credible. Avoid gaming, glitch, fake-terminal, and generic AI imagery.
+The hero introduces privacy and lexical purpose. Restrained deterministic
+geometry provides depth, but it contains no fake score, count, terminal, or
+continuous ambient animation. Copy and the real workflow remain dominant.
 
 ## Coverage dashboard
 
@@ -69,3 +81,12 @@ Opportunity review is a focused editing workflow, not a survey or ranking system
 ## Responsive behavior
 
 The same workflow must remain clear at desktop, tablet, and mobile widths. Preserve score prominence, natural chip wrapping, compact export actions, usable navigation, and zero horizontal overflow. Validate the breakpoint matrix in [VERIFICATION.md](VERIFICATION.md).
+
+## Native and fallback behavior
+
+Real terms remain selectable, searchable text rather than canvas output. Native
+file, textarea, select, print, focus, and clipboard semantics are preserved and
+progressively enhanced. Forced-colors and print rules remove decorative
+dependency; `prefers-reduced-motion` disables nonessential motion. Focus rings
+must remain visible around clipped or rounded surfaces, and user-controlled
+filenames/terms use bidi isolation and overflow-safe layout.

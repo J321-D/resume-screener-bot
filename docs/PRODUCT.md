@@ -28,6 +28,7 @@ It does **not** measure candidate quality, predict applicant-tracking-system dec
 3. Run the deterministic server-side comparison.
 4. Review coverage, matched terms, opportunities, categories, and normalization explanations.
 5. Download the server-generated PDF report when useful.
+6. Clear the current session with New analysis before starting another document.
 
 ## Current capabilities
 
@@ -41,6 +42,8 @@ It does **not** measure candidate quality, predict applicant-tracking-system dec
 - Streamlit compatibility interface
 - FastAPI boundary and responsive Next.js interface
 - Session-local opportunity review with status filters, search, progress, reset, and a Markdown action checklist
+- A synthetic demonstration, responsive navigation, Help, manual retry/cancel, stale-result protection, and explicit New analysis reset
+- Copyable factual result summaries and explicitly selected opportunity terms
 - Local processing without document persistence or external résumé transmission
 - Anonymous aggregate Vercel page analytics limited to the fixed public routes;
   no document content, form input, filenames, query strings, or custom interaction
@@ -53,14 +56,13 @@ It does **not** measure candidate quality, predict applicant-tracking-system dec
 - Curated normalization recognizes only documented concepts
 - Review decisions reset on refresh or when analysis inputs become stale; there are no saved analyses, accounts, collaboration, or cross-candidate comparisons
 - Coverage is lexical evidence, not evidence of competency or experience
+- Curated analysis is English-first; Unicode remains safe but multilingual semantic understanding is not claimed
 
 ## Future vision
 
-The public Version 2 release candidate includes the Version 2.1 review workspace
-without changing the engine: session-local opportunity statuses, filters, search,
-progress, stale-input clearing, and Markdown checklist export. Planned work keeps
-the same deterministic boundary while exploring restrained futuristic
-Apple/Tesla/cyberpunk polish, clearer menu and navigation, richer review flows,
-and customer Q&A and feedback. Persistence, authentication, collaboration, AI,
-and plugins remain approval-gated architectural changes. See
-[ROADMAP.md](ROADMAP.md).
+The public Version 2 baseline includes the review workspace. The current
+unreleased hardening work refines navigation, demo/onboarding, resilience,
+security boundaries, responsive presentation, and repository operations without
+changing the engine. Persistence, authentication, collaboration, AI, source
+highlighting, and public result sharing remain outside the current product
+contract. See [ROADMAP.md](ROADMAP.md).

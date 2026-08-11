@@ -21,6 +21,7 @@ export const metadata: Metadata = {
     description: "Map your résumé language to the role—privately and deterministically.",
     images: ["/social-preview.svg"],
     type: "website",
+    url: "https://resume-keyword-screener.vercel.app",
   },
 };
 
@@ -30,6 +31,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en" className={`${geist.variable} ${geistMono.variable}`}>
       <body>
+        <a className="skip-link" href="#main-content">Skip to main content</a>
         {children}
         <WebAnalytics />
       </body>

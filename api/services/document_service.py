@@ -24,8 +24,13 @@ from resume_screener.parsing import (
 
 MAX_RESUME_UPLOADS = 5
 MAX_TOTAL_UPLOAD_SIZE_BYTES = 25 * 1024 * 1024
+MAX_TEXT_CHARACTERS = 200_000
+MAX_DOCX_ENTRIES = 2_048
+MAX_DOCX_UNCOMPRESSED_BYTES = 50 * 1024 * 1024
+MAX_DOCX_ENTRY_BYTES = 20 * 1024 * 1024
+MAX_DOCX_COMPRESSION_RATIO = 200
 READ_CHUNK_SIZE = 1024 * 1024
-_CONTROL_CHARACTERS = re.compile(r"[\x00-\x1f\x7f]")
+_CONTROL_CHARACTERS = re.compile(r"[\x00-\x1f\x7f\u202a-\u202e\u2066-\u2069]")
 _EXPECTED_SUFFIX = {
     PDF_MEDIA_TYPE: ".pdf",
     DOCX_MEDIA_TYPE: ".docx",
@@ -144,6 +149,40 @@ def _detect_media_type(content: bytes) -> str | None:
     return TXT_MEDIA_TYPE
 
 
+def _validate_docx_archive(content: bytes, filename: str, field: str) -> None:
+    """Reject pathological DOCX containers without extracting archive entries."""
+    try:
+        with ZipFile(BytesIO(content)) as archive:
+            entries = archive.infolist()
+            if len(entries) > MAX_DOCX_ENTRIES:
+                raise ValueError("too many archive entries")
+            total_uncompressed = 0
+            for entry in entries:
+                parts = PurePath(entry.filename.replace("\\", "/")).parts
+                if entry.filename.startswith("/") or ".." in parts:
+                    raise ValueError("unsafe archive path")
+                if entry.flag_bits & 0x1:
+                    raise ValueError("encrypted archive entry")
+                total_uncompressed += entry.file_size
+                if entry.file_size > MAX_DOCX_ENTRY_BYTES:
+                    raise ValueError("archive entry is too large")
+                if entry.compress_size == 0:
+                    ratio = entry.file_size if entry.file_size else 1
+                else:
+                    ratio = entry.file_size / entry.compress_size
+                if ratio > MAX_DOCX_COMPRESSION_RATIO:
+                    raise ValueError("suspicious compression ratio")
+            if total_uncompressed > MAX_DOCX_UNCOMPRESSED_BYTES:
+                raise ValueError("archive expands beyond limit")
+    except (BadZipFile, ValueError) as error:
+        raise PublicApiError(
+            422,
+            "unsafe_docx",
+            f"{filename} could not be processed safely as a DOCX file.",
+            field,
+        ) from error
+
+
 def _validated_media_type(
     content: bytes,
     filename: str,
@@ -169,6 +208,8 @@ def _validated_media_type(
             f"{filename} does not match its reported file type.",
             field,
         )
+    if detected == DOCX_MEDIA_TYPE:
+        _validate_docx_archive(content, filename, field)
     return detected
 
 
@@ -193,6 +234,17 @@ async def prepare_documents(
     job_description_text: str,
 ) -> PreparedDocuments:
     """Validate request inputs while preserving Streamlit precedence semantics."""
+    for value, field in (
+        (resume_text, "resume_text"),
+        (job_description_text, "job_description_text"),
+    ):
+        if len(value) > MAX_TEXT_CHARACTERS:
+            raise PublicApiError(
+                413,
+                "text_too_large",
+                f"Pasted text must be {MAX_TEXT_CHARACTERS:,} characters or fewer.",
+                field,
+            )
     if len(resume_uploads) > MAX_RESUME_UPLOADS:
         for upload in resume_uploads:
             await upload.close()

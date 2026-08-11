@@ -1,6 +1,7 @@
 import { analysisResponseSchema, type AnalysisInputs, type AnalysisResponse, type PublicError } from "./contracts";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+export const REQUEST_TIMEOUT_MS = 45_000;
 
 export function buildAnalysisForm(inputs: AnalysisInputs): FormData {
   const form = new FormData();
@@ -22,21 +23,65 @@ async function publicError(response: Response): Promise<PublicError> {
   return { code: "request_failed", message: "The request could not be completed. Try again." };
 }
 
+async function request(
+  path: string,
+  options: RequestInit,
+  signal?: AbortSignal,
+): Promise<Response> {
+  const controller = new AbortController();
+  const abort = () => controller.abort();
+  signal?.addEventListener("abort", abort, { once: true });
+  const timeout = window.setTimeout(abort, REQUEST_TIMEOUT_MS);
+
+  try {
+    return await fetch(`${API_URL}${path}`, { ...options, signal: controller.signal });
+  } catch {
+    if (controller.signal.aborted) {
+      if (signal?.aborted) throw new DOMException("Request aborted", "AbortError");
+      throw {
+        code: "request_timeout",
+        message: "The analysis service took too long to respond. Retry in a moment.",
+      } satisfies PublicError;
+    }
+    throw {
+      code: "network_error",
+      message: "The analysis service is unavailable. Check your connection and retry.",
+    } satisfies PublicError;
+  } finally {
+    window.clearTimeout(timeout);
+    signal?.removeEventListener("abort", abort);
+  }
+}
+
 export async function analyze(inputs: AnalysisInputs, signal?: AbortSignal): Promise<AnalysisResponse> {
-  const response = await fetch(`${API_URL}/api/v1/analyze`, {
+  const response = await request("/api/v1/analyze", {
     method: "POST",
     body: buildAnalysisForm(inputs),
-    signal,
-  });
+  }, signal);
   if (!response.ok) throw await publicError(response);
-  return analysisResponseSchema.parse(await response.json());
+  try {
+    const parsed = analysisResponseSchema.safeParse(await response.json());
+    if (!parsed.success) throw new Error("invalid schema");
+    return parsed.data;
+  } catch {
+    throw {
+      code: "invalid_response",
+      message: "The analysis service returned an unexpected response. Retry in a moment.",
+    } satisfies PublicError;
+  }
 }
 
 export async function createReport(inputs: AnalysisInputs): Promise<Blob> {
-  const response = await fetch(`${API_URL}/api/v1/report`, {
+  const response = await request("/api/v1/report", {
     method: "POST",
     body: buildAnalysisForm(inputs),
   });
   if (!response.ok) throw await publicError(response);
+  if (!response.headers.get("content-type")?.toLowerCase().startsWith("application/pdf")) {
+    throw {
+      code: "invalid_response",
+      message: "The report service returned an unexpected response. Try the download again.",
+    } satisfies PublicError;
+  }
   return response.blob();
 }

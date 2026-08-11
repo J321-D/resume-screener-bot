@@ -1,7 +1,7 @@
 # Resume Keyword Screener
 
 [![Version](https://img.shields.io/badge/version-v2.0.0-53E5FF)](https://github.com/J321-D/resume-screener-bot/releases/tag/v2.0.0)
-[![Verification](https://img.shields.io/badge/checks-126%20passing-34D399)](#verification)
+[![Verification](https://img.shields.io/badge/checks-156%20passing-34D399)](#verification)
 [![License](https://img.shields.io/badge/license-MIT-A9B3C8)](LICENSE)
 [![Live Demo](https://img.shields.io/badge/demo-live-53E5FF)](https://resume-keyword-screener.vercel.app)
 
@@ -37,7 +37,8 @@ require authentication before displaying it.
 - 🔒 No external AI or résumé-analysis API calls
 - ✅ Robust upload validation and user-friendly errors
 - 📉 Anonymous aggregate page analytics with no document or form content
-- 🧪 126 automated repository checks
+- 🧭 Responsive navigation, synthetic demo, Help, and resilient timeout/retry/cancel states
+- 🛡️ No-store analysis responses, bounded inputs, archive safety checks, and Preview noindex controls
 
 ### Version 2 release-candidate additions
 
@@ -47,6 +48,8 @@ require authentication before displaying it.
 - Reviewed/remaining progress, factual status totals, filters, and term search.
 - Ordered Markdown checklist export for opportunities marked Add to résumé.
 - Automatic decision clearing when changed inputs make the current analysis stale.
+- Copyable result summaries and explicitly selected opportunity terms.
+- Confirmed New analysis reset, print-friendly output, and stable error/404 recovery.
 
 ---
 
@@ -61,6 +64,8 @@ require authentication before displaying it.
 [![Mobile](docs/images/mobile.png)](docs/images/mobile.png)
 
 > The screenshots show the public Version 2 Next.js results and review experience using synthetic content.
+
+![Architecture](docs/images/architecture.svg)
 
 ---
 
@@ -197,12 +202,15 @@ Multiple uploaded résumés are currently combined into one lexical comparison r
 
 - Supported formats are PDF, DOCX, and UTF-8 TXT.
 - Maximum file size is **10 MB per file**.
+- Combined uploaded files are limited to **25 MB per request** and each pasted text field to **200,000 characters**.
 - Password-protected, malformed, unsupported, unreadable, and empty files are rejected with concise messages.
 - Invalid UTF-8 TXT files are rejected.
 - Image-only PDFs are detected when they contain no extractable text.
 - OCR is **not** included.
 - Scanned documents must be converted to searchable PDFs before upload.
 - Unknown MIME types do not silently fall through to TXT parsing.
+- DOCX containers are rejected when archive size, entry count, path, encryption,
+  or compression-ratio checks indicate decompression abuse.
 
 PDF reports use **Droid Sans Fallback**, supplied through PyMuPDF/MuPDF. It supports accented Latin, Chinese, Japanese, and Korean text without requiring a system font installation.
 
@@ -289,6 +297,7 @@ the API and renders the returned ordered contract.
 - [Architectural decisions](docs/DECISIONS.md)
 - [Changelog](docs/CHANGELOG.md)
 - [Contributing guide](docs/CONTRIBUTING.md)
+- [Security policy](SECURITY.md)
 
 ### Version 2 architecture
 
@@ -336,10 +345,9 @@ The v1.1.2 release includes **84 automated unittest tests** covering analysis, n
 
 ### Version 2 verification
 
-The current Version 2 repository contains **97 deterministic Python
-unittest tests**, **23 frontend unit, interaction, formatting, analytics-privacy,
-and accessibility tests**, and **6 Playwright desktop/mobile checks**: **126
-checks total**.
+The final automated check inventory for this unreleased hardening work is derived
+from the fresh verification run below; historical badge counts are not treated as
+a substitute for current test evidence.
 
 ```bash
 MPLCONFIGDIR=/private/tmp/resume-screener-matplotlib-tests \
@@ -354,7 +362,12 @@ python -c "import app; import api.main"
 cd frontend
 pnpm check
 pnpm test:e2e
+pnpm audit --prod
 ```
+
+The application is English-first for lexical normalization. Unicode text is
+handled safely end-to-end, but the product does not claim multilingual semantic
+analysis, ATS prediction, or hiring assessment.
 
 ---
 
@@ -490,8 +503,9 @@ The legacy v1.1.2 release includes:
 Version 2.0 is complete, including the additive FastAPI boundary, Next.js frontend,
 premium responsive interface, review workspace, and repository operating
 documentation. The Vercel/Render release candidate is public at the Live Demo URL.
-The current repository-level verification count is **126 checks**: 97 Python
-tests, 23 frontend unit/accessibility tests, and 6 Playwright tests.
+The current repository-level verification count is **156 checks**: 101 Python
+tests, 39 frontend unit/accessibility tests, and 16 Playwright checks across
+desktop and mobile projects.
 
 Future work includes restrained futuristic Apple/Tesla/cyberpunk visual polish,
 a fuller menu and navigation system, richer review workflows, and customer Q&A

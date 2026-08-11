@@ -29,6 +29,23 @@ function jsonResponse(payload = response, status = 200) {
 }
 
 describe("Analyzer", () => {
+  it("loads and clears the isolated synthetic demo without retaining URL content", async () => {
+    const user = userEvent.setup();
+    window.history.replaceState({}, "", "/?demo=1#workspace");
+    render(<Analyzer />);
+
+    expect(await screen.findByText("Synthetic demo loaded.")).toBeInTheDocument();
+    expect((screen.getByLabelText("Résumé text") as HTMLTextAreaElement).value).toContain("Bioprocess engineer");
+    expect((screen.getByLabelText("Job-description text") as HTMLTextAreaElement).value).toContain("MATLAB");
+    expect(window.location.search).toBe("");
+
+    await user.click(screen.getByRole("button", { name: "Clear demo" }));
+    expect(screen.getByLabelText("Résumé text")).toHaveValue("");
+    expect(screen.getByLabelText("Job-description text")).toHaveValue("");
+    expect(screen.queryByText("Synthetic demo loaded.")).not.toBeInTheDocument();
+    window.history.replaceState({}, "", "/");
+  });
+
   it("starts disabled and becomes ready with pasted inputs", async () => {
     const user = userEvent.setup();
     render(<Analyzer />);
@@ -152,6 +169,87 @@ describe("Analyzer", () => {
     expect(document.body).not.toHaveTextContent("Traceback");
     expect(screen.queryByRole("region", { name: "Your lexical coverage map" })).not.toBeInTheDocument();
     expect(Element.prototype.scrollIntoView).not.toHaveBeenCalled();
+  });
+
+  it("cancels a pending request without clearing current inputs", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(globalThis, "fetch").mockImplementation((_url, init) => new Promise((_, reject) => {
+      init?.signal?.addEventListener("abort", () => reject(new DOMException("Aborted", "AbortError")));
+    }));
+    render(<Analyzer />);
+
+    await user.type(screen.getByLabelText("Résumé text"), "Python");
+    await user.type(screen.getByLabelText("Job-description text"), "Python SQL");
+    await user.click(screen.getByRole("button", { name: /run keyword scan/i }));
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+
+    expect(await screen.findByRole("status")).toHaveTextContent("Analysis canceled");
+    expect(screen.getByLabelText("Résumé text")).toHaveValue("Python");
+    expect(screen.getByLabelText("Job-description text")).toHaveValue("Python SQL");
+    expect(screen.getByRole("button", { name: /run keyword scan/i })).toBeEnabled();
+  });
+
+  it("retries a failed request with the preserved current inputs", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(globalThis, "fetch")
+      .mockImplementationOnce(() => jsonResponse({ error: { code: "service_unavailable", message: "Service unavailable." } } as never, 503))
+      .mockImplementationOnce(() => jsonResponse());
+    render(<Analyzer />);
+
+    await user.type(screen.getByLabelText("Résumé text"), "Python");
+    await user.type(screen.getByLabelText("Job-description text"), "Python SQL");
+    await user.click(screen.getByRole("button", { name: /run keyword scan/i }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Service unavailable.");
+
+    await user.click(screen.getByRole("button", { name: "Retry analysis" }));
+    expect(await screen.findByRole("heading", { name: "Your lexical coverage map" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Résumé text")).toHaveValue("Python");
+  });
+
+  it("keeps a canceled request from overwriting a newer analysis", async () => {
+    const user = userEvent.setup();
+    let firstReject!: (reason: unknown) => void;
+    vi.spyOn(globalThis, "fetch")
+      .mockImplementationOnce((_url, init) => new Promise((_, reject) => {
+        firstReject = reject;
+        init?.signal?.addEventListener("abort", () => reject(new DOMException("Aborted", "AbortError")));
+      }))
+      .mockImplementationOnce(() => jsonResponse({
+        ...response,
+        matched_terms: [{ term: "MATLAB", count: 1, category: "Tools/software" }],
+      }));
+    render(<Analyzer />);
+
+    await user.type(screen.getByLabelText("Résumé text"), "Python");
+    await user.type(screen.getByLabelText("Job-description text"), "Python SQL");
+    await user.click(screen.getByRole("button", { name: /run keyword scan/i }));
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    await user.clear(screen.getByLabelText("Résumé text"));
+    await user.type(screen.getByLabelText("Résumé text"), "MATLAB");
+    await user.click(screen.getByRole("button", { name: /run keyword scan/i }));
+
+    expect(await screen.findByText("MATLAB", { selector: ".term-cloud li" })).toBeInTheDocument();
+    firstReject(new Error("late first response"));
+    expect(screen.getByText("MATLAB", { selector: ".term-cloud li" })).toBeInTheDocument();
+  });
+
+  it("requires confirmation before clearing a completed current-session analysis", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(globalThis, "fetch").mockImplementation(() => jsonResponse());
+    render(<Analyzer />);
+    await user.type(screen.getByLabelText("Résumé text"), "Python");
+    await user.type(screen.getByLabelText("Job-description text"), "Python SQL");
+    await user.click(screen.getByRole("button", { name: /run keyword scan/i }));
+    await screen.findByRole("heading", { name: "Your lexical coverage map" });
+
+    await user.click(screen.getByRole("button", { name: "New analysis" }));
+    expect(screen.getByRole("alertdialog")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Keep current analysis" }));
+    expect(screen.getByLabelText("Résumé text")).toHaveValue("Python");
+    await user.click(screen.getByRole("button", { name: "New analysis" }));
+    await user.click(screen.getByRole("button", { name: "Clear and start new" }));
+    expect(screen.getByLabelText("Résumé text")).toHaveValue("");
+    expect(screen.queryByRole("heading", { name: "Your lexical coverage map" })).not.toBeInTheDocument();
   });
 
   it("validates empty and oversized files before submission", async () => {

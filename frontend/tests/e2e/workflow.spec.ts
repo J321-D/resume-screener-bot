@@ -29,8 +29,8 @@ test("completes a keyboard-accessible pasted-text analysis", async ({ page }) =>
   await page.waitForLoadState("networkidle");
   await page.getByLabel("Résumé text").fill("QC Python");
   await page.getByLabel("Job-description text").fill("quality control Python SQL");
-  await expect(page.getByText("9 characters", { exact: true })).toBeVisible();
-  await expect(page.getByText("26 characters", { exact: true })).toBeVisible();
+  await expect(page.getByText("9 / 200,000 characters", { exact: true })).toBeVisible();
+  await expect(page.getByText("26 / 200,000 characters", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Run Keyword Scan" }).click();
   await expect(page.getByRole("heading", { name: "Your lexical coverage map" })).toBeVisible();
   await expect(page.getByRole("img", { name: "66.7% keyword coverage" })).toBeVisible();
@@ -42,6 +42,75 @@ test("has no horizontal overflow at mobile width", async ({ page }) => {
   await page.goto("/");
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
   expect(overflow).toBe(false);
+});
+
+test("reflows without horizontal overflow at 200 percent zoom", async ({ page }) => {
+  // A 640 CSS-pixel viewport represents a 1280-pixel display at 200% browser zoom.
+  await page.setViewportSize({ width: 640, height: 800 });
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: "Map your résumé to the role." })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(false);
+});
+
+test("loads the synthetic demo through the real workflow and clears URL state", async ({ page }) => {
+  await page.route("**/api/v1/analyze", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(reviewPayload) }));
+  await page.goto("/?demo=1#workspace");
+  await expect(page.getByText("Synthetic demo loaded.")).toBeVisible();
+  await expect(page).not.toHaveURL(/demo=1/);
+  await page.getByRole("button", { name: "Run Keyword Scan" }).click();
+  await expect(page.getByRole("heading", { name: "Your lexical coverage map" })).toBeVisible();
+  await page.getByRole("button", { name: "New analysis" }).click();
+  await page.getByRole("button", { name: "Clear and start new" }).click();
+  await expect(page.getByLabel("Résumé text")).toHaveValue("");
+  await expect(page.getByRole("heading", { name: "Your lexical coverage map" })).toHaveCount(0);
+});
+
+test("keeps responsive navigation keyboard accessible at 320 pixels", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 720 });
+  await page.goto("/");
+  const menu = page.getByRole("button", { name: "Open navigation menu" });
+  await menu.focus();
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("navigation", { name: "Primary navigation" }).getByRole("link", { name: "Help" })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(menu).toBeFocused();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(false);
+});
+
+test("honors reduced-motion preferences without hiding results", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.route("**/api/v1/analyze", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(payload) }));
+  await page.goto("/");
+  await page.getByLabel("Résumé text").fill("QC Python");
+  await page.getByLabel("Job-description text").fill("quality control Python SQL");
+  await page.getByRole("button", { name: "Run Keyword Scan" }).click();
+
+  const heading = page.getByRole("heading", { name: "Your lexical coverage map" });
+  await expect(heading).toBeVisible();
+  await expect(page.locator("section.results")).toBeFocused();
+  await expect(page.getByRole("img", { name: "66.7% keyword coverage" })).toBeVisible();
+
+  const transitionSeconds = await page.locator(".ring-value").evaluate((element) => {
+    const duration = getComputedStyle(element).transitionDuration;
+    const value = Number.parseFloat(duration);
+    return duration.endsWith("ms") ? value / 1_000 : value;
+  });
+  expect(transitionSeconds).toBeLessThanOrEqual(0.001);
+});
+
+test("keeps analysis inputs isolated across browser tabs", async ({ page, context }) => {
+  const secondPage = await context.newPage();
+  await Promise.all([page.goto("/"), secondPage.goto("/")]);
+
+  await page.getByLabel("Résumé text").fill("First tab Python");
+  await page.getByLabel("Job-description text").fill("First role SQL");
+  await secondPage.getByLabel("Résumé text").fill("Second tab MATLAB");
+  await secondPage.getByLabel("Job-description text").fill("Second role GMP");
+
+  await expect(page.getByLabel("Résumé text")).toHaveValue("First tab Python");
+  await expect(page.getByLabel("Job-description text")).toHaveValue("First role SQL");
+  await expect(secondPage.getByLabel("Résumé text")).toHaveValue("Second tab MATLAB");
+  await expect(secondPage.getByLabel("Job-description text")).toHaveValue("Second role GMP");
 });
 
 test("reviews ordered opportunities and clears decisions when inputs become stale", async ({ page }) => {

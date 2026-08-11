@@ -18,6 +18,8 @@ FastAPI (`api/`)             │
           Unicode PDF report
 ```
 
+![Runtime architecture](images/architecture.svg)
+
 ## Python engine
 
 `resume_screener/` is the source of truth for deterministic behavior:
@@ -36,7 +38,10 @@ These modules are protected because small changes can alter scores, ordering, co
 
 `api/` exposes versioned HTTP routes for health, analysis, and reporting. Pydantic models in `api/schemas.py` define the public contract. Services validate transport inputs, invoke the existing engine, and map results into ordered responses. Public exceptions are concise and do not expose stack traces or document contents.
 
-The API does not reimplement analysis rules.
+The API does not reimplement analysis rules. It bounds file count, individual and
+combined upload size, pasted-text length, and suspicious DOCX archive expansion;
+it parses documents in memory and emits `Cache-Control: no-store` on analysis and
+report responses, including public errors.
 
 ## Next.js client
 
@@ -51,6 +56,10 @@ The API does not reimplement analysis rules.
 - `lib/`: API client, runtime contract validation, and presentation formatting
 
 The client owns presentation state only. Stale results remain visible but cannot be exported as if they represented changed inputs.
+Request identity, AbortController cleanup, and submitted-input snapshots prevent
+late requests from overwriting newer state. No document or result data is placed
+in localStorage, sessionStorage, URLs, or server-rendered route payloads, so tabs
+remain independent by default.
 
 ## Data flow
 
@@ -60,7 +69,11 @@ The client owns presentation state only. Stale results remain visible but cannot
 4. The engine parses content and applies the selected deterministic analysis mode.
 5. The API returns ordered terms, coverage, categories, explanations, metadata, and warnings.
 6. The client renders those values without recalculation or reordering.
-7. PDF export sends the current input signature to `/api/v1/reports`; the server recomputes and generates the report.
+7. PDF export sends the current inputs to `/api/v1/report`; the server recomputes and generates the report.
+
+`/api/v1` is the stable transport contract. Product/UI Version 2 does not imply
+an API v2; a new API version is reserved for an intentionally incompatible
+request or response contract.
 
 ## Why scoring stays server-side
 
@@ -108,3 +121,23 @@ anonymous aggregate page traffic and deliberately defines no custom events; it
 never receives multipart request bodies, document contents, filenames, extracted
 terms, reports, or form input. Local development and tests use the package's
 non-transmitting development mode with debug output disabled.
+
+## Security and privacy boundaries
+
+- Public surfaces: four static frontend routes, static assets, health, analysis,
+  report, and intentionally public FastAPI OpenAPI documentation.
+- Authentication/CSRF: the API is stateless and accepts no credential-bearing
+  cookies, so traditional CSRF tokens are not applicable. CORS remains an exact
+  origin browser boundary, not authentication.
+- Documents: supported containers are read in memory; DOCX files are never
+  extracted to filesystem paths and external relationships/macros are not
+  executed or fetched. DOCM is unsupported.
+- Resource controls: 10 MB per file, 25 MB combined uploads, five résumés,
+  200,000 characters per text field, a bounded client request timeout, manual
+  retry, and cancellation. A hard server CPU deadline for pathological PDF
+  parsing requires infrastructure-level isolation and remains a documented risk.
+- Caching/indexing: sensitive API responses are `no-store`; public static content
+  remains cacheable. Preview builds emit noindex controls while Production stays
+  canonical and indexable.
+- Observability: health proves process availability only. Synthetic smoke tests
+  provide deeper behavior evidence without using private documents.

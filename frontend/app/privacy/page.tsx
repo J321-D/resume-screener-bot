@@ -1,8 +1,19 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import { Footer } from "@/components/shell/footer";
+import { Navigation } from "@/components/shell/navigation";
+
+export const metadata: Metadata = {
+  title: "Privacy · Resume Keyword Screener",
+  description: "How submitted documents, temporary downloads, and aggregate page-view analytics are handled.",
+  alternates: { canonical: "/privacy" },
+};
 
 export default function PrivacyPage() {
   return (
-    <main className="prose-page shell">
+    <>
+      <Navigation />
+      <main id="main-content"><article className="prose-page shell">
       <Link href="/" className="back-link">← Back to the screener</Link>
       <p className="eyebrow">Privacy</p>
       <h1>Your documents are used only for the current request.</h1>
@@ -20,6 +31,12 @@ export default function PrivacyPage() {
         contents, or form input—and does not use analytics cookies or custom
         interaction events.
       </p>
-    </main>
+      <h2>Exports and temporary browser resources</h2>
+      <p>PDF reports and Markdown checklists are created only when you request them. Temporary browser download URLs are revoked after use; downloaded files remain under your browser and device controls.</p>
+      <h2>Infrastructure metadata</h2>
+      <p>Hosting providers may process ordinary operational metadata under their own policies. The application does not intentionally log document contents or send them to analytics.</p>
+      </article></main>
+      <Footer />
+    </>
   );
 }

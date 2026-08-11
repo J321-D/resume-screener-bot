@@ -1,4 +1,4 @@
-import { ArrowDown, BookOpen, ShieldCheck } from "lucide-react";
+import { ArrowDown, BookOpen, FlaskConical, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 
 export function Hero() {
@@ -22,11 +22,13 @@ export function Hero() {
           <Link className="button button-quiet" href="/methodology">
             <BookOpen size={16} /> View methodology
           </Link>
+          <Link className="button button-quiet" href="/?demo=1#workspace">
+            <FlaskConical size={16} /> Try synthetic demo
+          </Link>
         </div>
       </div>
       <div className="hero-visual" role="img" aria-label="Illustration of a résumé keyword scan">
         <div className="hero-bloom bloom-cyan" aria-hidden="true" />
-        <div className="hero-bloom bloom-violet" aria-hidden="true" />
         <div className="visual-grid" aria-hidden="true" />
         <div className="visual-plate plate-back" aria-hidden="true" />
         <div className="visual-plate plate-mid" aria-hidden="true" />
@@ -43,11 +45,11 @@ export function Hero() {
           <div className="document-line medium" />
           <div className="scan-line" />
           <div className="coverage-orb">
-            <span>78%</span><small>COVERAGE</small>
+            <span>LEX</span><small>COVERAGE MAP</small>
           </div>
         </div>
-        <div className="node node-a"><span /> MATCHED <i>12</i></div>
-        <div className="node node-b"><span /> OPPORTUNITY <i>04</i></div>
+        <div className="node node-a"><span /> MATCHED TERMS</div>
+        <div className="node node-b"><span /> REVIEW TERMS</div>
       </div>
     </section>
   );
