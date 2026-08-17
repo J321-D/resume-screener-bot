@@ -1,5 +1,9 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { readFile } from "node:fs/promises";
+
+async function waitForAnalyzerHydration(page: Page) {
+  await expect(page.locator("html")).toHaveAttribute("data-analysis-state", /^(idle|input_ready)$/);
+}
 
 const payload = {
   analysis_mode: "Skills-focused analysis",
@@ -40,6 +44,7 @@ test("completes a keyboard-accessible pasted-text analysis", async ({ page }) =>
   await page.route("**/api/v2/analyze", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(payload) }));
   await page.goto("/");
   await page.waitForLoadState("networkidle");
+  await waitForAnalyzerHydration(page);
   await page.getByLabel("Résumé text").fill("QC Python");
   await page.getByLabel("Job-description text").fill("quality control Python SQL");
   await expect(page.getByText("9 / 200,000 characters", { exact: true })).toBeVisible();
@@ -54,7 +59,7 @@ test("inspects canonical documents and synchronizes X-Ray with authoritative TRA
   await page.route("**/api/v2/analyze", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(evidencePayload) }));
   await page.goto("/");
   await page.waitForLoadState("networkidle");
-  await expect(page.locator("html")).toHaveAttribute("data-analysis-state", "idle");
+  await waitForAnalyzerHydration(page);
   await page.getByLabel("Résumé text").fill("QC Python");
   await page.getByLabel("Job-description text").fill("quality control Python SQL");
   await expect(page.getByText("9 / 200,000 characters", { exact: true })).toBeVisible();
@@ -103,6 +108,7 @@ test("compares two session-only résumé runs and clears them on refresh", async
   await page.route("**/api/v2/analyze", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(requestCount++ ? revised : evidencePayload) }));
   await page.goto("/");
   await page.waitForLoadState("networkidle");
+  await waitForAnalyzerHydration(page);
   await page.getByLabel("Résumé text").fill("QC Python");
   await page.getByLabel("Job-description text").fill("quality control Python SQL");
   await page.getByRole("button", { name: "Run Keyword Scan" }).click();
@@ -127,6 +133,7 @@ test("uses the command palette and evidence focus without changing the result", 
   await page.route("**/api/v2/analyze", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(payload) }));
   await page.goto("/");
   await page.waitForLoadState("networkidle");
+  await waitForAnalyzerHydration(page);
 
   async function openCommands() {
     if (testInfo.project.name === "mobile") {
@@ -205,6 +212,7 @@ test("loads the synthetic demo through the real workflow and clears URL state", 
   await page.route("**/api/v2/analyze", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(reviewPayload) }));
   await page.goto("/");
   await page.waitForLoadState("networkidle");
+  await waitForAnalyzerHydration(page);
   await page.getByRole("link", { name: "Try synthetic demo" }).click();
   await expect(page.getByText("Synthetic demo loaded.")).toBeVisible();
   await expect(page).not.toHaveURL(/demo=1/);
@@ -246,6 +254,7 @@ test("honors reduced-motion preferences without hiding results", async ({ page }
   await page.route("**/api/v2/analyze", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(payload) }));
   await page.goto("/");
   await page.waitForLoadState("networkidle");
+  await waitForAnalyzerHydration(page);
   await expect(page.getByRole("heading", { name: "Map your résumé to the role." })).toHaveCSS("opacity", "1");
   await expect(page.locator(".analysis-core")).toHaveCSS("animation-name", "none");
   await page.getByLabel("Résumé text").fill("QC Python");
@@ -268,6 +277,7 @@ test("honors reduced-motion preferences without hiding results", async ({ page }
 test("keeps analysis inputs isolated across browser tabs", async ({ page, context }) => {
   const secondPage = await context.newPage();
   await Promise.all([page.goto("/"), secondPage.goto("/")]);
+  await Promise.all([waitForAnalyzerHydration(page), waitForAnalyzerHydration(secondPage)]);
 
   await page.getByLabel("Résumé text").fill("First tab Python");
   await page.getByLabel("Job-description text").fill("First role SQL");
@@ -284,6 +294,7 @@ test("reviews ordered opportunities and clears decisions when inputs become stal
   await page.route("**/api/v2/analyze", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(reviewPayload) }));
   await page.goto("/");
   await page.waitForLoadState("networkidle");
+  await waitForAnalyzerHydration(page);
   await page.getByLabel("Résumé text").fill("QC Python");
   await page.getByLabel("Job-description text").fill("quality control Python SQL GMP cell-culture Node.js");
   await page.getByRole("button", { name: "Run Keyword Scan" }).click();
@@ -326,6 +337,7 @@ test("uses Gap Mode as a session-only ordered review mission", async ({ page }) 
   await page.route("**/api/v2/analyze", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(reviewPayload) }));
   await page.goto("/");
   await page.waitForLoadState("networkidle");
+  await waitForAnalyzerHydration(page);
   await page.getByLabel("Résumé text").fill("QC Python");
   await page.getByLabel("Job-description text").fill("quality control Python SQL GMP cell-culture Node.js");
   await page.getByRole("button", { name: "Run Keyword Scan" }).click();
@@ -344,6 +356,7 @@ test("walks, presents, and reports the same result without persistence", async (
   await page.route("**/api/v2/analyze", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(reviewPayload) }));
   await page.goto("/");
   await page.waitForLoadState("networkidle");
+  await waitForAnalyzerHydration(page);
   await page.getByLabel("Résumé text").fill("QC Python");
   await page.getByLabel("Job-description text").fill("quality control Python SQL GMP");
   await page.getByRole("button", { name: "Run Keyword Scan" }).click();
