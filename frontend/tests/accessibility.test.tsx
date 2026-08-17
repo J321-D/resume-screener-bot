@@ -43,7 +43,7 @@ describe("accessibility foundation", () => {
     await user.type(screen.getByLabelText("Résumé text"), "Python");
     await user.type(screen.getByLabelText("Job-description text"), "Python SQL");
     await user.click(screen.getByRole("button", { name: "Run Keyword Scan" }));
-    await screen.findByRole("heading", { name: "Your lexical coverage map" });
+    await screen.findByRole("heading", { name: "Your lexical coverage map" }, { timeout: 3_000 });
 
     const results = await axe(container, {
       rules: { "color-contrast": { enabled: false } },

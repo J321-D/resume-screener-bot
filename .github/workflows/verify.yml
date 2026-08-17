@@ -51,6 +51,7 @@ jobs:
       - run: pnpm typecheck --pretty false
       - run: pnpm test
       - run: pnpm build
+      - run: pnpm check:bundle
       - run: pnpm exec playwright install --with-deps chromium firefox webkit
       - run: pnpm test:e2e
       - run: pnpm audit --prod
