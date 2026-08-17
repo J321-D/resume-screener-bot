@@ -9,7 +9,7 @@ repository. A requirement has exactly one state:
 - **🟡 Blocked** — implementation or an external write requires an explicit gate.
 
 There is no unclassified “future,” “later,” or “optional” bucket. The current
-development verification inventory is **283 checks**: 133 Python/API, 102 frontend
+development verification inventory is **284 checks**: 133 Python/API, 103 frontend
 unit/accessibility, and 48 Playwright checks.
 
 ## Broad product concepts

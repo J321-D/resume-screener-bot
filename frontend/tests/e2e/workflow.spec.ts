@@ -51,6 +51,10 @@ test("completes a keyboard-accessible pasted-text analysis", async ({ page }) =>
   await expect(page.getByText("26 / 200,000 characters", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Run Keyword Scan" }).click();
   await expect(page.getByRole("heading", { name: "Your lexical coverage map" })).toBeVisible();
+  const waypoints = page.getByRole("navigation", { name: "Result waypoints" });
+  await expect(waypoints).toBeVisible();
+  await waypoints.getByRole("link", { name: "Review" }).click();
+  await expect(page.locator("#review")).toBeInViewport();
   await expect(page.getByRole("img", { name: "66.7% keyword coverage" })).toBeVisible();
   await expect(page.getByLabel("Coverage opportunities").getByText("SQL", { exact: true })).toBeVisible();
 });

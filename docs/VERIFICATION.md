@@ -136,7 +136,7 @@ Before committing deployment configuration or requesting another provider change
   the hosted public release.
 - Follow [DEPLOYMENT.md](DEPLOYMENT.md) for hosted smoke tests and rollback.
 
-The current fresh development verification inventory is **283 automated checks**: 133 Python/API tests, 102
+The current fresh development verification inventory is **284 automated checks**: 133 Python/API tests, 103
 frontend unit/accessibility tests, and 48 Playwright checks across Chromium
 desktop, Firefox desktop, and an iPhone 13 WebKit project. `pnpm check:bundle`
 enforces a 180 KiB gzip budget for production home-route JavaScript. Recalculate this inventory

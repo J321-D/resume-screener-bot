@@ -1,7 +1,7 @@
 # Resume Keyword Screener
 
 [![Version](https://img.shields.io/badge/version-v2.0.0-53E5FF)](https://github.com/J321-D/resume-screener-bot/tree/v2.0.0)
-[![Development verification](https://img.shields.io/badge/development%20verification-283%20checks-34D399)](#verification)
+[![Development verification](https://img.shields.io/badge/development%20verification-284%20checks-34D399)](#verification)
 [![License](https://img.shields.io/badge/license-MIT-A9B3C8)](LICENSE)
 [![Live Demo](https://img.shields.io/badge/demo-live-53E5FF)](https://resume-keyword-screener.vercel.app)
 
@@ -44,7 +44,7 @@ Streamlit may require authentication before displaying it.
 - ◉ Original analysis-core hero with a reduced-motion-safe boot sequence and truthful request timeline
 - ⎔ Deterministic analysis fingerprint, résumé/role category blueprint, and Overview/Standard/Dense result views
 - ◎ Gap Mode, factual Mission Board progress, resolved-state advancement, and session-only finding notes
-- ◫ Result walkthrough/minimap, screen-first Living Report, Showcase Mode, Precision Lab light mode, and factual local performance HUD
+- ◫ Result walkthrough/minimap, sticky result waypoints, screen-first Living Report, Showcase Mode, Precision Lab light mode, and factual local performance HUD
 - 🛡️ No-store analysis responses, bounded inputs, archive safety checks, and Preview noindex controls
 - 🔎 Privacy-bounded Contract v2 with exact matched-term provenance, TRACE,
   Evidence Explorer filters, Machine View, and exact Resume/JD X-Ray over
@@ -531,8 +531,8 @@ The V2.x release is complete and feature-frozen, including the additive FastAPI
 boundary, Next.js frontend, premium responsive interface, review workspace,
 release hardening, and repository operating documentation. The Vercel/Render
 release is public at the Live Demo URL.
-The current integrated development verification inventory is **283 checks**: 133 Python/API
-tests, 102 frontend unit/accessibility tests, and 48 Playwright checks across
+The current integrated development verification inventory is **284 checks**: 133 Python/API
+tests, 103 frontend unit/accessibility tests, and 48 Playwright checks across
 Chromium desktop, Firefox desktop, and an iPhone 13 WebKit project. The
 production home-route JavaScript budget is 180 KiB gzip and is enforced after
 the Next.js build.

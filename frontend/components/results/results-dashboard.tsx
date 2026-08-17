@@ -14,6 +14,7 @@ import { LivingReport } from "./living-report";
 import { EvidenceIntelligence } from "./evidence-intelligence";
 import { DocumentXRay } from "./document-xray";
 import { DiagnosticsExplorer } from "./diagnostics-explorer";
+import { ResultWaypoints } from "./result-waypoints";
 import { SystemTransparency } from "./system-transparency";
 
 interface ResultsDashboardProps {
@@ -238,6 +239,7 @@ export function ResultsDashboard({ result, stale, reporting, reportError, analys
           <span className="scan-complete"><Check size={14} /> Analysis complete</span>
         </div>
       </div>
+      <ResultWaypoints />
       <AnalysisPlayback result={result} reducedMotion={Boolean(reduceMotion)} />
       {stale && (
         <div className="stale-banner" role="status">

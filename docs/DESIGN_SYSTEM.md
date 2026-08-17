@@ -85,6 +85,10 @@ existing regions; it never simulates engine stages. Living Report is a screen-on
 reading view of the same ordered response and does not replace or modify the
 protected PDF. Showcase and Precision Lab are session-only presentation modes.
 The opt-in performance HUD uses local Navigation Timing and returned counts only.
+The compact Result Map remains sticky while reviewing long analyses and links to
+existing Coverage, Terms, Evidence, Review, and Lab landmarks. On narrow screens
+it scrolls horizontally with touch-sized native links instead of compressing or
+duplicating the underlying content; print omits it.
 
 The procedural hero field is a bounded ambient layer, not a primary visualization:
 18 deterministic nodes, a 20 fps ceiling, visibility pausing, capped pixel ratio,

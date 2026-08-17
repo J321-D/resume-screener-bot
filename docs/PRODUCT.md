@@ -47,7 +47,7 @@ It does **not** measure candidate quality, predict applicant-tracking-system dec
 - State-fed résumé/role circuitry and an accessible deterministic category coverage matrix that cross-filters the existing evidence and review views
 - A deterministic result fingerprint, paired résumé/role category blueprint, and session-only Overview/Standard/Dense result presentation
 - An ordered Gap Mode, factual review Mission Board, resolved-item advancement, and session-only finding annotations
-- A guided result walkthrough/system map, screen-only Living Report, Showcase Mode, Precision Lab light mode, and optional local-only performance HUD
+- A guided result walkthrough/system map, sticky result waypoints for long-form navigation, screen-only Living Report, Showcase Mode, Precision Lab light mode, and optional local-only performance HUD
 - A bounded CSS/Canvas analysis-core field and exploded methodology view that explain state and architecture without inventing analysis data
 - Ephemeral Presentation Mode, an explicit Cinematic Demo entry point, continuous analysis-state layout choreography, and interactive Methodology/Privacy system maps
 - Copyable factual result summaries and explicitly selected opportunity terms
