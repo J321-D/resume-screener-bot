@@ -54,9 +54,14 @@ test("inspects canonical documents and synchronizes X-Ray with authoritative TRA
   await page.route("**/api/v2/analyze", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(evidencePayload) }));
   await page.goto("/");
   await page.waitForLoadState("networkidle");
+  await expect(page.locator("html")).toHaveAttribute("data-analysis-state", "idle");
   await page.getByLabel("Résumé text").fill("QC Python");
   await page.getByLabel("Job-description text").fill("quality control Python SQL");
-  await page.getByRole("button", { name: "Run Keyword Scan" }).click();
+  await expect(page.getByText("9 / 200,000 characters", { exact: true })).toBeVisible();
+  await expect(page.getByText("26 / 200,000 characters", { exact: true })).toBeVisible();
+  const runScan = page.getByRole("button", { name: "Run Keyword Scan" });
+  await expect(runScan).toBeEnabled();
+  await runScan.click();
   const resumeDocument = page.getByRole("article", { name: "Résumé canonical text" });
   await expect(resumeDocument).toContainText("QC Python");
   await resumeDocument.getByRole("button", { name: "QC" }).press("Enter");
