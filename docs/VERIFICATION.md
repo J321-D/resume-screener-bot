@@ -32,6 +32,7 @@ pnpm lint
 pnpm typecheck
 pnpm test
 pnpm build
+pnpm check:bundle
 pnpm test:e2e
 pnpm audit --prod
 ```
@@ -135,9 +136,10 @@ Before committing deployment configuration or requesting another provider change
   the hosted public release.
 - Follow [DEPLOYMENT.md](DEPLOYMENT.md) for hosted smoke tests and rollback.
 
-The current fresh inventory is **190 automated checks**: 107 Python/API tests, 53
-frontend unit/accessibility tests, and 30 Playwright checks across Chromium
-desktop, Firefox desktop, and WebKit mobile projects. Recalculate this inventory
+The current fresh development verification inventory is **283 automated checks**: 133 Python/API tests, 102
+frontend unit/accessibility tests, and 48 Playwright checks across Chromium
+desktop, Firefox desktop, and an iPhone 13 WebKit project. `pnpm check:bundle`
+enforces a 180 KiB gzip budget for production home-route JavaScript. Recalculate this inventory
 whenever suites change rather than preserving a number for presentation
 continuity.
 
@@ -163,6 +165,17 @@ becomes a failing/security condition.
   errors, export, or demo state across tabs.
 - Verify temporary download URLs are revoked and global keyboard listeners are
   removed when their component closes/unmounts.
+- Run two successful Contract v2 analyses with one synthetic job description and
+  revised synthetic résumé text. Confirm Resume Lab retains two runs, compares
+  by `comparison_key`, focuses the selected evidence, writes no browser storage,
+  and disappears after refresh. Repeat at the five-run/three-variant bounds.
+- For each Contract v2 source document, concatenate ordered block text and prove
+  it exactly equals the canonical parser output; verify blocks are contiguous,
+  preserve Unicode/empty lines, and map cross-block evidence by stable ID.
+- Inspect Document X-Ray at 1440×900 and 390×844. Verify selectable canonical
+  text, represented-only overlays, separate gaps, source switching, repeated
+  occurrence navigation, shared TRACE selection, no horizontal overflow, and no
+  console errors. Repeat with reduced motion, forced colors, 200% zoom, and print.
 
 For an already authorized deployed smoke only:
 

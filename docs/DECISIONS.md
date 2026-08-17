@@ -198,8 +198,10 @@ separate billing decision.
 **Decision:** Use semantic HTML, CSS/SVG, native browser behavior, the existing
 small motion layer, and shared visual/motion tokens. Scores are exposed at their
 final value immediately; only supporting surfaces and the ring arc may settle.
-Idle ambient loops, canvas UI, video backgrounds, fake telemetry, fake progress,
-fullscreen presentation mode, sound, and haptics are excluded.
+Low-intensity ambient motion is confined to the original analysis core and reacts
+only to real page state. General decorative loops, canvas UI, video backgrounds,
+fake telemetry, fake internal progress, fullscreen presentation mode, sound, and
+haptics are excluded.
 
 **Reason:** The product should feel advanced through real state, spatial
 continuity, accessibility, and precision—not decoration or fabricated engine
@@ -228,8 +230,8 @@ runtime memory erasure.
 
 **Decision:** Mark analysis/report responses `no-store`, keep public static pages
 cacheable, use the Production host as canonical, and emit noindex controls for
-Preview builds. Keep `/api/v1` stable across product UI versions; a future API v2
-requires an incompatible contract.
+Preview builds. Keep `/api/v1` stable across product UI versions; introduce new
+evidence only through the opt-in `/api/v2` envelope.
 
 **Reason:** User-derived responses should not be cached, Preview copies should not
 compete in search, and product marketing versions do not justify transport churn.
@@ -238,6 +240,38 @@ compete in search, and product marketing versions do not justify transport churn
 on Preview/Production. FastAPI OpenAPI remains intentionally public for
 transparency and contract inspection; it is not advertised as a supported
 third-party service.
+
+## ADR-021: Add privacy-bounded evidence without echoing documents (superseded in part)
+
+**Decision:** Add opt-in `/api/v2/analyze` as an envelope around the unchanged v1
+result. Return deterministic finding/evidence identity, exact half-open Unicode
+offsets, matched surface terms, source kind, and explicit unknown metadata. Do
+not return full canonical text or full-document hashes.
+
+**Reason:** Evidence-level provenance and comparison keys are useful, but
+returning complete extracted documents would materially expand sensitive-data
+exposure. Request-local document labels disclose less while remaining stable for
+identical ordered Contract 2.0 requests.
+
+**Trade-offs:** At this stage full uploaded-document X-Ray remained blocked because a browser
+cannot apply server offsets without the identical canonical text. Sections,
+formatting, severity, and diagnostics remain explicitly unknown rather than
+being inferred.
+
+## ADR-022: Adopt Contract v2 through one additive frontend view model
+
+**Decision:** Request `/api/v2/analyze`, validate the envelope at runtime, and
+adapt the unchanged carried v1 result plus evidence into one presentation model.
+Use finding IDs—not term indexes—for v2 review/evidence links. Preserve an
+explicit evidence-unavailable fallback when a valid v1 response is received.
+
+**Reason:** TRACE, provenance filtering, and Machine View need authoritative
+server fields and stable identity. A single adapter prevents components from
+reinterpreting scores or reconstructing source content.
+
+**Trade-offs:** The initial browser rendered exact matched surfaces and offsets
+only. ADR-027 later approved exact canonical document blocks; section, formatting,
+severity, persistence, and the v1 report endpoint remain unchanged.
 
 ## ADR-019: Focused supply-chain and operational hardening
 
@@ -314,3 +348,99 @@ scope extension after the verified product program is complete.
 
 **Trade-offs:** A rejected concept reopens only with concrete new evidence or a
 separately approved architecture/provider/data decision.
+
+## ADR-024: Bound résumé-variant comparison to current React memory
+
+**Decision:** Resume Lab creates a run only from a successful analysis response,
+retains at most five runs and three résumé identities for one job-description
+identity, and relates findings only through Contract v2 comparison keys. A new
+job description starts a new Lab session. Review decisions and notes are per-run
+and do not propagate. Clear, New analysis, demo clear, refresh, or tab close
+removes all retained Lab state. No browser or server persistence is introduced.
+
+**Reason:** This provides truthful before/after and variant comparison while
+preserving the stateless privacy architecture and deterministic engine contract.
+
+**Trade-offs:** History cannot survive refresh or tab close; file identities are
+opaque non-cryptographic UI keys rather than proof of document identity; only
+same-job, same-mode Contract v2 runs are comparable; full-document X-Ray and PDF
+comparison remain unavailable.
+
+**Alternatives rejected:** localStorage, IndexedDB, URL serialization, server
+history, automatic decision transfer, text-only finding matching, unbounded run
+retention, and causal or hiring-probability claims.
+
+## ADR-025: Keep résumé revision explicit and temporary
+
+**Decision:** The Revision Workspace edits a text copy in current React memory,
+never the original upload. It performs no autosave or autosubmit. Run Revision
+uses the existing v2 endpoint, creates a Lab run only after success, records the
+`temporary_text_revision` source type, and compares through the existing
+Contract v2 model. Upload-only analyses do not receive their canonical text back;
+the revision editor starts blank.
+
+**Reason:** This completes the analyze → inspect → revise → rerun → compare loop
+without persistence, AI rewriting, a second comparison engine, or broader source
+disclosure.
+
+**Trade-offs:** Refresh, reset, clear, or tab close destroys application
+references without promising secure erasure. Users must deliberately paste a
+text revision for upload-only runs. The successful temporary text becomes the
+active input representation but never modifies or generates a PDF/DOCX file.
+
+## ADR-026: Gate full-document X-Ray and semantic sections (superseded in part)
+
+**Decision:** Do not return full canonical documents or infer sections yet. The
+three disclosure models and parser limitations are recorded in
+[XRAY_PRIVACY_AND_SECTIONS.md](XRAY_PRIVACY_AND_SECTIONS.md).
+
+**Reason:** Every readable full-document option materially expands sensitive
+content in browser memory, while the existing parsers flatten text and cannot
+authoritatively identify semantic sections.
+
+**Trade-offs:** TRACE remains limited to exact returned matched surfaces until a
+separate privacy decision and parser-contract review are approved.
+
+## ADR-027: Approve request-scoped canonical blocks for Document X-Ray
+
+**Decision:** Add contiguous deterministic document-view blocks to Contract v2
+and render them as escaped text nodes in Resume/JD X-Ray. Blocks preserve every
+canonical Unicode code point and map represented evidence by stable IDs and exact
+global offsets. Missing findings remain a separate gap layer. No document text is
+persisted, logged, analyzed by telemetry, or placed in URLs/browser storage.
+
+**Reason:** Exact full-document inspection and scanner/TRACE synchronization are
+valuable only when the server provides the authoritative canonical representation.
+The user explicitly approved the documented browser-memory disclosure after the
+three alternatives were reviewed.
+
+**Trade-offs:** The response now contains sensitive canonical text and increases
+payload/browser-memory exposure; `no-store` is not secure erasure and does not
+prevent user copies, screenshots, extensions, or developer tools. Semantic
+sections, formatting diagnostics, severity, and invented provenance remain
+unavailable because the parsers and engine do not produce them. PDF semantics
+remain protected and unchanged.
+
+## ADR-028: Add conservative sections and factual diagnostics
+
+**Decision:** Preserve canonical extraction and add only exact semantic sections
+from explicit DOCX heading styles, emphasized PDF text lines, or conservative
+standalone known headings. Return stable section ranges and evidence references
+through Contract v2. Evaluate a small factual diagnostic inventory covering text
+extraction, section availability/repetition, the existing strict 30% boundary,
+and returned lexical opportunities. Redesign only PDF presentation and provide a
+separate client-side print view for comparable Resume Lab runs.
+
+**Reason:** These observations are mechanically supportable and useful for X-Ray,
+TRACE, and review without changing analysis semantics or presenting repository
+tests as résumé checks.
+
+**Trade-offs:** The English-first heading vocabulary intentionally misses
+unconventional structure. PDF/DOCX style signals must map exactly to canonical
+text; otherwise the result is unavailable. Visual formatting quality, section
+hierarchy, requirement severity, contact readiness, and hiring readiness remain
+unknown. Comparison print is not a server PDF and disappears with session state.
+
+**Alternatives rejected:** Frontend heading guesses; approximate section spans;
+confidence scores without a calibrated model; subjective formatting advice;
+serializing client comparison state into the protected report endpoint.

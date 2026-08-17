@@ -1,7 +1,7 @@
 # Resume Keyword Screener
 
 [![Version](https://img.shields.io/badge/version-v2.0.0-53E5FF)](https://github.com/J321-D/resume-screener-bot/tree/v2.0.0)
-[![Verification](https://img.shields.io/badge/checks-190%20passing-34D399)](#verification)
+[![Development verification](https://img.shields.io/badge/development%20verification-283%20checks-34D399)](#verification)
 [![License](https://img.shields.io/badge/license-MIT-A9B3C8)](LICENSE)
 [![Live Demo](https://img.shields.io/badge/demo-live-53E5FF)](https://resume-keyword-screener.vercel.app)
 
@@ -40,7 +40,22 @@ Streamlit may require authentication before displaying it.
 - ✅ Robust upload validation and user-friendly errors
 - 📉 Anonymous aggregate page analytics with no document or form content
 - 🧭 Responsive navigation, synthetic demo, searchable Help, and resilient timeout/retry/cancel states
+- ⌨️ Command palette, keyboard-first review controls, and evidence-focused category/term inspection
+- ◉ Original analysis-core hero with a reduced-motion-safe boot sequence and truthful request timeline
+- ⎔ Deterministic analysis fingerprint, résumé/role category blueprint, and Overview/Standard/Dense result views
+- ◎ Gap Mode, factual Mission Board progress, resolved-state advancement, and session-only finding notes
+- ◫ Result walkthrough/minimap, screen-first Living Report, Showcase Mode, Precision Lab light mode, and factual local performance HUD
 - 🛡️ No-store analysis responses, bounded inputs, archive safety checks, and Preview noindex controls
+- 🔎 Privacy-bounded Contract v2 with exact matched-term provenance, TRACE,
+  Evidence Explorer filters, Machine View, and exact Resume/JD X-Ray over
+  request-scoped canonical parser text; v1 remains backward compatible
+- 🧭 Conservative semantic sections and a factual per-request diagnostics rail
+  without visual-format, severity, readiness, or hiring claims
+- ⚗️ Session-only Resume Lab for bounded résumé-variant and before/after
+  comparison against one role, with a hangar, timeline, matrix, Diff Reactor,
+  per-run review state, and no durable browser or server history
+- ✎ Temporary Revision Workspace for editing a browser-memory-only text copy,
+  explicitly rerunning it, and comparing the returned result with a chosen baseline
 
 ### Version 2 additions
 
@@ -49,6 +64,8 @@ Streamlit may require authentication before displaying it.
   **Already represented**, **Not relevant**, and **Review later** statuses.
 - Reviewed/remaining progress, factual status totals, filters, and term search.
 - Ordered Markdown checklist export for opportunities marked Add to résumé.
+- Static Unicode precision-dossier PDF plus a separate print-only Resume Lab
+  comparison record assembled from current in-memory runs.
 - Automatic decision clearing when changed inputs make the current analysis stale.
 - Copyable result summaries and explicitly selected opportunity terms.
 - Confirmed New analysis reset, print-friendly output, and stable error/404 recovery.
@@ -451,6 +468,10 @@ Résumés often contain sensitive personal information.
   processing. The application does not intentionally persist that content;
   framework multipart handling may spool bounded larger uploads to temporary
   storage and closes upload resources when the request completes.
+- Contract v2 returns exact canonical parser text to the requesting browser for
+  Document X-Ray. It is not anonymized and can be copied or captured by the
+  user; application code does not place it in analytics, logs, URLs, or browser
+  storage, and the response is marked `no-store`.
 - The Version 2 frontend is configured to use Vercel Web Analytics for anonymous aggregate page views,
   referrers, approximate region, browser, operating system, and device category.
   Analytics receives only the exact public origin and fixed page path; query strings, document
@@ -510,9 +531,11 @@ The V2.x release is complete and feature-frozen, including the additive FastAPI
 boundary, Next.js frontend, premium responsive interface, review workspace,
 release hardening, and repository operating documentation. The Vercel/Render
 release is public at the Live Demo URL.
-The current integrated verification inventory is **190 checks**: 107 Python/API
-tests, 53 frontend unit/accessibility tests, and 30 Playwright checks across
-Chromium desktop, Firefox desktop, and WebKit mobile projects.
+The current integrated development verification inventory is **283 checks**: 133 Python/API
+tests, 102 frontend unit/accessibility tests, and 48 Playwright checks across
+Chromium desktop, Firefox desktop, and an iPhone 13 WebKit project. The
+production home-route JavaScript budget is 180 KiB gzip and is enforced after
+the Next.js build.
 
 The full historical product program—including visual polish, navigation, review
 ergonomics, assistance/feedback, privacy, security, resilience, public assets,

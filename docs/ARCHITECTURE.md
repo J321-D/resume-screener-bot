@@ -54,17 +54,99 @@ loop, and every sensitive response—including public errors—uses
 - `app/`: routes, metadata, and global visual system
 - `components/analysis/`: inputs, upload controls, readiness, and progress
 - `components/results/`: coverage, ordered findings, categories, explanations, and export
+- `components/results/analysis-fingerprint.tsx`: deterministic result signature and paired returned category-count blueprint
+- `components/review/`: ephemeral human decisions, filtering, keyboard review, and checklist export
+- `components/lab/`: bounded in-memory analysis runs and one shared deterministic comparison model
 - `components/help/`: searchable, categorized, deep-linked assistance and glossary
-- `components/shell/`: navigation and hero
+- `components/shell/`: navigation, contextual command palette, and state-reactive analysis-core hero
 - `components/analytics/`: production page-analytics mounting and the fixed-path
   privacy filter, with no custom events
 - `lib/`: API client, runtime contract validation, and presentation formatting
+
+The current client consumes `/api/v2/analyze` through a Zod-validated additive
+view model. The
+[Analysis Contract v2](ANALYSIS_CONTRACT_V2.md) exposes the unchanged v1 result
+plus privacy-bounded finding provenance, exact canonical-text offsets, matched
+surfaces, explicit unknown states, and contiguous canonical document-view blocks.
+Those blocks support exact full upload-derived Document X-Ray. A conservative
+additive section model maps DOCX heading styles, emphasized PDF lines, or bounded
+standalone known headings to exact canonical ranges; ambiguous section and all
+visual-formatting metadata remain explicitly unavailable.
+Stable finding IDs connect term selection, review decisions, Evidence Explorer
+filters, TRACE, and Machine View without client-side score calculation. A v1
+response remains an explicit evidence-unavailable compatibility fallback.
 
 The client owns presentation state only. Stale results remain visible but cannot be exported as if they represented changed inputs.
 Request identity, AbortController cleanup, and submitted-input snapshots prevent
 late requests from overwriting newer state. No document or result data is placed
 in localStorage, sessionStorage, URLs, or server-rendered route payloads, so tabs
 remain independent by default.
+
+The request timeline exposes only phases the browser can truthfully observe:
+input validation, waiting for the deterministic API response, and assembled
+results. It does not pretend to stream internal parser/scoring stages. Category
+and term focus filters the already returned ordered arrays and never recalculates
+coverage or mutates the transport response.
+
+The analysis fingerprint hashes a canonical presentation string containing only
+returned coverage/category values. Its geometry and résumé/role blueprint use
+those same counts; they add no score, weight, severity, or inference. Overview,
+Standard, and Dense modes change only client-side presentation density and are
+not persisted.
+
+Gap Mode and the Mission Board reuse the same ordered opportunity array and
+review-decision map as the standard review workspace. Final local decisions
+(`add`, `represented`, or `not_relevant`) remove an item from the unresolved
+queue; `later` remains unresolved. Notes are keyed to the current component
+instance only and clear on reset, stale-result remount, refresh, or New analysis.
+Neither review state nor notes mutate the API result or deterministic coverage.
+
+Resume Lab retains at most five successful runs and three distinct résumé input
+identities for one job-description identity. A run is created only after a
+successful analysis response; validation and API failures create nothing. A
+successful run for a different job description replaces the prior Lab session.
+Review decisions and notes remain keyed to their individual run and never copy
+forward automatically. New analysis, Clear Resume Lab, demo clearing, refresh,
+and tab close release the retained React references. Route navigation within the
+single-page app does not serialize them. No run, source input, comparison,
+scratchpad, file, or blob is written to localStorage, sessionStorage, IndexedDB,
+a URL, a service worker, analytics, or a server persistence endpoint. Client
+input identities are non-cryptographic opaque UI keys—not security or
+anonymization guarantees—and mirror the established manual-job-text precedence.
+
+All comparison surfaces consume one derived model keyed by Contract v2
+`comparison_key`. They compare existing scores, counts, evidence totals, and
+finding statuses only. Runs with different job identities, modes, or unavailable
+v2 evidence are explicitly not comparable. Selecting a difference restores that
+run's existing result and authoritative finding inspector; it never recomputes
+or approximates evidence. Comparison remains client-derived and may be printed
+from the factual Diff Reactor record; it is never submitted to `/api/v1/report`
+or represented as the server-generated Unicode PDF.
+
+The Temporary Revision Workspace is a child of this same bounded lifecycle. It
+holds only an editable React-state text copy, never writes browser storage, and
+submits through the existing `/api/v2/analyze` request only after Run Revision.
+Successful revisions receive the explicit `temporary_text_revision` source type
+and reuse the selected baseline, comparison model, evidence explorer, TRACE,
+timeline, and Living Report. Uploaded source text is not echoed into the editor;
+an upload-only run starts with a blank revision copy.
+
+Full-document and section-model alternatives are analyzed in
+[XRAY_PRIVACY_AND_SECTIONS.md](XRAY_PRIVACY_AND_SECTIONS.md). The approved block
+model reconstructs only server-returned canonical text and maps exact evidence.
+Sections and diagnostics are returned by the server; no client surface infers
+layout, missing-term locations, readiness, severity, or visual-format quality.
+
+The result walkthrough, minimap, Living Report, Showcase/Precision Lab modes,
+and engineering/performance panel are presentation-only projections of the same
+typed response. Walkthrough stages navigate real DOM regions rather than claiming
+streamed engine progress. The performance HUD reads browser Navigation Timing and
+returned counts locally; it creates no analytics event or persistent record.
+
+The hero Canvas field is decorative and bounded to 18 deterministic nodes at a
+maximum 20 frames per second with capped device-pixel ratio. It pauses when not
+visible, renders once for reduced motion, and carries no document or analysis data.
+The exploded Methodology core is a static architecture explanation.
 
 ## Data flow
 
@@ -76,9 +158,9 @@ remain independent by default.
 6. The client renders those values without recalculation or reordering.
 7. PDF export sends the current inputs to `/api/v1/report`; the server recomputes and generates the report.
 
-`/api/v1` is the stable transport contract. Product/UI Version 2 does not imply
-an API v2; a new API version is reserved for an intentionally incompatible
-request or response contract.
+`/api/v1` remains backward compatible for existing consumers and PDF reporting.
+The Next.js analysis workflow uses `/api/v2/analyze`; its `analysis` member is
+the complete unchanged v1 response inside a versioned evidence envelope.
 
 ## Why scoring stays server-side
 
@@ -90,7 +172,12 @@ Multiple uploaded résumés and optional manual résumé text form one union for
 
 ## PDF generation
 
-The server reuses analysis output and the protected reporting engine. Reports preserve ordered sections and term lists, support Unicode through a dependency-provided licensed font, and return PDF bytes. The browser only initiates and downloads the response.
+The server reuses analysis output and the protected reporting engine. Reports
+preserve ordered analytical content and term limits, support Unicode through a
+dependency-provided licensed font, and render a static precision-dossier frame
+with an optional conservative document/section summary. Current-analysis PDF and
+session-only comparison print are separate actions; the browser never treats
+comparison state as server-authoritative report input.
 
 ## Testing layers
 

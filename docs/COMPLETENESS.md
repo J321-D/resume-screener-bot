@@ -9,8 +9,8 @@ repository. A requirement has exactly one state:
 - **🟡 Blocked** — implementation or an external write requires an explicit gate.
 
 There is no unclassified “future,” “later,” or “optional” bucket. The current
-automated inventory is **190 checks**: 107 Python/API, 53 frontend
-unit/accessibility, and 30 Playwright checks.
+development verification inventory is **283 checks**: 133 Python/API, 102 frontend
+unit/accessibility, and 48 Playwright checks.
 
 ## Broad product concepts
 
@@ -18,13 +18,13 @@ unit/accessibility, and 30 Playwright checks.
 | --- | --- | --- |
 | Deterministic-product identity | ✅ Implemented | Skills-focused and Full lexical modes use the protected Python engine; UI, Methodology, Help, PDF, and API labels say lexical coverage rather than ATS prediction or candidate quality. |
 | Full productization | ✅ Implemented | Public Next.js application, versioned FastAPI boundary, health/error contracts, reports, documentation, CI, deployment runbook, rollback, and legacy interface. |
-| Futuristic premium presentation | ✅ Implemented | Semantic visual/motion tokens, restrained technical surfaces, deliberate hierarchy, current desktop/mobile captures, no fake metrics, no continuous ambient animation. |
+| Futuristic premium presentation | ✅ Implemented | Original five-segment analysis core, CSS-first boot, bounded procedural Canvas field, state-fed résumé/role traces, deterministic result fingerprint, paired category blueprint, three information-density modes, result walkthrough/minimap, exploded methodology view, Living Report, Showcase/Precision Lab modes, restrained ambient motion, deliberate hierarchy, and no fake metrics or copyrighted/cinematic imitation. |
 | Unified design system | ✅ Implemented | `frontend/app/globals.css` and `docs/DESIGN_SYSTEM.md` centralize type, spacing, radii, surfaces, elevation, focus, interaction, motion, forced-colors, print, and responsive rules. |
-| Power-user utilities | ✅ Implemented | Demo, keyboard-native controls, copy summary/terms, review search/filter/status/reset, Markdown checklist, PDF, print, retry, cancel, rerun, and New analysis. |
-| Human-review philosophy | ✅ Implemented | Review decisions are user-authored, session-local, preserve engine order, never generate résumé copy, and clear when inputs become stale. |
+| Power-user utilities | ✅ Implemented | Contextual command palette, keyboard review shortcuts, evidence/category focus, demo, copy summary/terms, review search/filter/status/reset, Markdown checklist, PDF, print, retry, cancel, rerun, and New analysis. |
+| Human-review philosophy | ✅ Implemented | Review decisions are user-authored, session-local, preserve engine order, never generate résumé copy, and clear when inputs become stale. Gap Mode advances through unresolved items while Mission Board progress and notes remain explicitly separate from analysis results. |
 | Privacy-first statelessness | ✅ Implemented | No accounts/database/application persistence; no-store API responses; no document/form analytics; bounded request-scoped upload resources are closed; provider metadata risk is disclosed. |
 | User assistance, Q&A, and feedback | ✅ Implemented | Searchable categorized Help, deep links, contextual explanations, troubleshooting, glossary, synthetic examples, and transparent external GitHub feedback path with PII warning. |
-| Recruiter/portfolio demonstration | ✅ Implemented | Synthetic demo, polished public screenshots, architecture asset, live/legacy links, badges, methodology, privacy, deterministic limitations, and repository metadata. |
+| Recruiter/portfolio demonstration | ✅ Implemented | Synthetic and Cinematic Demo entry points, ephemeral Showcase Mode, guided result map, screen-first Living Report, polished public screenshots, interactive architecture/privacy explainers, live/legacy links, badges, methodology, deterministic limitations, and repository metadata. |
 | Resilience | ✅ Implemented | Central timeout constants, slow-service state, cancellation, retry, stale/race guards, invalid-response handling, report-specific recovery, cold-start guidance, and repeated-use tests. |
 | Security and privacy | ✅ Implemented | Content/signature validation, size/archive/extraction/body bounds, private structured errors, exact-origin CORS, no-store, security headers, secret scanning, clean production dependency audits. |
 | Operational maturity | ✅ Implemented | Runtime pins, CI, weekly dependency review, smoke script, provider topology, protected Preview, rollback target, observation checklist, and explicit deployment gates. |
@@ -76,7 +76,21 @@ unit/accessibility, and 30 Playwright checks.
 | Upload/paste/mode/review/rerun/export troubleshooting | ✅ Implemented | Help covers task flows, invalid documents, cold starts, network/timeouts/rate status, report recovery, stale state, and accessibility. |
 | Canonical synthetic examples | ✅ Implemented | Demo fixtures and test fixtures contain no user data. |
 | Four review statuses and reviewed/remaining progress | ✅ Implemented | Session-local review workspace with factual totals. |
+| Gap Mode, Mission Board, and local annotations | ✅ Implemented | One-at-a-time unresolved review preserves engine order; final decisions advance the queue; Review later remains unresolved; notes and workflow progress live only in React memory and never alter coverage. |
 | Review filters, search, reset, stale clearing, and checklist export | ✅ Implemented | Unit/E2E coverage confirms order, content, and lifecycle. |
+| Category/term focus and evidence classification | ✅ Implemented | Focus narrows existing ordered results and review rows without changing coverage or decisions; labels distinguish exact lexical from API-returned normalized matches. |
+| Deterministic coverage matrix | ✅ Implemented | Returned category matched/total/score fields render as an accessible table and cross-filter the existing evidence view without client scoring. |
+| Analysis Contract v2 | ✅ Implemented | `/api/v2/analyze` carries the unchanged v1 result plus deterministic finding/evidence IDs, exact Unicode code-point offsets, matched surfaces, source identity, and explicit unknown metadata. |
+| Exact matched-surface provenance | ✅ Implemented | Contract tests prove every returned `[start, end)` span reconstructs repeated, punctuated, case-varied, and Unicode source occurrences. |
+| Evidence Explorer, TRACE, and Machine View | ✅ Implemented | The frontend validates Contract v2, preserves the carried v1 result unchanged, filters authoritative findings by status/category/source/method/review state, and renders stable IDs, methods, exact surfaces, sources, offsets, and explicit unavailable metadata. |
+| Stable evidence/review cross-filtering | ✅ Implemented | Missing-term review rows and Gap Mode use deterministic finding IDs when v2 is present; legacy v1 fallback retains index identity. Decisions remain React-memory only and never alter coverage. |
+| Resume Lab and before/after comparison | ✅ Implemented | A single derived model relates same-role, same-mode Contract v2 findings by comparison key. The UI bounds current-memory retention to five successful runs and three résumé identities, keeps decisions/notes per run, renders a hangar, timeline, matrix, Diff Reactor, and screen-only record, and clears on reset/refresh/tab close. |
+| Temporary Revision Workspace | ✅ Implemented | A browser-memory-only text copy never autosaves or autosubmits, cannot modify the original upload, creates a typed run only after successful explicit submission, and reuses the selected baseline plus the authoritative comparison/evidence model. |
+| Full document X-Ray / scanner lens | ✅ Implemented | Explicitly approved contiguous Contract v2 blocks reconstruct canonical parser text exactly; represented evidence overlays use global offsets, missing findings stay separate, and selection synchronizes with TRACE without persistence. |
+| Authoritative semantic sections / disassembly | ✅ Implemented | Conservative DOCX/PDF/text heading evidence maps to exact canonical ranges with stable IDs; ambiguous, unknown, unmappable, and cross-section cases remain explicitly unavailable. |
+| Durable comparison/browser history | ❌ Rejected | Accounts, browser storage, or server persistence would require a new retention, deletion, identity, and threat model. Resume Lab deliberately provides only bounded current-memory comparison. |
+| Factual deterministic diagnostics | ✅ Implemented | The v2 response evaluates text extraction, section availability/repetition, the existing strict 30% boundary, and returned lexical opportunities; the UI reports the exact request rule count and never the development inventory. |
+| Requirement severity and readiness scoring | ❌ Rejected | The deterministic engine does not classify hard versus preferred requirements or inspect contact/format readiness; UI weighting would invent unsupported authority. |
 | Non-persistent “Was this helpful?” | ❌ Rejected | A vote that reaches nobody is misleading and provides no product value. |
 | Feedback/contact path | ✅ Implemented | Help links to GitHub Issues and explicitly discloses external storage/policies and forbids document/PII submission. |
 | Stored feedback, submitted Q&A, comments, voting, accounts, histories, or notifications | ❌ Rejected | Requires identity, persistence, moderation, retention/deletion, abuse controls, and consent infrastructure. |
@@ -87,7 +101,7 @@ unit/accessibility, and 30 Playwright checks.
 | Requirement | State | Evidence or terminal reason |
 | --- | --- | --- |
 | Premium Apple/Tesla/technical direction without imitation | ✅ Implemented | Restrained dark instrument aesthetic, one accent system, layered surfaces, precise typography, no copied branding or excessive neon. |
-| Coherent motion and state continuity | ✅ Implemented | Shared duration/easing tokens, upload/action/result/review/menu transitions, exact scores available immediately, no interaction delay. |
+| Coherent motion and state continuity | ✅ Implemented | Shared tokens, hero boot/core, truthful request timeline, real state-reactive depth, upload/action/result/review/menu transitions, exact scores immediately available, and no interaction delay. |
 | Reduced motion | ✅ Implemented | CSS suppression and Playwright/unit evidence; no count-up or misleading animated score. |
 | High contrast and forced colors | ✅ Implemented | Semantic native controls, visible focus, forced-colors rules, automated browser coverage. |
 | Keyboard/screen-reader semantics | ✅ Implemented | Landmarks, headings, labels, live regions, disclosure semantics, focus transfer/restoration, Escape behavior, axe tests. |
@@ -95,9 +109,12 @@ unit/accessibility, and 30 Playwright checks.
 | Cross-browser policy/evidence | ✅ Implemented | Chromium desktop, Firefox desktop, and iPhone 13 WebKit automation; evergreen Edge covered by Chromium compatibility target, not falsely claimed as separate manual evidence. |
 | English-first unusual Unicode behavior | ✅ Implemented | Unicode-safe transport/PDF tests for accented Latin, Chinese, Japanese, Korean, mixed technical terms; no unsupported localization claim. |
 | Print/export quality | ✅ Implemented | Native print action/static print CSS, Markdown checklist, copy utilities, Unicode PDF, clean report ordering. |
+| Technical-dossier PDF and comparison export | ✅ Implemented | The server PDF adds static hierarchy, frame, footer, and conservative section summary while preserving ordered analytical content and limits; Resume Lab provides a separate print-only factual comparison record. |
 | Template downloads | ❌ Rejected | Static templates would imply résumé-authoring guidance outside deterministic analysis; no broken placeholder control remains. |
 | Theme switcher | ❌ Rejected | Maintaining two complete accessible visual systems is disproportionate; forced-colors and user motion preferences remain first-class. |
 | Additional animation dependency | ❌ Rejected | CSS/native capabilities plus the already established small Framer Motion layer meet the motion system; another bundle/runtime dependency has no justified capability. |
+| Constellation/network visualization | ❌ Rejected | The existing category and evidence views are more legible and actionable; a decorative node graph would add rendering cost without new authoritative information. |
+| Pointer-follow/magnetic effects and scroll hijacking | ❌ Rejected | Pointer-dependent depth adds battery/compositing cost and no task value; restrained hover/focus and ambient core motion preserve performance and mobile parity. |
 
 ## API, privacy, security, and reliability
 
@@ -109,13 +126,13 @@ unit/accessibility, and 30 Playwright checks.
 | Cancellation, retry, repeated submission, and race protection | ✅ Implemented | AbortControllers, request IDs/snapshots, stale export blocking, late-response guards, repeated-lifecycle E2E. |
 | Offline/cold-start/unavailable behavior | ✅ Implemented | Neutral slow-service guidance, retained inputs, retry/cancel, 429/502/503/504/network messages. |
 | No raw document logging or analytics | ✅ Implemented | Application code logs neither input nor extracted terms; analytics accepts only fixed public paths and receives no form/document values. |
-| Request privacy lifecycle | ✅ Implemented | No DB/storage APIs; no local/session storage; no document URLs; upload and download object URLs/listeners are revoked or removed. |
+| Request privacy lifecycle | ✅ Implemented | No DB/storage APIs; no local/session storage; no document URLs; upload and download object URLs/listeners are revoked or removed. Resume Lab retains bounded result models only in current React memory and explicitly clears their references without claiming secure erasure. |
 | Exact CORS | ✅ Implemented | Fail-closed configuration validates exact HTTP(S) origins; production and protected Preview only; wildcard denied. |
 | Security headers | ✅ Implemented | Anti-sniffing, frame denial, referrer and permissions policy; canonical/noindex boundaries verified. |
 | CSP | ❌ Rejected | No unsafe user HTML is rendered; a nonce/hash rollout risks Next.js/Analytics breakage without a concrete injection path. |
 | Application IP rate limiter | ❌ Rejected | Privacy-sensitive per-instance state would not reliably protect a horizontally scaled/free service; strict resource bounds already exist. |
 | Provider rate limiting | 🟡 Blocked | Requires provider configuration and possibly billing/privacy approval; no measured abuse currently justifies it. |
-| Python dependency hardening | ✅ Implemented | FastAPI 0.141.1 and python-multipart 0.0.32; unused OpenAI/dotenv removed; clean install, 107 tests, `pip check`, and OSV audit pass. |
+| Python dependency hardening | ✅ Implemented | FastAPI 0.141.1 and python-multipart 0.0.32; unused OpenAI/dotenv removed; clean install, 118 tests, `pip check`, and OSV audit pass. |
 | Frontend dependency security | ✅ Implemented | Locked pnpm graph and `pnpm audit --prod` with no known production advisories. |
 | Dedicated persistent Python scanner | ❌ Rejected | Adding another dependency/service is unnecessary for this release; a clean resolved-environment OSV query supplies current evidence. Reopen only if the existing check cannot cover an identified risk. |
 

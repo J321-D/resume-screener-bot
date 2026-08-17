@@ -10,7 +10,11 @@ presented as promises. Evidence links point to the authoritative
 - [x] Preserve the deterministic Python engine and Full lexical compatibility.
 - [x] Add the versioned FastAPI boundary and typed browser contract.
 - [x] Add the responsive Next.js workflow, premium technical design system, and
-  restrained motion language.
+  restrained motion language, original analysis core, truthful request timeline,
+  state-fed document circuitry, deterministic coverage matrix, evidence focus,
+  deterministic analysis fingerprint, paired résumé/role blueprint, three result-density modes,
+  contextual command palette, keyboard-first review controls, guided result system map,
+  Living Report, Showcase Mode, Precision Lab light mode, and factual local performance HUD.
 - [x] Add Skills-focused and Full lexical workflows, upload/paste precedence,
   ordered results, review decisions, search/filter, copy, Markdown, PDF, and
   print utilities.
@@ -27,6 +31,20 @@ presented as promises. Evidence links point to the authoritative
   the Streamlit v1.1.2 legacy fallback, and document rollback evidence.
 - [x] Add least-privilege CI, weekly dependency review, production smoke tooling,
   security policy, repository operating documentation, and public portfolio assets.
+- [x] Adopt Contract v2 in the frontend and add stable finding-ID review links,
+  Evidence Explorer filtering, TRACE/provenance inspection, Machine View, and
+  Living Report evidence disclosure without changing PDF report semantics.
+- [x] Add privacy-bounded Resume Lab comparison: five successful in-memory runs,
+  three résumé variants for one job description, per-run review state, a hangar,
+  timeline, matrix, Diff Reactor, and explicit destruction controls.
+- [x] Add a Temporary Revision Workspace with explicit submission, truthful
+  source typing, selected-baseline comparison, and no browser/server persistence.
+- [x] Add explicitly approved canonical Contract v2 blocks plus exact Resume/JD
+  X-Ray, represented-evidence scanner overlays, source switching, keyboard
+  navigation, and shared TRACE selection without persistence.
+- [x] Add conservative canonical semantic sections, section-aware X-Ray,
+  request-scoped factual diagnostics, a static PDF dossier redesign, and a
+  distinct screen/print Resume Lab comparison record.
 
 ## Intentionally rejected
 
@@ -35,14 +53,18 @@ These are closed product decisions, not an unprioritized backlog:
 | Proposal | Terminal reason |
 | --- | --- |
 | Generative-AI rewriting, coaching, ATS prediction, embeddings, fuzzy matching, or opaque weighting | Conflicts with deterministic explainability, capability-boundary clarity, and the current privacy promise. |
-| Approximate source highlighting | The engine does not return occurrence spans; reconstructing them in the client could misattribute a match. |
+| Approximate full-document highlighting | Exact X-Ray is now implemented from authoritative canonical blocks; approximation remains prohibited because it can misplace evidence. |
 | Independent candidate ranking or multiple-résumé scoring | Changes the protected résumé-union contract and risks implying candidate assessment. |
 | Accounts, saved analyses, histories, collaboration, public sharing, comments, voting, or community Q&A | Requires identity, persistence, retention/deletion, moderation, abuse controls, and a materially different threat model. |
+| Broad or inferred section disassembly | Conservative exact sections are implemented; arbitrary headings, visual layout, and ambiguous structure remain unavailable rather than guessed. |
+| Readiness/severity/visual-format diagnostics | A narrow factual rule inventory is implemented. Broader diagnostics remain unsupported because the engine has no such deterministic rules; development tests are never presented as résumé checks. |
+| Requirement severity or application-readiness scoring | The engine does not classify hard/preferred requirements or inspect contact/format readiness; presenting such weights in the client would create unsupported authority. |
+| Constellation/network visualization | Adds rendering and accessibility cost without authoritative information beyond the ordered category/evidence views. |
 | Persistent in-product feedback collection | Requires storage, identity/consent, moderation, retention, and spam infrastructure. Help instead provides a transparent GitHub issue path with a warning not to include document content or PII. |
 | Fake local “Was this helpful?” control | A non-persistent vote would not reach maintainers and would misleadingly imply feedback was received. |
 | OCR | Adds heavy document processing and dependencies while changing the accepted input/security boundary; image-only PDFs are rejected clearly. |
 | Theme switcher | A second complete accessible visual system adds ongoing contrast and regression cost without demonstrated product value; forced-colors and system accessibility preferences are supported. |
-| Motion/animation framework | Native CSS and existing browser APIs provide the restrained transitions required without another runtime dependency. |
+| Additional motion/animation framework | Native CSS and the existing small Framer Motion layer provide the restrained transitions required without another runtime dependency. |
 | Stateful application rate limiter | Per-instance IP state would be privacy-sensitive and ineffective across free-tier instances; exact bounds and provider controls remain the appropriate current boundary. |
 | Speculative Content Security Policy | A nonce/hash rollout across Next.js and Vercel Analytics would add breakage risk without a demonstrated injection path; unsafe user HTML is never rendered. |
 | Custom analytics events | Standard aggregate page views answer the accepted usage question without workflow surveillance or a paid-plan expansion. |

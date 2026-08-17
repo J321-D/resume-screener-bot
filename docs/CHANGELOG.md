@@ -6,6 +6,63 @@ All notable changes are documented here. This project follows [Keep a Changelog]
 
 ### Added
 
+- Added privacy-bounded `POST /api/v2/analyze`, carrying the unchanged v1 result
+  plus deterministic lexical finding/evidence identity, exact half-open Unicode
+  offsets, matched surfaces, and explicit unavailable metadata.
+- Added focused Contract v2 tests for deterministic identity, v1 parity, input
+  precedence, repeated terms, technical punctuation, case variants, Unicode,
+  multiple résumé provenance, privacy, and structured errors.
+- Added frontend Contract v2 runtime validation and a single additive analysis
+  view model while preserving v1 compatibility and all carried result fields.
+- Added Evidence Explorer filters, TRACE/provenance inspection, Machine View,
+  stable finding-ID review links, and Living Report evidence disclosure.
+- Added Resume Lab with a bounded in-memory run model, one-role résumé hangar,
+  authoritative comparison matrix, before/after Diff Reactor, run timeline,
+  per-run decisions/notes, fictional variants, and explicit session clearing.
+- Added comparison-key-derived newly represented, no-longer represented,
+  unchanged, new, and removed finding states without changing analysis output or
+  PDF report semantics.
+- Added a Temporary Revision Workspace that keeps text in current React memory,
+  never autosubmits, labels temporary-text runs explicitly, and compares a
+  successful explicit rerun against the selected Resume Lab baseline.
+- Added explicitly approved, contiguous canonical document-view blocks to
+  Contract v2 and exact Resume/JD X-Ray with source switching, represented-only
+  overlays, scanner controls, keyboard navigation, and synchronized TRACE.
+- Added exact conservative semantic sections, section-aware X-Ray disassembly,
+  and explicit unknown states for ambiguous or unsupported source structure.
+- Added a real per-request diagnostics inventory for text extraction, section
+  availability/repetition, the strict 30% boundary, and coverage opportunities.
+- Redesigned the Unicode PDF as a static precision dossier without changing
+  analytical order or limits, and added a separate Resume Lab print comparison.
+- Documented the full-document disclosure decision and the independent
+  section-aware parser/diagnostics gate without inventing semantic metadata.
+
+### Security
+
+- Kept Contract v2 request-scoped and `no-store`; approved canonical blocks are
+  returned only to the requesting browser and add no reusable document hashes,
+  persistence, content logging, analytics, or external calls.
+- Kept Resume Lab source inputs and comparisons out of browser persistence,
+  URLs, analytics, and server storage; refresh and explicit clearing destroy the
+  bounded application references without claiming secure memory erasure.
+
+### Added
+
+- Added an original analysis-core hero with a CSS-first boot sequence, restrained
+  ambient motion, real analyzer-state reactions, and a reduced-motion-specific path.
+- Added a truthful three-stage request timeline, evidence/category focus mode,
+  exact-versus-normalized labels, a contextual command palette, and keyboard-first
+  review-row controls without changing engine output or review decisions.
+- Added a deterministic analysis fingerprint, paired résumé/role category-count
+  blueprint, and session-only Overview/Standard/Dense result views.
+- Added ordered Gap Mode review, a factual Mission Board, session-only finding
+  notes, resolved-item advancement, and command-palette access.
+- Added a result walkthrough/minimap, screen-first Living Report, original motion-brand
+  treatment, Showcase Mode, Precision Lab light mode, and an opt-in local-only performance HUD.
+- Added a bounded procedural Canvas field for the analysis core, an exploded
+  Methodology architecture view, and explicit walkthrough-to-result optical continuity.
+- Added a dependency-free 180 KiB gzip home-route JavaScript budget and explicit
+  iPhone WebKit browser coverage.
 - Added anonymous aggregate Vercel Web Analytics for the three fixed public pages.
 - Added a defensive path filter that strips queries and rejects unapproved paths,
   with local development and tests kept on the non-transmitting mode.
@@ -27,8 +84,9 @@ All notable changes are documented here. This project follows [Keep a Changelog]
 
 - Consolidated the dark technical visual system around semantic spacing, motion,
   focus, surface, and layering tokens with quieter mobile composition.
-- Removed fake hero counts, score count-up animation, and continuous decorative
-  ambient loops while preserving the final score and engine-provided ordering.
+- Removed fake hero counts and score count-up animation while preserving the final
+  score and engine-provided ordering; ambient motion is now confined to the
+  product-specific analysis core.
 - Added factual source metadata, review-visible counts, completion language, and
   confirmed New analysis semantics.
 - Deployed the complete V2.x hardening baseline at commit
@@ -54,7 +112,7 @@ All notable changes are documented here. This project follows [Keep a Changelog]
   anti-sniffing, framing, referrer, and browser-capability headers.
 - Patched frontend transitive advisories through narrow pnpm overrides without a
   major framework migration.
-- Verified the clean resolved Python environment with 107 tests, `pip check`, and
+- Verified the clean resolved Python environment with 118 tests, `pip check`, and
   an OSV package/version audit with no known findings.
 
 ## Version 2 public release candidate — 2026-08-10
