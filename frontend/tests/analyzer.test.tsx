@@ -21,7 +21,23 @@ const response = {
   warnings: [],
 };
 
-function jsonResponse(payload = response, status = 200) {
+function v2Response(sqlStatus: "matched" | "missing") {
+  const matched = sqlStatus === "matched";
+  const analysis = {
+    ...response,
+    coverage: { ...response.coverage, score: matched ? 100 : 66.7, matched: matched ? 3 : 2, missing: matched ? 0 : 1 },
+    matched_terms: matched ? [...response.matched_terms, { term: "SQL", count: 1, category: "Tools/software" }] : response.matched_terms,
+    missing_terms: matched ? [] : response.missing_terms,
+  };
+  return {
+    contract_version: "2.0",
+    analysis,
+    source_documents: [],
+    findings: [{ finding_id: `finding-sql-${sqlStatus}`, comparison_key: "skills_focused.concept_coverage:sql", rule_id: "skills_focused.concept_coverage", category: "Tools/software", status: sqlStatus, reason: matched ? "exact_match" : "not_detected", display_term: "SQL", normalized_term: "sql", match_method: matched ? "exact" : "not_detected", evidence: [], unavailable_evidence_reason: matched ? null : "not_detected" }],
+  };
+}
+
+function jsonResponse(payload: unknown = response, status = 200) {
   return Promise.resolve(new Response(JSON.stringify(payload), {
     status,
     headers: { "Content-Type": "application/json" },
@@ -46,16 +62,31 @@ describe("Analyzer", () => {
     window.history.replaceState({}, "", "/");
   });
 
+  it("loads cinematic demo inputs without automatically submitting them", async () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+    window.history.replaceState({}, "", "/?demo=cinematic#workspace");
+    render(<Analyzer />);
+    expect(await screen.findByText("Synthetic demo loaded.")).toBeInTheDocument();
+    expect(document.documentElement).toHaveAttribute("data-presentation", "active");
+    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: /run keyword scan/i })).toBeEnabled();
+    window.history.replaceState({}, "", "/");
+    delete document.documentElement.dataset.presentation;
+  });
+
   it("starts disabled and becomes ready with pasted inputs", async () => {
     const user = userEvent.setup();
     render(<Analyzer />);
     const button = screen.getByRole("button", { name: /run keyword scan/i });
 
     expect(button).toBeDisabled();
+    expect(screen.getByLabelText("Document analysis state")).toHaveTextContent("Awaiting input");
     await user.type(screen.getByLabelText("Résumé text"), "QC Python");
     expect(button).toBeDisabled();
     await user.type(screen.getByLabelText("Job-description text"), "quality control Python SQL");
     expect(button).toBeEnabled();
+    expect(screen.getByLabelText("Document analysis state")).toHaveTextContent("Pasted text");
+    await waitFor(() => expect(document.documentElement).toHaveAttribute("data-analysis-state", "input_ready"));
   });
 
   it("renders successful analysis, focuses its results region, and scrolls it into view", async () => {
@@ -67,7 +98,7 @@ describe("Analyzer", () => {
     await user.type(screen.getByLabelText("Job-description text"), "quality control Python SQL");
     await user.click(screen.getByRole("button", { name: /run keyword scan/i }));
 
-    expect(await screen.findByRole("heading", { name: "Your lexical coverage map" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Your lexical coverage map" }, { timeout: 3_000 })).toBeInTheDocument();
     const results = screen.getByRole("region", { name: "Your lexical coverage map" });
     expect(results).toHaveAttribute("tabindex", "-1");
     expect(results).toHaveFocus();
@@ -79,7 +110,103 @@ describe("Analyzer", () => {
     expect(screen.getByText("Uncategorized lexical coverage")).toBeInTheDocument();
     expect(screen.getByText("N/A — no applicable concepts")).toBeInTheDocument();
     expect(screen.getByText(/excluded from the primary categorized score/i)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Analysis fingerprint" })).toBeInTheDocument();
+    expect(screen.getByText("1 represented / 2 requested")).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: "standard" })).toBeChecked();
+    await user.click(screen.getByRole("radio", { name: "dense" }));
+    expect(screen.getByRole("region", { name: "Your lexical coverage map" })).toHaveClass("density-dense");
     expect(screen.getByRole("button", { name: /download pdf report/i })).toBeEnabled();
+    expect(screen.getByText("Normalized match")).toBeInTheDocument();
+    expect(screen.getByText("Exact lexical match")).toBeInTheDocument();
+    const matrix = screen.getByRole("table", { name: /résumé representation and coverage opportunities/i });
+    expect(within(matrix).getByText("Tools/software")).toBeInTheDocument();
+    expect(within(matrix).getByText("50.0%")).toBeInTheDocument();
+    expect(within(matrix).getAllByText("1")).toHaveLength(2);
+  });
+
+  it("retains successful reruns in Resume Lab and compares v2 findings", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(globalThis, "fetch")
+      .mockImplementationOnce(() => jsonResponse(v2Response("missing")))
+      .mockImplementationOnce(() => jsonResponse(v2Response("matched")));
+    render(<Analyzer />);
+    await user.type(screen.getByLabelText("Résumé text"), "QC Python");
+    await user.type(screen.getByLabelText("Job-description text"), "quality control Python SQL");
+    await user.click(screen.getByRole("button", { name: /run keyword scan/i }));
+    expect(await screen.findByRole("heading", { name: "Resume Lab" })).toBeInTheDocument();
+    await user.type(screen.getByLabelText("Résumé text"), " SQL");
+    await user.click(screen.getByRole("button", { name: /run keyword scan/i }));
+    expect(await screen.findByText("2 / 5 runs")).toBeInTheDocument();
+    expect(screen.getAllByText("Newly represented")).toHaveLength(2);
+  });
+
+  it("runs a temporary revision only on explicit submission and retains its source type", async () => {
+    const user = userEvent.setup();
+    const fetchSpy = vi.spyOn(globalThis, "fetch")
+      .mockImplementationOnce(() => jsonResponse(v2Response("missing")))
+      .mockImplementationOnce(() => jsonResponse(v2Response("matched")));
+    render(<Analyzer />);
+    await user.type(screen.getByLabelText("Résumé text"), "QC Python");
+    await user.type(screen.getByLabelText("Job-description text"), "quality control Python SQL");
+    await user.click(screen.getByRole("button", { name: /run keyword scan/i }));
+    await screen.findByRole("heading", { name: "Resume Lab" });
+
+    const editor = screen.getByRole("textbox", { name: "Temporary résumé revision" });
+    await user.type(editor, " SQL");
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(screen.getByLabelText("Résumé text")).toHaveValue("QC Python");
+
+    await user.click(screen.getByRole("button", { name: "Run Revision" }));
+    expect(await screen.findByText(/Revision run completed/)).toBeInTheDocument();
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+    const revisionForm = fetchSpy.mock.calls[1]?.[1]?.body as FormData;
+    expect(revisionForm.get("resume_text")).toBe("QC Python SQL");
+    expect(revisionForm.getAll("resumes")).toHaveLength(0);
+    expect(screen.getByLabelText("Résumé text")).toHaveValue("QC Python SQL");
+    expect(screen.getAllByText(/temporary text revision/i).length).toBeGreaterThan(1);
+    expect(screen.getAllByText("Newly represented")).toHaveLength(2);
+  });
+
+  it("focuses category and term evidence without changing coverage or review decisions", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(globalThis, "fetch").mockImplementation(() => jsonResponse({
+      ...response,
+      missing_terms: [
+        { term: "SQL", count: 2, category: "Tools/software" },
+        { term: "GMP", count: 1, category: "Quality/regulatory" },
+      ],
+      categories: [
+        { category: "Tools/software", matched: 1, total: 2, score: 50, display_value: "50.0%", included_in_primary: true },
+        { category: "Quality/regulatory", matched: 1, total: 2, score: 50, display_value: "50.0%", included_in_primary: true },
+      ],
+    }));
+    render(<Analyzer />);
+
+    await user.type(screen.getByLabelText("Résumé text"), "QC Python");
+    await user.type(screen.getByLabelText("Job-description text"), "quality control Python SQL GMP");
+    await user.click(screen.getByRole("button", { name: /run keyword scan/i }));
+    await screen.findByRole("heading", { name: "Your lexical coverage map" });
+
+    await user.click(screen.getByRole("button", { name: /Tools\/software.*50\.0%/i }));
+    expect(screen.getByRole("complementary", { name: "Focused evidence view" })).toHaveTextContent("Category evidence isolated");
+    expect(within(screen.getByRole("list", { name: "Coverage opportunities" })).getByText("SQL", { exact: true })).toBeInTheDocument();
+    await waitFor(() => expect(within(screen.getByRole("list", { name: "Coverage opportunities" })).queryByText("GMP", { exact: true })).not.toBeInTheDocument());
+    await waitFor(() => expect(within(screen.getByLabelText("Opportunity review list")).getAllByRole("article")).toHaveLength(1));
+
+    await user.selectOptions(screen.getByLabelText("Review status for SQL"), "add");
+    await user.click(screen.getByRole("button", { name: "Clear focus" }));
+    expect(screen.getByLabelText("Review status for SQL")).toHaveValue("add");
+    expect(screen.getByLabelText("Review status for GMP")).toBeInTheDocument();
+
+    await user.click(within(screen.getByRole("list", { name: "Coverage opportunities" })).getByRole("button", { name: "GMP" }));
+    expect(screen.getByRole("complementary", { name: "Focused evidence view" })).toHaveTextContent("GMP");
+    await waitFor(() => expect(within(screen.getByLabelText("Opportunity review list")).getAllByRole("article")).toHaveLength(1));
+    expect(screen.getByLabelText("Review status for GMP")).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "66.7% keyword coverage" })).toBeInTheDocument();
+
+    const matrix = screen.getByRole("table", { name: /résumé representation and coverage opportunities/i });
+    await user.click(within(matrix).getByRole("button", { name: "Tools/software" }));
+    expect(screen.getByRole("complementary", { name: "Focused evidence view" })).toHaveTextContent("Tools/software");
   });
 
   it("preserves engine order while progressively disclosing long opportunity lists", async () => {
@@ -103,7 +230,7 @@ describe("Analyzer", () => {
     expect(within(list).getAllByRole("listitem").map((item) => item.textContent)).toEqual(
       missingTerms.slice(0, 12).map((item) => item.term),
     );
-    expect(screen.queryByText("term-13")).not.toBeInTheDocument();
+    expect(within(list).queryByText("term-13")).not.toBeInTheDocument();
 
     const disclosure = screen.getByRole("button", { name: "Show 8 more" });
     expect(disclosure).toHaveAttribute("aria-expanded", "false");
@@ -115,7 +242,7 @@ describe("Analyzer", () => {
     );
 
     await user.click(screen.getByRole("button", { name: "Show fewer" }));
-    await waitFor(() => expect(screen.queryByText("term-13")).not.toBeInTheDocument());
+    await waitFor(() => expect(within(list).queryByText("term-13")).not.toBeInTheDocument());
   });
 
   it("shows truthful request progress while the API is pending", async () => {
@@ -128,10 +255,16 @@ describe("Analyzer", () => {
     await user.type(screen.getByLabelText("Job-description text"), "Python SQL");
     await user.click(screen.getByRole("button", { name: /run keyword scan/i }));
 
-    expect(screen.getByRole("status")).toHaveTextContent("Analyzing language");
+    const timeline = screen.getByRole("status", { name: "Analysis status: Deterministic analysis" });
+    expect(timeline).toHaveTextContent("Input snapshot");
+    expect(timeline).toHaveTextContent("Deterministic analysis");
+    expect(timeline).toHaveTextContent("Results assembled");
+    expect(within(timeline).getAllByRole("listitem")).toHaveLength(3);
+    expect(document.documentElement).toHaveAttribute("data-analysis-state", "processing");
     expect(screen.getByRole("button", { name: /analyzing/i })).toBeDisabled();
     resolveRequest(await jsonResponse());
-    expect(await screen.findByText("Results ready")).toBeInTheDocument();
+    expect(await screen.findByRole("status", { name: "Analysis status: Results assembled" })).toBeInTheDocument();
+    expect(document.documentElement).toHaveAttribute("data-analysis-state", "results");
   });
 
   it("marks results stale and disables export when inputs change", async () => {
@@ -150,7 +283,7 @@ describe("Analyzer", () => {
 
     await user.type(resume, " MATLAB");
     expect(screen.getByText(/inputs changed after this scan/i)).toBeInTheDocument();
-    expect(screen.queryByText("Results ready")).not.toBeInTheDocument();
+    expect(screen.queryByRole("status", { name: "Analysis status: Results assembled" })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: /download pdf report/i })).toBeDisabled();
     expect(screen.getByText(/review decisions were cleared/i)).toBeInTheDocument();
     expect(screen.getByLabelText("Review status for SQL")).toHaveValue("");
@@ -232,9 +365,9 @@ describe("Analyzer", () => {
     await user.type(screen.getByLabelText("Résumé text"), "MATLAB");
     await user.click(screen.getByRole("button", { name: /run keyword scan/i }));
 
-    expect(await screen.findByText("MATLAB", { selector: ".term-cloud li" })).toBeInTheDocument();
+    expect(await screen.findByText("MATLAB", { selector: ".term-name" })).toBeInTheDocument();
     firstReject(new Error("late first response"));
-    expect(screen.getByText("MATLAB", { selector: ".term-cloud li" })).toBeInTheDocument();
+    expect(screen.getByText("MATLAB", { selector: ".term-name" })).toBeInTheDocument();
   });
 
   it("requires confirmation before clearing a completed current-session analysis", async () => {
