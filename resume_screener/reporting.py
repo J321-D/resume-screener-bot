@@ -17,6 +17,10 @@ _FALLBACK_CHARACTER = "?"
 _FONT_SIZE = 12
 _LINE_HEIGHT = 18
 _PAGE_MARGIN = 36
+_INK = (0.10, 0.14, 0.22)
+_MUTED = (0.34, 0.40, 0.50)
+_ACCENT = (0.06, 0.55, 0.70)
+_PANEL = (0.95, 0.97, 0.98)
 
 
 def _replace_unsupported_glyphs(text: str, font: fitz.Font) -> str:
@@ -59,10 +63,22 @@ def _wrap_line(
 
 
 def _add_page(document: fitz.Document, font: fitz.Font) -> fitz.Page:
-    """Add an A4 page and make the dependency-provided font available on it."""
+    """Add a static precision-dossier page with a restrained page frame."""
     page_size = fitz.paper_rect("a4")
     page = document.new_page(width=page_size.width, height=page_size.height)
     page.insert_font(fontname=_PDF_FONT_NAME, fontbuffer=font.buffer)
+    page.draw_rect(page.rect, color=None, fill=(0.985, 0.99, 1.0))
+    page.draw_rect(
+        fitz.Rect(_PAGE_MARGIN - 10, _PAGE_MARGIN - 14, page.rect.width - _PAGE_MARGIN + 10, page.rect.height - _PAGE_MARGIN + 8),
+        color=(0.82, 0.86, 0.91),
+        width=0.6,
+    )
+    page.draw_line(
+        fitz.Point(_PAGE_MARGIN, page.rect.height - _PAGE_MARGIN + 1),
+        fitz.Point(page.rect.width - _PAGE_MARGIN, page.rect.height - _PAGE_MARGIN + 1),
+        color=(0.76, 0.81, 0.87),
+        width=0.5,
+    )
     return page
 
 
@@ -75,6 +91,7 @@ def generate_pdf_report(
     explanations: list[NormalizedMatchExplanation] | None = None,
     ordered_matched_keywords: list[str] | None = None,
     primary_coverage: PrimaryCoverage | None = None,
+    document_section_summaries: list[str] | None = None,
 ) -> bytes:
     """Build the current report and return valid, Unicode-capable PDF bytes.
 
@@ -152,20 +169,40 @@ def generate_pdf_report(
                     font,
                 )
             )
+    if document_section_summaries:
+        report_lines.extend(["", "Document / Section Summary:"])
+        report_lines.extend(
+            _replace_unsupported_glyphs(summary, font)
+            for summary in document_section_summaries
+        )
 
     with fitz.open() as document:
         page = _add_page(document, font)
         content_width = page.rect.width - (2 * _PAGE_MARGIN)
-        title_width = font.text_length(title, fontsize=_FONT_SIZE)
+        title_size = 21
+        title_width = font.text_length(title, fontsize=title_size)
         title_x = max(_PAGE_MARGIN, (page.rect.width - title_width) / 2)
-        y_position = _PAGE_MARGIN + _FONT_SIZE
+        y_position = _PAGE_MARGIN + 17
+        page.draw_rect(
+            fitz.Rect(_PAGE_MARGIN, _PAGE_MARGIN - 4, page.rect.width - _PAGE_MARGIN, _PAGE_MARGIN + 48),
+            color=None,
+            fill=_PANEL,
+        )
+        page.insert_text(
+            (_PAGE_MARGIN + 10, _PAGE_MARGIN + 8),
+            "RKS // DETERMINISTIC LEXICAL DOSSIER",
+            fontname=_PDF_FONT_NAME,
+            fontsize=7,
+            color=_ACCENT,
+        )
         page.insert_text(
             (title_x, y_position),
             title,
             fontname=_PDF_FONT_NAME,
-            fontsize=_FONT_SIZE,
+            fontsize=title_size,
+            color=_INK,
         )
-        y_position += 2 * _LINE_HEIGHT
+        y_position += 3 * _LINE_HEIGHT
 
         for logical_line in report_lines:
             for line in _wrap_line(logical_line, font, content_width):
@@ -173,13 +210,40 @@ def generate_pdf_report(
                     page = _add_page(document, font)
                     y_position = _PAGE_MARGIN + _FONT_SIZE
                 if line:
+                    is_section = line.endswith(":") and not line.startswith(("Matched Keywords", "Missing Keywords", "Analysis Mode"))
+                    if is_section:
+                        y_position += 4
+                        page.draw_line(
+                            fitz.Point(_PAGE_MARGIN, y_position - 11),
+                            fitz.Point(page.rect.width - _PAGE_MARGIN, y_position - 11),
+                            color=(0.80, 0.85, 0.90),
+                            width=0.5,
+                        )
                     page.insert_text(
                         (_PAGE_MARGIN, y_position),
                         line,
                         fontname=_PDF_FONT_NAME,
                         fontsize=_FONT_SIZE,
+                        color=_ACCENT if is_section else _INK,
                     )
                 y_position += _LINE_HEIGHT
+
+        for page_number, report_page in enumerate(document, start=1):
+            report_page.insert_text(
+                (_PAGE_MARGIN, report_page.rect.height - _PAGE_MARGIN + 14),
+                "Lexical comparison—not a candidate-performance assessment.",
+                fontname=_PDF_FONT_NAME,
+                fontsize=7,
+                color=_MUTED,
+            )
+            page_label = f"{page_number:02d} / {len(document):02d}"
+            report_page.insert_text(
+                (report_page.rect.width - _PAGE_MARGIN - font.text_length(page_label, fontsize=7), report_page.rect.height - _PAGE_MARGIN + 14),
+                page_label,
+                fontname=_PDF_FONT_NAME,
+                fontsize=7,
+                color=_MUTED,
+            )
 
         document.subset_fonts()
         return document.tobytes(garbage=4, deflate=True)

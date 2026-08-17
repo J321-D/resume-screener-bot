@@ -190,6 +190,27 @@ class GeneratePdfReportTests(unittest.TestCase):
             " ".join(report_text.split()),
         )
 
+    def test_adds_static_dossier_chrome_and_optional_section_summary(self) -> None:
+        report_text = extract_pdf_text(
+            generate_pdf_report(
+                {"python"},
+                ["sql"],
+                document_section_summaries=[
+                    "Resume 1: skills, experience",
+                    "Job description: semantic sections unavailable",
+                ],
+            )
+        )
+
+        normalized = " ".join(report_text.split())
+        self.assertIn("RKS // DETERMINISTIC LEXICAL DOSSIER", normalized)
+        self.assertIn("Document / Section Summary:", normalized)
+        self.assertIn("Resume 1: skills, experience", normalized)
+        self.assertIn(
+            "Lexical comparison—not a candidate-performance assessment.",
+            normalized,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

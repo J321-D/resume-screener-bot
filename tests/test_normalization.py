@@ -6,7 +6,10 @@ import unittest
 
 from resume_screener.analysis import extract_keywords
 from resume_screener.models import ConceptCategory
-from resume_screener.normalization.matcher import normalize_concepts
+from resume_screener.normalization.matcher import (
+    normalize_concept_occurrences,
+    normalize_concepts,
+)
 from resume_screener.normalization.stop_words import ENGLISH_STOP_WORDS
 
 
@@ -144,6 +147,19 @@ class ConceptNormalizationTests(unittest.TestCase):
 
         for _ in range(10):
             self.assertEqual(normalize_concepts(text), expected)
+
+    def test_occurrences_preserve_exact_phrase_and_unicode_offsets(self) -> None:
+        text = "✨ QC then Quality Control; cell-culture 品質"
+        occurrences = normalize_concept_occurrences(text)
+
+        self.assertEqual(
+            [text[item.start : item.end] for item in occurrences],
+            ["QC", "Quality Control", "cell-culture", "品質"],
+        )
+        self.assertEqual(
+            [item.concept for item in occurrences],
+            ["quality control", "quality control", "cell culture", "品質"],
+        )
 
 
 if __name__ == "__main__":

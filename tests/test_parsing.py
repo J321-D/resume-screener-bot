@@ -49,6 +49,17 @@ def make_pdf(text: str | None = None) -> bytes:
     return content
 
 
+def make_structured_pdf() -> bytes:
+    document = fitz.open()
+    page = document.new_page()
+    page.insert_text((72, 72), "EXPERIENCE", fontsize=16)
+    page.insert_text((72, 96), "Python engineer", fontsize=10)
+    page.insert_text((72, 112), "Built systems", fontsize=10)
+    content = document.tobytes()
+    document.close()
+    return content
+
+
 def make_docx(text: str) -> bytes:
     content = BytesIO()
     document_xml = (
@@ -57,6 +68,24 @@ def make_docx(text: str) -> bytes:
         'wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>'
         f"{text}"
         "</w:t></w:r></w:p></w:body></w:document>"
+    )
+    with ZipFile(content, "w", ZIP_DEFLATED) as archive:
+        archive.writestr("word/document.xml", document_xml)
+    return content.getvalue()
+
+
+def make_structured_docx() -> bytes:
+    """Build the minimum archive needed to characterize heading-style metadata."""
+    content = BytesIO()
+    document_xml = (
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+        '<w:document xmlns:w="http://schemas.openxmlformats.org/'
+        'wordprocessingml/2006/main"><w:body>'
+        '<w:p><w:pPr><w:pStyle w:val="Heading1"/></w:pPr><w:r><w:t>Experience</w:t></w:r></w:p>'
+        '<w:p><w:r><w:t>Python engineer</w:t></w:r></w:p>'
+        '<w:p><w:pPr><w:pStyle w:val="Heading2"/></w:pPr><w:r><w:t>Skills</w:t></w:r></w:p>'
+        '<w:p><w:r><w:t>Python SQL</w:t></w:r></w:p>'
+        '</w:body></w:document>'
     )
     with ZipFile(content, "w", ZIP_DEFLATED) as archive:
         archive.writestr("word/document.xml", document_xml)
@@ -89,6 +118,21 @@ class ParseUploadedDocumentTests(unittest.TestCase):
         self.assertEqual(result.source_name, "resume.pdf")
         self.assertEqual(result.media_type, PDF_MEDIA_TYPE)
 
+    def test_preserves_emphasized_pdf_heading_hint_at_exact_offset(self) -> None:
+        result = parse_uploaded_document(
+            UploadedBytes(
+                make_structured_pdf(),
+                name="resume.pdf",
+                media_type=PDF_MEDIA_TYPE,
+            )
+        )
+
+        self.assertEqual(len(result.heading_hints), 1)
+        hint = result.heading_hints[0]
+        self.assertEqual(hint.raw_heading, "EXPERIENCE")
+        self.assertEqual(hint.detection_method, "pdf_emphasized_text_line")
+        self.assertEqual(result.text[hint.start : hint.end], "EXPERIENCE")
+
     def test_extracts_docx_with_the_existing_docx2txt_parser(self) -> None:
         upload = UploadedBytes(
             make_docx("DOCX resume"),
@@ -99,6 +143,26 @@ class ParseUploadedDocumentTests(unittest.TestCase):
         result = parse_uploaded_document(upload)
 
         self.assertEqual(result.text, "DOCX resume")
+
+    def test_preserves_exact_docx_heading_style_hints_without_changing_text(self) -> None:
+        upload = UploadedBytes(
+            make_structured_docx(),
+            name="resume.docx",
+            media_type=DOCX_MEDIA_TYPE,
+        )
+
+        result = parse_uploaded_document(upload)
+
+        self.assertEqual(result.text, "Experience\n\nPython engineer\n\nSkills\n\nPython SQL")
+        self.assertEqual(
+            [(item.raw_heading, item.detection_method) for item in result.heading_hints],
+            [
+                ("Experience", "docx_heading_style"),
+                ("Skills", "docx_heading_style"),
+            ],
+        )
+        for hint in result.heading_hints:
+            self.assertEqual(result.text[hint.start : hint.end], hint.raw_heading)
 
     def test_extracts_valid_utf8_text(self) -> None:
         upload = UploadedBytes(

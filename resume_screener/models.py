@@ -6,6 +6,16 @@ from dataclasses import dataclass
 from enum import Enum
 
 
+@dataclass(frozen=True)
+class DocumentHeadingHint:
+    """One parser-backed heading mapped to canonical extracted-text offsets."""
+
+    start: int
+    end: int
+    raw_heading: str
+    detection_method: str
+
+
 @dataclass
 class ExtractedDocument:
     """Text extracted from an uploaded file or supplied manually."""
@@ -13,6 +23,7 @@ class ExtractedDocument:
     text: str
     source_name: str | None = None
     media_type: str | None = None
+    heading_hints: tuple[DocumentHeadingHint, ...] = ()
 
 
 @dataclass
@@ -52,6 +63,17 @@ class NormalizedConcept:
     display_term: str
     category: ConceptCategory
     count: int
+
+
+@dataclass(frozen=True)
+class NormalizedConceptOccurrence:
+    """One authoritative normalized concept occurrence in canonical source text."""
+
+    concept: str
+    surface_term: str
+    category: ConceptCategory
+    start: int
+    end: int
 
 
 @dataclass(frozen=True)
