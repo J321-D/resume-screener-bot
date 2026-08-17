@@ -1,1 +1,1 @@
-"""Version 1 route modules."""
+"""Versioned public API route modules."""

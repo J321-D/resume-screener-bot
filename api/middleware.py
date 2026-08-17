@@ -10,7 +10,7 @@ from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 MAX_REQUEST_BODY_BYTES = 28 * 1024 * 1024
 _REPLAY_CHUNK_BYTES = 1024 * 1024
-_LIMITED_PATHS = {"/api/v1/analyze", "/api/v1/report"}
+_LIMITED_PATHS = {"/api/v1/analyze", "/api/v1/report", "/api/v2/analyze"}
 
 
 async def _send_error(send: Send, status: int, code: str, message: str) -> None:

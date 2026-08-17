@@ -14,6 +14,7 @@ from api.config import allowed_origins
 from api.errors import PublicApiError
 from api.middleware import RequestBodyLimitMiddleware
 from api.routes.analysis import router as analysis_router
+from api.routes.analysis_v2 import router as analysis_v2_router
 from api.routes.health import router as health_router
 from api.routes.reports import router as reports_router
 from api.schemas import ErrorDetail, ErrorResponse
@@ -31,7 +32,11 @@ class SensitiveResponseCacheMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next):  # type: ignore[no-untyped-def]
         response = await call_next(request)
-        if request.url.path in {"/api/v1/analyze", "/api/v1/report"}:
+        if request.url.path in {
+            "/api/v1/analyze",
+            "/api/v1/report",
+            "/api/v2/analyze",
+        }:
             response.headers["Cache-Control"] = "no-store"
         return response
 
@@ -95,3 +100,4 @@ async def unexpected_error_handler(request: Request, error: Exception) -> JSONRe
 app.include_router(health_router, prefix="/api/v1", tags=["health"])
 app.include_router(analysis_router, prefix="/api/v1", tags=["analysis"])
 app.include_router(reports_router, prefix="/api/v1", tags=["reports"])
+app.include_router(analysis_v2_router, prefix="/api/v2", tags=["analysis-v2"])
