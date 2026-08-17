@@ -11,12 +11,32 @@ export interface FileValidation {
   status: string;
 }
 
-export function inputSignature(inputs: AnalysisInputs): string {
+function opaqueIdentity(value: string): string {
+  let first = 2166136261;
+  let second = 2246822519;
+  for (const character of value) {
+    const point = character.codePointAt(0) ?? 0;
+    first = Math.imul(first ^ point, 16777619);
+    second = Math.imul(second ^ point, 3266489917);
+  }
+  return `${(first >>> 0).toString(16).padStart(8, "0")}${(second >>> 0).toString(16).padStart(8, "0")}`;
+}
+
+export function resumeInputIdentity(inputs: AnalysisInputs): string {
   const files = inputs.resumeFiles.map((file) => `${file.name}:${file.size}:${file.lastModified}`).join("|");
-  const job = inputs.jobFile
-    ? `${inputs.jobFile.name}:${inputs.jobFile.size}:${inputs.jobFile.lastModified}`
-    : "";
-  return JSON.stringify([inputs.analysisMode, files, inputs.resumeText, job, inputs.jobText]);
+  return opaqueIdentity(JSON.stringify([files, inputs.resumeText]));
+}
+
+export function jobInputIdentity(inputs: AnalysisInputs): string {
+  if (inputs.jobText.trim()) {
+    return opaqueIdentity(JSON.stringify(["manual", inputs.jobText]));
+  }
+  const file = inputs.jobFile ? `${inputs.jobFile.name}:${inputs.jobFile.size}:${inputs.jobFile.lastModified}` : "";
+  return opaqueIdentity(JSON.stringify(["upload", file]));
+}
+
+export function inputSignature(inputs: AnalysisInputs): string {
+  return opaqueIdentity(JSON.stringify([inputs.analysisMode, resumeInputIdentity(inputs), jobInputIdentity(inputs)]));
 }
 
 export function validateFile(file: File): FileValidation {

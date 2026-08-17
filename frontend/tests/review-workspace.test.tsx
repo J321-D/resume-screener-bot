@@ -95,6 +95,61 @@ describe("ReviewWorkspace", () => {
     expect(writeText).toHaveBeenCalledWith("SQL");
     expect(screen.getByText("Selected terms copied.")).toBeInTheDocument();
   });
+
+  it("supports keyboard-first row navigation and status shortcuts", async () => {
+    const user = userEvent.setup();
+    render(<ReviewWorkspace opportunities={opportunities} stale={false} />);
+    const rows = within(screen.getByLabelText("Opportunity review list")).getAllByRole("article");
+
+    rows[0].focus();
+    expect(rows[0]).toHaveAttribute("aria-keyshortcuts", "ArrowUp ArrowDown Enter 1 2 3 4");
+    await user.keyboard("1");
+    expect(screen.getByLabelText("Review status for SQL")).toHaveValue("add");
+    await user.keyboard("{ArrowDown}");
+    expect(rows[1]).toHaveFocus();
+    await user.keyboard("4");
+    expect(screen.getByLabelText("Review status for GMP")).toHaveValue("later");
+    await user.keyboard("{Enter}");
+    expect(screen.getByLabelText("Review status for GMP")).toHaveFocus();
+  });
+
+  it("runs an ordered Gap Mode with session-only notes and factual mission progress", async () => {
+    const user = userEvent.setup();
+    render(<ReviewWorkspace opportunities={opportunities} stale={false} />);
+
+    expect(screen.getByRole("heading", { name: "Review workflow" })).toBeInTheDocument();
+    expect(screen.getByText("0 / 4 resolved")).toBeInTheDocument();
+    expect(screen.getByText(/not application readiness/i)).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Review unresolved gaps" }));
+    const dialog = screen.getByRole("dialog", { name: "SQL" });
+    expect(dialog).toHaveTextContent("GAP MODE · 01 / 04");
+    await user.type(screen.getByLabelText("Session note for SQL"), "Confirm database work before revising.");
+    expect(screen.getByText("1 session note")).toBeInTheDocument();
+
+    await user.selectOptions(screen.getByLabelText("Gap decision for SQL"), "add");
+    expect(screen.getByRole("dialog", { name: "GMP" })).toHaveTextContent("01 / 03");
+    expect(screen.getByText("1 / 4 resolved")).toBeInTheDocument();
+    await user.selectOptions(screen.getByLabelText("Gap decision for GMP"), "later");
+    expect(screen.getByRole("dialog", { name: "GMP" })).toBeInTheDocument();
+    expect(localStorage).toHaveLength(0);
+    expect(sessionStorage).toHaveLength(0);
+
+    await user.click(screen.getByRole("button", { name: "Exit Gap Mode" }));
+    await waitFor(() => expect(screen.queryByRole("dialog", { name: "GMP" })).not.toBeInTheDocument());
+  });
+
+  it("uses stable finding IDs for review decisions and evidence inspection", async () => {
+    const user = userEvent.setup();
+    const onInspectFinding = vi.fn();
+    const onDecisionsChange = vi.fn();
+    const identified = opportunities.map((item, index) => ({ ...item, findingId: `finding-${index}` }));
+    render(<ReviewWorkspace opportunities={identified} stale={false} onInspectFinding={onInspectFinding} onDecisionsChange={onDecisionsChange} />);
+    await user.selectOptions(screen.getByLabelText("Review status for SQL"), "add");
+    await waitFor(() => expect(onDecisionsChange).toHaveBeenLastCalledWith({ "finding-0": "add" }));
+    await user.click(screen.getAllByRole("button", { name: "Inspect evidence" })[0]);
+    expect(onInspectFinding).toHaveBeenCalledWith("finding-0");
+  });
 });
 
 describe("actionChecklist", () => {

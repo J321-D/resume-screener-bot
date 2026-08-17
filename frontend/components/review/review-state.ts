@@ -4,6 +4,10 @@ export const reviewStatuses = ["add", "represented", "not_relevant", "later"] as
 export type ReviewStatus = (typeof reviewStatuses)[number];
 export type ReviewFilter = "all" | "unreviewed" | ReviewStatus;
 export type ReviewDecisions = Record<string, ReviewStatus>;
+export type ReviewNotes = Record<string, string>;
+export type ReviewOpportunity = AnalysisResponse["missing_terms"][number] & {
+  findingId?: string;
+};
 
 export const reviewLabels: Record<ReviewStatus, string> = {
   add: "Add to résumé",
@@ -12,8 +16,8 @@ export const reviewLabels: Record<ReviewStatus, string> = {
   later: "Review later",
 };
 
-export function reviewItemId(index: number): string {
-  return String(index);
+export function reviewItemId(index: number, findingId?: string): string {
+  return findingId ?? String(index);
 }
 
 export function reviewSummary(total: number, decisions: ReviewDecisions) {
@@ -26,15 +30,24 @@ export function reviewSummary(total: number, decisions: ReviewDecisions) {
   return summary;
 }
 
+export function unresolvedOpportunities(
+  opportunities: ReviewOpportunity[],
+  decisions: ReviewDecisions,
+) {
+  return opportunities
+    .map((opportunity, index) => ({ opportunity, index, id: reviewItemId(index, opportunity.findingId) }))
+    .filter(({ id }) => !decisions[id] || decisions[id] === "later");
+}
+
 export function filteredOpportunities(
-  opportunities: AnalysisResponse["missing_terms"],
+  opportunities: ReviewOpportunity[],
   decisions: ReviewDecisions,
   filter: ReviewFilter,
   query: string,
 ) {
   const normalizedQuery = query.trim().toLocaleLowerCase();
   return opportunities
-    .map((opportunity, index) => ({ opportunity, index, id: reviewItemId(index) }))
+    .map((opportunity, index) => ({ opportunity, index, id: reviewItemId(index, opportunity.findingId) }))
     .filter(({ opportunity, id }) => {
       const status = decisions[id];
       const matchesFilter = filter === "all"
@@ -46,10 +59,10 @@ export function filteredOpportunities(
 }
 
 export function actionChecklist(
-  opportunities: AnalysisResponse["missing_terms"],
+  opportunities: ReviewOpportunity[],
   decisions: ReviewDecisions,
 ): string {
-  const selected = opportunities.filter((_, index) => decisions[reviewItemId(index)] === "add");
+  const selected = opportunities.filter((item, index) => decisions[reviewItemId(index, item.findingId)] === "add");
   const safeTerm = (term: string) => term
     .replaceAll("\\", "\\\\")
     .replace(/[\r\n\u2028\u2029]+/g, " ")

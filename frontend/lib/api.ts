@@ -1,4 +1,4 @@
-import { analysisResponseSchema, type AnalysisInputs, type AnalysisResponse, type PublicError } from "./contracts";
+import { analysisResponseSchema, analysisV2ResponseSchema, analysisViewModel, type AnalysisInputs, type AnalysisViewModel, type PublicError } from "./contracts";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 export const REQUEST_TIMEOUT_MS = 45_000;
@@ -66,16 +66,19 @@ async function request(
   }
 }
 
-export async function analyze(inputs: AnalysisInputs, signal?: AbortSignal): Promise<AnalysisResponse> {
-  const response = await request("/api/v1/analyze", {
+export async function analyze(inputs: AnalysisInputs, signal?: AbortSignal): Promise<AnalysisViewModel> {
+  const response = await request("/api/v2/analyze", {
     method: "POST",
     body: buildAnalysisForm(inputs),
   }, signal);
   if (!response.ok) throw await publicError(response);
   try {
-    const parsed = analysisResponseSchema.safeParse(await response.json());
-    if (!parsed.success) throw new Error("invalid schema");
-    return parsed.data;
+    const payload: unknown = await response.json();
+    const v2 = analysisV2ResponseSchema.safeParse(payload);
+    if (v2.success) return analysisViewModel(v2.data);
+    const v1 = analysisResponseSchema.safeParse(payload);
+    if (v1.success) return analysisViewModel(v1.data);
+    throw new Error("invalid schema");
   } catch {
     throw {
       code: "invalid_response",
