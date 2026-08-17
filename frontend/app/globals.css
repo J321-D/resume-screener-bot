@@ -293,6 +293,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .results { position:relative;padding-top:112px;background:radial-gradient(circle at 22% 17%,rgba(83,229,255,.035),transparent 28rem),radial-gradient(circle at 82% 30%,rgba(146,125,255,.025),transparent 32rem); }
 .results-heading { margin-bottom:40px; }
 .result-waypoints { position:sticky;top:76px;z-index:9;margin:0 0 20px;padding:8px;display:flex;align-items:center;gap:10px;border:1px solid rgba(120,165,255,.16);border-radius:14px;background:rgba(7,11,20,.88);box-shadow:0 14px 38px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.04);backdrop-filter:blur(18px); }
+.result-waypoints.is-overflowing::after { content:"";position:absolute;right:0;top:0;bottom:0;width:28px;background:linear-gradient(to right,transparent,rgba(7,11,20,.88));pointer-events:none;border-radius:0 14px 14px 0;opacity:1;transition:opacity var(--motion-fast); }
 .result-waypoints-label { flex:0 0 auto;padding:0 8px;color:var(--text-muted);font-family:var(--font-geist-mono),monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase; }
 .result-waypoints ol { min-width:0;margin:0;padding:0;display:flex;flex:1;gap:5px;overflow-x:auto;list-style:none;scrollbar-width:none; }
 .result-waypoints ol::-webkit-scrollbar { display:none; }
@@ -300,6 +301,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .result-waypoints a { min-height:38px;padding:8px 11px;display:flex;align-items:center;justify-content:center;gap:7px;border:1px solid transparent;border-radius:9px;color:var(--text-secondary);font-size:11px;font-weight:650;text-decoration:none;white-space:nowrap;transition:border-color var(--motion-fast) var(--ease-standard),background var(--motion-fast) var(--ease-standard),color var(--motion-fast) var(--ease-standard); }
 .result-waypoints a span { color:var(--cyan);font-family:var(--font-geist-mono),monospace;font-size:8px; }
 .result-waypoints a:hover,.result-waypoints a:focus-visible { border-color:rgba(83,229,255,.28);background:rgba(83,229,255,.07);color:var(--text-primary); }
+.result-waypoints li.is-active a { border-color:rgba(83,229,255,.4);background:rgba(83,229,255,.1);color:var(--text-primary); }
+.result-waypoints li.is-active a span { color:var(--cyan);font-weight:700; }
 #summary,#findings,#evidence-explorer,#review,#resume-lab { scroll-margin-top:148px; }
 .result-hero-grid { grid-template-columns:minmax(0,1.68fr) minmax(250px,.32fr);gap:18px; }
 .coverage-card { position:relative;min-height:390px;overflow:hidden;border-color:rgba(83,229,255,.25);background:radial-gradient(circle at 18% 50%,rgba(83,229,255,.08),transparent 36%),linear-gradient(145deg,rgba(18,29,51,.9),rgba(9,15,29,.82));box-shadow:0 36px 110px rgba(0,0,0,.25),inset 0 1px rgba(255,255,255,.065),0 0 0 1px rgba(83,229,255,.02); }
