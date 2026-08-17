@@ -4,6 +4,9 @@ import { Code2, Menu, ShieldCheck, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { CommandPalette } from "./command-palette";
+import { ExperienceControls } from "./experience-controls";
+import { PresentationToggle } from "./presentation-toggle";
 
 const destinations = [
   { href: "/#workspace", label: "Analyze", activePath: "/" },
@@ -36,7 +39,7 @@ export function Navigation() {
     <header className="topbar">
       <nav className="shell nav" aria-label="Primary navigation">
         <Link href="/" className="brand" aria-label="Resume Keyword Screener home">
-          <span className="brand-mark" aria-hidden="true">R</span>
+          <span className="brand-mark" aria-hidden="true"><i /><b>R</b><em /></span>
           <span>Resume Keyword Screener</span>
         </Link>
         <button
@@ -52,6 +55,9 @@ export function Navigation() {
         </button>
         <div ref={menuRef} id="primary-menu" className={`nav-actions ${open ? "is-open" : ""}`}>
           <span className="privacy-pill"><ShieldCheck size={14} /> Request-scoped processing</span>
+          <CommandPalette onNavigate={() => setOpen(false)} />
+          <ExperienceControls />
+          <PresentationToggle />
           {destinations.map((item) => (
             <Link
               key={item.href}

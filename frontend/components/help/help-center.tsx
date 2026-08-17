@@ -121,8 +121,8 @@ const topics: HelpTopic[] = [
     id: "keyboard-access",
     category: "Troubleshooting",
     question: "Can I use the screener with a keyboard or assistive technology?",
-    answer: "Yes. Use standard Tab, Shift+Tab, Enter, Space, arrow-key, and native form-control behavior. Escape closes the mobile menu and confirmation prompts. Results receive focus after a successful scan, and reduced-motion and forced-color preferences are respected.",
-    keywords: "accessibility keyboard screen reader focus reduced motion forced colors",
+    answer: "Yes. Press Command-K or Control-K for available page actions. In the review queue, focus a row and use Up/Down to move, Enter to inspect its status, or 1–4 to apply the four labeled decisions. Standard Tab, Shift+Tab, Enter, Space, and native form-control behavior remain available. Escape closes menus, the command palette, and confirmation prompts. Results receive focus after a successful scan, and reduced-motion and forced-color preferences are respected.",
+    keywords: "accessibility keyboard screen reader focus reduced motion forced colors command palette shortcuts",
   },
   {
     id: "glossary",
