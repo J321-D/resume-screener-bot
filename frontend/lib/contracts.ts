@@ -78,6 +78,23 @@ const sourceSpanSchema = z.object({
   unit: z.literal("unicode_code_point"),
 }).refine((span) => span.end > span.start);
 
+const relevantKeywordEvidenceSchema = z.object({
+  source_document: z.enum(["resume", "job_description"]),
+  document_id: z.string(),
+  source_span: sourceSpanSchema,
+  matched_surface: z.string().min(1),
+});
+
+const relevantKeywordSchema = z.object({
+  keyword_id: z.string(),
+  category: z.string(),
+  status: z.enum(["matched", "missing"]),
+  display_term: z.string(),
+  normalized_term: z.string(),
+  match_method: z.enum(["exact", "documented_phrase", "curated_synonym", "not_detected"]),
+  evidence: z.array(relevantKeywordEvidenceSchema),
+});
+
 const documentSectionSchema = sectionReferenceSchema.extend({
   start: z.number().int().nonnegative(),
   end: z.number().int().positive(),
@@ -178,10 +195,12 @@ export const analysisV2ResponseSchema = z.object({
   source_documents: z.array(sourceDocumentSchema),
   findings: z.array(findingSchema),
   diagnostics: z.array(diagnosticFindingSchema).default([]),
+  relevant_keywords: z.array(relevantKeywordSchema).default([]),
 });
 
 export type EvidenceReference = z.infer<typeof evidenceReferenceSchema>;
 export type AnalysisFinding = z.infer<typeof findingSchema>;
+export type RelevantKeyword = z.infer<typeof relevantKeywordSchema>;
 export type SourceDocumentEvidence = z.infer<typeof analysisV2ResponseSchema>["source_documents"][number];
 export type AnalysisV2Response = z.infer<typeof analysisV2ResponseSchema>;
 export type DiagnosticFinding = z.infer<typeof diagnosticFindingSchema>;
@@ -192,6 +211,7 @@ export interface AnalysisViewModel extends AnalysisResponse {
     findings: AnalysisFinding[];
     sourceDocuments: SourceDocumentEvidence[];
     diagnostics?: DiagnosticFinding[];
+    relevantKeywords: RelevantKeyword[];
   };
 }
 
@@ -204,12 +224,13 @@ export function analysisViewModel(payload: AnalysisV2Response | AnalysisResponse
         findings: payload.findings,
         sourceDocuments: payload.source_documents,
         diagnostics: payload.diagnostics,
+        relevantKeywords: payload.relevant_keywords,
       },
     };
   }
   return {
     ...payload,
-    evidenceContract: { version: "unavailable", findings: [], sourceDocuments: [], diagnostics: [] },
+    evidenceContract: { version: "unavailable", findings: [], sourceDocuments: [], diagnostics: [], relevantKeywords: [] },
   };
 }
 
