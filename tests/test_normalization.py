@@ -141,6 +141,41 @@ class ConceptNormalizationTests(unittest.TestCase):
             ],
         )
 
+    def test_normalizes_curated_bioprocess_phrases_and_aliases(self) -> None:
+        concepts = normalize_concepts(
+            "Mammalian cell culture, downstream process development, protein "
+            "purifications, chromatographic techniques, membrane filtration, "
+            "tech transfer, process scale up, multivariate analysis, and bioprocesses"
+        )
+
+        self.assertEqual(
+            [item.concept for item in concepts],
+            [
+                "mammalian cell culture",
+                "downstream process development",
+                "protein purification",
+                "chromatography",
+                "membrane filtration",
+                "technology transfer",
+                "process scale-up",
+                "multivariate analysis",
+                "bioprocessing",
+            ],
+        )
+        self.assertTrue(
+            all(item.category is ConceptCategory.TECHNICAL_SKILLS for item in concepts)
+        )
+
+    def test_v2_1_anti_inference_boundaries_remain_non_matches(self) -> None:
+        concepts = {item.concept for item in normalize_concepts(
+            "Bradford assay scale-up experimental design cell culture"
+        )}
+
+        self.assertNotIn("protein purification", concepts)
+        self.assertNotIn("technology transfer", concepts)
+        self.assertNotIn("design of experiments", concepts)
+        self.assertNotIn("protein expression", concepts)
+
     def test_results_are_deterministic_across_repeated_runs(self) -> None:
         text = "QC root cause analysis C++ unknown-term"
         expected = normalize_concepts(text)
