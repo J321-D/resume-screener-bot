@@ -68,6 +68,7 @@ class V21BenchmarkTests(unittest.TestCase):
                 "experimentation",
                 "mammalian cell culture",
                 "membrane filtration",
+                "multivariate analysis",
                 "process scale-up",
                 "protein biochemistry",
                 "protein purification",
