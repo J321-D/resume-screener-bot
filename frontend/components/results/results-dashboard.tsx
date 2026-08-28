@@ -108,6 +108,21 @@ export function ResultsDashboard({ result, stale, reporting, reportError, analys
   const categorized = result.categories.filter((category) => category.category !== "Uncategorized");
   const uncategorized = result.categories.find((category) => category.category === "Uncategorized");
   const isFocused = result.analysis_mode === "Skills-focused analysis";
+  const relevantKeywords = result.evidenceContract.relevantKeywords;
+  const relevantMatchedTerms: AnalysisResponse["matched_terms"] = relevantKeywords
+    .filter((item) => item.status === "matched")
+    .map((item) => ({
+      term: item.normalized_term,
+      count: Math.max(1, item.evidence.filter((evidence) => evidence.source_document === "job_description").length),
+      category: item.category,
+    }));
+  const relevantMissingTerms: AnalysisResponse["missing_terms"] = relevantKeywords
+    .filter((item) => item.status === "missing")
+    .map((item) => ({
+      term: item.normalized_term,
+      count: Math.max(1, item.evidence.filter((evidence) => evidence.source_document === "job_description").length),
+      category: item.category,
+    }));
   const [copyState, setCopyState] = useState<"idle" | "copied" | "error">("idle");
   const [confirmingNew, setConfirmingNew] = useState(false);
   const [focusScope, setFocusScope] = useState<{ category: string; term: string | null } | null>(null);
@@ -130,7 +145,7 @@ export function ResultsDashboard({ result, stale, reporting, reportError, analys
       `${isFocused ? "Categorized gaps" : "Unmatched JD terms"}: ${result.coverage.missing}`,
       isFocused
         ? `${result.coverage.total} curated role concepts recognized; this score does not cover the entire job description.`
-        : "Raw lexical baseline: every unique JD token counts equally; unmatched tokens are not automatically résumé skills.",
+        : `${relevantKeywords.length} curated relevant JD concepts recognized separately from the raw lexical denominator.`,
       "Lexical comparison—not a candidate-performance assessment.",
     ].join("\n");
     try {
@@ -174,10 +189,12 @@ export function ResultsDashboard({ result, stale, reporting, reportError, analys
     if (!stale) onReviewStateChange?.(reviewDecisions, reviewNotes);
   }, [onReviewStateChange, reviewDecisions, reviewNotes, stale]);
 
-  const reviewOpportunities: ReviewOpportunity[] = result.missing_terms.map((item) => ({
-    ...item,
-    findingId: findingForTerm(result, "missing", item)?.finding_id,
-  }));
+  const reviewOpportunities: ReviewOpportunity[] = isFocused
+    ? result.missing_terms.map((item) => ({
+        ...item,
+        findingId: findingForTerm(result, "missing", item)?.finding_id,
+      }))
+    : relevantMissingTerms.map((item) => ({ ...item }));
 
   const focusedMatched = focusScope ? result.matched_terms.filter((item) => item.category === focusScope.category) : result.matched_terms;
   const focusedMissing = focusScope
@@ -309,6 +326,25 @@ export function ResultsDashboard({ result, stale, reporting, reportError, analys
         </motion.article>
       </div>
 
+      {!isFocused && relevantKeywords.length > 0 && (
+        <motion.article id="relevant-keyword-review" tabIndex={-1} className="insight-card" variants={cardVariants}>
+          <header><div><span className="result-icon"><Sparkles size={16} /></span><div><h3>Relevant keyword review</h3><p>Curated technical and professional concepts are derived separately from the raw lexical denominator. Consider missing concepts only where they truthfully reflect your experience.</p></div></div><strong>{relevantKeywords.length}</strong></header>
+          <div className="terms-grid">
+            <div>
+              <p className="mono-label">REPRESENTED CURATED CONCEPTS</p>
+              <TermList items={relevantMatchedTerms} label="Represented relevant keywords" limit={MATCHED_LIMIT} reduceMotion={reduceMotion} />
+              {!relevantMatchedTerms.length && <p className="empty-copy">No curated concepts are represented in the résumé.</p>}
+            </div>
+            <div>
+              <p className="mono-label">CURATED CONCEPTS TO REVIEW</p>
+              <TermList items={relevantMissingTerms} label="Relevant keywords to review" limit={OPPORTUNITY_LIMIT} reduceMotion={reduceMotion} />
+              {!relevantMissingTerms.length && <p className="empty-copy">No missing curated concepts were found.</p>}
+            </div>
+          </div>
+          <p className="results-disclaimer">Relevant Keyword Review uses only explicit curated phrases and aliases. It does not infer experience, requirement severity, or application readiness.</p>
+        </motion.article>
+      )}
+
       {(categorized.length > 0 || uncategorized) && (
         <motion.article id="category-signal" tabIndex={-1} className="insight-card" variants={cardVariants}>
           <header><div><span className="result-icon"><Layers3 size={16} /></span><div><h3>Category coverage</h3><p>Coverage across the curated relevance taxonomy. <a className="context-link" href="/help#categories">How categories work</a></p></div></div></header>
@@ -407,9 +443,9 @@ export function ResultsDashboard({ result, stale, reporting, reportError, analys
           key={`${analysisKey}:${stale ? "stale" : "current"}`}
           opportunities={reviewOpportunities}
           stale={stale}
-          focusCategory={focusScope?.category}
-          focusTerm={focusScope?.term}
-          onInspectFinding={(findingId) => selectFinding(findingId, "evidence")}
+          focusCategory={isFocused ? focusScope?.category : undefined}
+          focusTerm={isFocused ? focusScope?.term : undefined}
+          onInspectFinding={isFocused ? (findingId) => selectFinding(findingId, "evidence") : undefined}
           onDecisionsChange={setReviewDecisions}
           onNotesChange={setReviewNotes}
           initialDecisions={stale ? {} : initialReviewDecisions}
