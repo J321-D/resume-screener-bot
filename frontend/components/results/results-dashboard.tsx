@@ -125,9 +125,12 @@ export function ResultsDashboard({ result, stale, reporting, reportError, analys
     const summary = [
       "Resume Keyword Screener",
       `Mode: ${result.analysis_mode}`,
-      `Keyword coverage: ${result.coverage.score === null ? "N/A" : `${result.coverage.score.toFixed(1)}%`}`,
-      `Matched: ${result.coverage.matched}`,
-      `Coverage opportunities: ${result.coverage.missing}`,
+      `${isFocused ? "Categorized keyword coverage" : "Raw lexical overlap"}: ${result.coverage.score === null ? "N/A" : `${result.coverage.score.toFixed(1)}%`}`,
+      `${isFocused ? "Categorized represented" : "Exact terms shared"}: ${result.coverage.matched}`,
+      `${isFocused ? "Categorized gaps" : "Unmatched JD terms"}: ${result.coverage.missing}`,
+      isFocused
+        ? `${result.coverage.total} curated role concepts recognized; this score does not cover the entire job description.`
+        : "Raw lexical baseline: every unique JD token counts equally; unmatched tokens are not automatically résumé skills.",
       "Lexical comparison—not a candidate-performance assessment.",
     ].join("\n");
     try {
@@ -222,7 +225,7 @@ export function ResultsDashboard({ result, stale, reporting, reportError, analys
       animate="visible"
       variants={{ visible: { transition: { staggerChildren: reduceMotion ? 0 : 0.07 } } }}
     >
-      <p className="sr-only" role="status" aria-live="polite">Analysis complete. Lexical coverage {result.coverage.score === null ? "not applicable" : `${result.coverage.score.toFixed(1)}%`}. {result.coverage.matched} of {result.coverage.total} terms matched.</p>
+      <p className="sr-only" role="status" aria-live="polite">Analysis complete. {isFocused ? "Categorized keyword coverage" : "Raw lexical overlap"} {result.coverage.score === null ? "not applicable" : `${result.coverage.score.toFixed(1)}%`}. {result.coverage.matched} of {result.coverage.total} terms matched.</p>
       <div className="results-heading">
         <div><p className="eyebrow"><span /> Scan complete</p><h2 id="results-title">Your lexical coverage map</h2></div>
         <div className="results-heading-actions">
@@ -261,8 +264,13 @@ export function ResultsDashboard({ result, stale, reporting, reportError, analys
           <CoverageRing score={result.coverage.score} />
           <div className="coverage-copy">
             <p className="mono-label">{result.analysis_mode.toUpperCase()}</p>
-            <h3>{result.coverage.label}</h3>
+            <h3>{isFocused ? result.coverage.label : "Raw Lexical Overlap"}</h3>
             <p>Lexical overlap across the supplied résumé content and role description. <a className="context-link" href="/methodology#coverage">What does this mean?</a></p>
+            {isFocused ? (
+              <p><strong>{result.coverage.total} curated role concepts recognized.</strong> This score covers supported categorized concepts, not the entire job description.</p>
+            ) : (
+              <p><strong>Raw lexical baseline.</strong> Every unique JD token counts equally. Unmatched tokens are not automatically skills or résumé opportunities.</p>
+            )}
             <div className="result-meta"><FileText size={15} /><span>{result.metadata.resume_label}</span></div>
             <div className="result-meta"><Layers3 size={15} /><span>{result.metadata.input_mode.replaceAll("_", " ")}</span></div>
             <div className="result-meta"><Clock3 size={15} /><time dateTime={result.metadata.analyzed_at}>{date}</time></div>
@@ -273,13 +281,13 @@ export function ResultsDashboard({ result, stale, reporting, reportError, analys
 
         <div className="metric-stack">
           <motion.article className="metric-card matched" variants={cardVariants}>
-            <span>{isFocused ? "CATEGORIZED MATCHED" : "MATCHED"}</span><strong>{result.coverage.matched}</strong><p>{isFocused ? "categorized concepts represented" : "terms already represented"}</p>
+            <span>{isFocused ? "CATEGORIZED MATCHED" : "EXACT TERMS SHARED"}</span><strong>{result.coverage.matched}</strong><p>{isFocused ? "categorized concepts represented" : "exact JD terms found in the résumé"}</p>
           </motion.article>
           <motion.article className="metric-card opportunity" variants={cardVariants}>
-            <span>{isFocused ? "CATEGORIZED GAPS" : "OPPORTUNITIES"}</span><strong>{result.coverage.missing}</strong><p>{isFocused ? "categorized concepts to review" : "terms worth reviewing"}</p>
+            <span>{isFocused ? "CATEGORIZED GAPS" : "UNMATCHED JD TERMS"}</span><strong>{result.coverage.missing}</strong><p>{isFocused ? "categorized concepts to review" : "raw JD terms absent from the résumé"}</p>
           </motion.article>
           <motion.article className="metric-card" variants={cardVariants}>
-            <span>{isFocused ? "CATEGORIZED TOTAL" : "TOTAL"}</span><strong>{result.coverage.total}</strong><p>unique role concepts</p>
+            <span>{isFocused ? "CATEGORIZED TOTAL" : "UNIQUE JD TERMS"}</span><strong>{result.coverage.total}</strong><p>{isFocused ? "unique role concepts" : "unique terms in the raw lexical baseline"}</p>
           </motion.article>
         </div>
       </div>
@@ -290,14 +298,14 @@ export function ResultsDashboard({ result, stale, reporting, reportError, analys
 
       <div id="findings" className="terms-grid">
         <motion.article className="terms-card matched-terms" variants={cardVariants}>
-          <header><div><span className="result-icon success"><Check size={16} /></span><div><h3>Skills already covered</h3><p>Language detected in both inputs.</p></div></div><strong>{result.matched_terms.length}</strong></header>
-          <TermList items={focusedMatched} label="Matched terms" limit={MATCHED_LIMIT} reduceMotion={reduceMotion} evidenceFor={matchEvidence} onSelect={result.evidenceContract.version === "2.0" ? inspectMatchedTerm : undefined} />
+          <header><div><span className="result-icon success"><Check size={16} /></span><div><h3>{isFocused ? "Skills already covered" : "Exact terms shared"}</h3><p>{isFocused ? "Language detected in both inputs." : "Exact tokens detected in both inputs."}</p></div></div><strong>{result.matched_terms.length}</strong></header>
+          <TermList items={focusedMatched} label={isFocused ? "Matched terms" : "Exact terms shared"} limit={MATCHED_LIMIT} reduceMotion={reduceMotion} evidenceFor={matchEvidence} onSelect={result.evidenceContract.version === "2.0" ? inspectMatchedTerm : undefined} />
           {!focusedMatched.length && <p className="empty-copy">No matched terms were found in this focus.</p>}
         </motion.article>
         <motion.article className="terms-card missing-terms" variants={cardVariants}>
-          <header><div><span className="result-icon warning"><Sparkles size={16} /></span><div><h3>Coverage opportunities</h3><p>Consider these terms where they accurately reflect experience.</p></div></div><strong>{result.missing_terms.length}</strong></header>
-          <TermList items={focusedMissing} label="Coverage opportunities" limit={OPPORTUNITY_LIMIT} reduceMotion={reduceMotion} onSelect={focusTerm} selectedTerm={focusScope?.term} />
-          {!focusedMissing.length && <p className="empty-copy">No missing terms—this lexical comparison is complete.</p>}
+          <header><div><span className="result-icon warning"><Sparkles size={16} /></span><div><h3>{isFocused ? "Coverage opportunities" : "Unmatched JD terms"}</h3><p>{isFocused ? "Consider these terms where they accurately reflect experience." : "Raw JD tokens not found verbatim in the résumé; not all are skills."}</p></div></div><strong>{result.missing_terms.length}</strong></header>
+          <TermList items={focusedMissing} label={isFocused ? "Coverage opportunities" : "Unmatched JD terms"} limit={OPPORTUNITY_LIMIT} reduceMotion={reduceMotion} onSelect={focusTerm} selectedTerm={focusScope?.term} />
+          {!focusedMissing.length && <p className="empty-copy">{isFocused ? "No missing terms—this lexical comparison is complete." : "No unmatched JD terms in this raw lexical comparison."}</p>}
         </motion.article>
       </div>
 
