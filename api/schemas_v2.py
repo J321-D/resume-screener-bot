@@ -87,6 +87,15 @@ class SourceSpan(BaseModel):
         return self
 
 
+class RelevantKeywordEvidence(BaseModel):
+    """One exact source occurrence supporting a curated relevant keyword."""
+
+    source_document: Literal["resume", "job_description"]
+    document_id: str
+    source_span: SourceSpan
+    matched_surface: str
+
+
 class EvidenceReference(BaseModel):
     """One exact, privacy-bounded source occurrence supporting a finding."""
 
@@ -97,6 +106,23 @@ class EvidenceReference(BaseModel):
     source_span: SourceSpan
     matched_surface: str
     normalized_term: str
+
+
+class RelevantKeywordResponse(BaseModel):
+    """One curated JD concept for factual résumé review."""
+
+    keyword_id: str
+    category: str
+    status: Literal["matched", "missing"]
+    display_term: str
+    normalized_term: str
+    match_method: Literal[
+        "exact",
+        "documented_phrase",
+        "curated_synonym",
+        "not_detected",
+    ]
+    evidence: list[RelevantKeywordEvidence]
 
 
 class DocumentBlockResponse(BaseModel):
@@ -185,3 +211,4 @@ class AnalysisV2Response(BaseModel):
     source_documents: list[SourceDocumentResponse]
     findings: list[AnalysisFindingResponse]
     diagnostics: list[DiagnosticFindingResponse]
+    relevant_keywords: list[RelevantKeywordResponse] = Field(default_factory=list)
