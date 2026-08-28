@@ -19,6 +19,8 @@ It does **not** measure candidate quality, predict applicant-tracking-system dec
 - Preserves technical tokens such as `C++`, `C#`, `.NET`, and `Node.js`.
 - Explains curated phrase and synonym normalization.
 - Separates categorized skills coverage from uncategorized lexical terms.
+- Separates the raw Full lexical denominator from a curated Relevant Keyword Review so ordinary job-description words are not presented as résumé skills.
+- Discloses the recognized curated-concept denominator used by Skills-focused scoring.
 - Produces a portable, Unicode-safe report without transmitting documents to an external AI service.
 
 ## Core workflow
@@ -26,14 +28,17 @@ It does **not** measure candidate quality, predict applicant-tracking-system dec
 1. Choose Skills-focused or Full lexical analysis.
 2. Upload or paste résumé content and a job description.
 3. Run the deterministic server-side comparison.
-4. Review coverage, matched terms, opportunities, categories, and normalization explanations.
-5. Download the server-generated PDF report when useful.
-6. Clear the current session with New analysis before starting another document.
+4. Review the score in the context of its denominator, matched terms, curated relevant concepts, categories, and normalization explanations.
+5. Classify only truthful curated review opportunities; raw Full lexical unmatched tokens remain a separate compatibility view.
+6. Download the server-generated PDF report when useful.
+7. Clear the current session with New analysis before starting another document.
 
 ## Current capabilities
 
-- Skills-focused analysis with deterministic stop words, longest-first phrases, curated synonyms, taxonomy categories, and an Uncategorized fallback
-- Full lexical v1.0 compatibility mode
+- Skills-focused analysis with deterministic stop words, longest-first phrases, curated synonyms, taxonomy categories, an Uncategorized fallback, and explicit score-denominator context
+- Expanded curated life-science and engineering concepts for bioprocess, downstream, protein, analytical, process-development, and cross-functional terminology
+- Full lexical v1.0 compatibility mode preserved as raw unique-token overlap
+- Additive Relevant Keyword Review that derives only explicitly curated categorized JD concepts, reports represented/missing status, and preserves exact request-scoped source spans without changing raw Full lexical scoring
 - PDF, DOCX, and UTF-8 TXT input with a 10 MB per-file limit
 - Combined analysis of up to five résumés
 - Explicit résumé and job-description input precedence
@@ -57,7 +62,8 @@ It does **not** measure candidate quality, predict applicant-tracking-system dec
   no document content, form input, filenames, query strings, or custom interaction
   events are collected by the application analytics integration
 - An additive, privacy-bounded `/api/v2/analyze` evidence contract with exact
-  matched-term offsets, deterministic finding identity, and explicit unknowns
+  matched-term offsets, deterministic finding identity, explicit unknowns, and an
+  additive curated relevant-keyword payload
 - An Evidence Explorer with status/category/source/method/review filters, a
   deterministic TRACE chain, provenance inspector, and Machine View derived
   only from authoritative Contract v2 fields
@@ -80,7 +86,9 @@ It does **not** measure candidate quality, predict applicant-tracking-system dec
 
 - No OCR for image-only PDFs
 - No semantic similarity, stemming, fuzzy matching, embeddings, or generative AI
-- Curated normalization recognizes only documented concepts
+- Curated normalization recognizes only documented concepts and aliases; unsupported related experience is not inferred
+- Raw Full lexical overlap intentionally counts every unique JD token equally, including ordinary prose; the UI labels those results as raw terms rather than skills
+- Relevant Keyword Review is curated rather than universal and does not classify hard/preferred requirements, infer competency, or score readiness
 - Review decisions, Resume Lab runs, and temporary revision text reset on refresh or explicit session
   clearing; decisions remain per-run and never propagate automatically. There
   are no saved analyses, accounts, collaboration, or candidate ranking.
@@ -101,10 +109,14 @@ It does **not** measure candidate quality, predict applicant-tracking-system dec
 
 ## Product boundary
 
-The V2.x product includes the review workspace, searchable assistance,
+The completed V2.x product includes the review workspace, searchable assistance,
 demo/onboarding, resilience, bounded document handling, cross-browser responsive
 presentation, and repository operations without changing the protected engine.
-It is intentionally a deterministic lexical instrument, not an AI writer,
+V2.1 is an evidence-driven analysis-quality extension that preserves the same
+protected deterministic boundary while improving curated concept coverage and the
+truthfulness of score/review language.
+
+The product remains a deterministic lexical instrument, not an AI writer,
 candidate-ranking system, coaching service, résumé template library, peer-review
 network, or ATS predictor.
 
