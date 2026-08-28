@@ -45,6 +45,7 @@ PHRASE_MAP: dict[str, str] = {
     "recombinant protein": "recombinant protein",
     "protein biochemistry": "protein biochemistry",
     "data analysis": "data analysis",
+    "multivariate data analysis": "multivariate analysis",
     "multivariate analysis": "multivariate analysis",
     "analytical technologies": "analytical technologies",
     "real time": "real time",
