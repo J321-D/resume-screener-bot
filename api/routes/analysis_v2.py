@@ -11,6 +11,7 @@ from api.schemas_v2 import AnalysisV2Response
 from api.services.analysis_service import analyze_documents
 from api.services.document_service import prepare_documents
 from api.services.evidence_service import build_v2_response
+from api.services.relevant_keyword_service import build_relevant_keywords
 from resume_screener.models import AnalysisMode
 
 
@@ -32,9 +33,11 @@ async def analyze_v2(
         job_description_text,
     )
     analysis = await run_in_threadpool(analyze_documents, documents, analysis_mode)
-    return await run_in_threadpool(
+    response = await run_in_threadpool(
         build_v2_response,
         documents,
         analysis_mode,
         analysis,
     )
+    relevant_keywords = await run_in_threadpool(build_relevant_keywords, documents)
+    return response.model_copy(update={"relevant_keywords": relevant_keywords})
