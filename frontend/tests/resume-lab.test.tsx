@@ -30,7 +30,7 @@ function makeRun(id: string, sqlStatus: "matched" | "missing"): AnalysisRun {
     categories: [{ category: "Tools/software", matched, total: 2, score: matched * 50, display_value: `${matched * 50}.0%`, included_in_primary: true }],
     normalized_matches: [], warnings: [],
     metadata: { resume_label: id, resume_count: 1, input_mode: "pasted_text", analyzed_at: "2026-08-13T12:00:00Z" },
-    evidenceContract: { version: "2.0", findings, sourceDocuments: [] },
+    evidenceContract: { version: "2.0", findings, sourceDocuments: [], relevantKeywords: [] },
   };
   return { runId: id, label: id, createdAtClient: "2026-08-13T12:00:00Z", analysis, inputIdentity: id, resumeIdentity: id, jobIdentity: "same-job", reviewState: {}, notes: {}, sourceType: "pasted_text" };
 }
