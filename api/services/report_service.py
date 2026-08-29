@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from api.services.document_service import PreparedDocuments
+from api.services.relevant_keyword_service import build_relevant_keywords
 from resume_screener.analysis import (
     aggregate_resume_words,
     calculate_matched_words,
@@ -10,7 +11,7 @@ from resume_screener.analysis import (
     extract_keywords,
     rank_missing_keywords,
 )
-from resume_screener.models import AnalysisMode
+from resume_screener.models import AnalysisMode, ConceptCategory
 from resume_screener.reporting import generate_pdf_report
 from resume_screener.sections import detect_sections
 from resume_screener.skills.matcher import analyze_skills_focused
@@ -50,20 +51,55 @@ def generate_report_for_documents(
         matched = calculate_matched_words(resume_words, job_words)
         missing = calculate_missing_words(resume_words, job_words)
         ranked = rank_missing_keywords(job_text, missing, "")
+        relevant_keywords = build_relevant_keywords(documents)
+        relevant_represented = [
+            item.display_term
+            for item in relevant_keywords
+            if item.status == "matched"
+        ]
+        relevant_missing = [
+            item.display_term
+            for item in relevant_keywords
+            if item.status == "missing"
+        ]
         return generate_pdf_report(
             matched,
             ranked.filtered,
             analysis_mode=analysis_mode.value,
             document_section_summaries=document_section_summaries,
+            report_title="Raw Lexical Overlap Report",
+            matched_label="Exact Terms Shared",
+            missing_label="Unmatched JD Terms",
+            additional_sections=[
+                (
+                    "Relevant Keyword Review",
+                    [
+                        f"Represented Curated Concepts: {relevant_represented}",
+                        f"Curated Concepts To Review: {relevant_missing}",
+                        "This curated review is separate from the raw lexical score.",
+                    ],
+                )
+            ],
         )
 
     result = analyze_skills_focused(resume_texts, job_text)
-    ordered_matched = [item.display_term for item in result.matched]
+    categorized_matched = [
+        item
+        for item in result.matched
+        if item.category is not ConceptCategory.UNCATEGORIZED
+    ]
+    categorized_missing = [
+        item
+        for item in result.missing
+        if item.category is not ConceptCategory.UNCATEGORIZED
+    ]
+    ordered_matched = [item.display_term for item in categorized_matched]
     ordered_missing = [
-        item.display_term for item in sorted(result.missing, key=lambda item: -item.count)
+        item.display_term
+        for item in sorted(categorized_missing, key=lambda item: -item.count)
     ]
     return generate_pdf_report(
-        {item.concept for item in result.matched},
+        {item.concept for item in categorized_matched},
         ordered_missing,
         analysis_mode=analysis_mode.value,
         category_coverage=result.category_coverage,
@@ -71,4 +107,7 @@ def generate_report_for_documents(
         ordered_matched_keywords=ordered_matched,
         primary_coverage=result.primary_coverage,
         document_section_summaries=document_section_summaries,
+        report_title="Categorized Keyword Coverage Report",
+        matched_label="Curated Concepts Represented",
+        missing_label="Curated Concepts To Review",
     )

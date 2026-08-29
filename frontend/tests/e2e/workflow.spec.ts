@@ -51,8 +51,8 @@ test("completes a keyboard-accessible pasted-text analysis", async ({ page }) =>
   await expect(page.getByText("26 / 200,000 characters", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Run Keyword Scan" }).click();
   await expect(page.getByRole("heading", { name: "Your lexical coverage map" })).toBeVisible();
-  await expect(page.getByRole("img", { name: "66.7% keyword coverage" })).toBeVisible();
-  await expect(page.getByLabel("Coverage opportunities").getByText("SQL", { exact: true })).toBeVisible();
+  await expect(page.getByRole("img", { name: "66.7% categorized keyword coverage" })).toBeVisible();
+  await expect(page.getByLabel("Curated concepts to review").getByText("SQL", { exact: true })).toBeVisible();
 });
 
 test("inspects canonical documents and synchronizes X-Ray with authoritative TRACE", async ({ page }) => {
@@ -166,7 +166,7 @@ test("uses the command palette and evidence focus without changing the result", 
 
   await page.locator(".category-bars").getByRole("button", { name: /Tools\/software.*50\.0%/i }).click();
   await expect(page.getByRole("complementary", { name: "Focused evidence view" })).toContainText("Category evidence isolated");
-  await expect(page.getByRole("img", { name: "66.7% keyword coverage" })).toBeVisible();
+  await expect(page.getByRole("img", { name: "66.7% categorized keyword coverage" })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(false);
 });
 
@@ -264,7 +264,7 @@ test("honors reduced-motion preferences without hiding results", async ({ page }
   const heading = page.getByRole("heading", { name: "Your lexical coverage map" });
   await expect(heading).toBeVisible();
   await expect(page.locator("section.results")).toBeFocused();
-  await expect(page.getByRole("img", { name: "66.7% keyword coverage" })).toBeVisible();
+  await expect(page.getByRole("img", { name: "66.7% categorized keyword coverage" })).toBeVisible();
 
   const transitionSeconds = await page.locator(".ring-value").evaluate((element) => {
     const duration = getComputedStyle(element).transitionDuration;

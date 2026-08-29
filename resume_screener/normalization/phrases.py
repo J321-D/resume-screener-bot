@@ -1,6 +1,10 @@
 """Curated two- and three-token phrases recognized longest-first."""
 
 PHRASE_MAP: dict[str, str] = {
+    "bachelor degree": "bachelor degree",
+    "bachelor of engineering": "bachelor degree",
+    "bachelor of science": "bachelor degree",
+    "bs degree": "bachelor degree",
     "quality assurance": "quality assurance",
     "quality control": "quality control",
     "process validation": "process validation",

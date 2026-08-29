@@ -74,6 +74,7 @@ TOOLS_SOFTWARE = frozenset(
 
 EDUCATION = frozenset(
     {
+        "bachelor degree",
         "bachelor",
         "bachelor's",
         "degree",

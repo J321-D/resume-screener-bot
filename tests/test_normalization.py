@@ -176,6 +176,34 @@ class ConceptNormalizationTests(unittest.TestCase):
         self.assertNotIn("design of experiments", concepts)
         self.assertNotIn("protein expression", concepts)
 
+    def test_r_and_d_does_not_imply_r_programming(self) -> None:
+        concepts = normalize_concepts(
+            "R&D research and R & D manufacturing"
+        )
+
+        normalized = {item.concept for item in concepts}
+        self.assertNotIn("r", normalized)
+        self.assertNotIn("d", normalized)
+
+        standalone = normalize_concepts("Python R SQL")
+        self.assertIn("r", {item.concept for item in standalone})
+
+    def test_normalizes_explicit_bachelor_degree_forms(self) -> None:
+        variants = [
+            "Bachelor of Engineering",
+            "Bachelor of Science",
+            "Bachelor's degree",
+            "BS degree",
+        ]
+
+        for variant in variants:
+            with self.subTest(variant=variant):
+                concepts = normalize_concepts(variant)
+                self.assertIn(
+                    "bachelor degree",
+                    {item.concept for item in concepts},
+                )
+
     def test_results_are_deterministic_across_repeated_runs(self) -> None:
         text = "QC root cause analysis C++ unknown-term"
         expected = normalize_concepts(text)

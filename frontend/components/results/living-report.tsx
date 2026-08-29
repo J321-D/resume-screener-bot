@@ -12,15 +12,27 @@ interface LivingReportProps {
 const SCREEN_REPORT_TERM_LIMIT = 50;
 
 export function LivingReport({ result, stale }: LivingReportProps) {
-  const applicable = result.categories.filter((category) => category.total > 0);
+  const isFocused = result.analysis_mode === "Skills-focused analysis";
+  const applicable = result.categories.filter(
+    (category) =>
+      category.total > 0 &&
+      (!isFocused || category.category !== "Uncategorized"),
+  );
+  const reportMatchedTerms = isFocused
+    ? result.matched_terms.filter((item) => item.category && item.category !== "Uncategorized")
+    : result.matched_terms;
+  const reportMissingTerms = isFocused
+    ? result.missing_terms.filter((item) => item.category && item.category !== "Uncategorized")
+    : result.missing_terms;
+  const reportTitle = isFocused ? result.coverage.label : "Raw Lexical Overlap";
   return (
     <details id="living-report" className="living-report" tabIndex={-1}>
       <summary><span><BookOpenText size={17} /><span><strong>Living Report</strong><small>Screen-first, selectable, and derived from this response</small></span></span><ChevronDown size={17} /></summary>
       <div className="living-report-body">
-        <header><p className="mono-label">LIVE ANALYSIS RECORD</p><h3>{result.coverage.label}</h3><strong>{result.coverage.score === null ? "N/A" : `${result.coverage.score.toFixed(1)}%`}</strong><p>{result.analysis_mode} · {result.metadata.resume_label}</p></header>
+        <header><p className="mono-label">LIVE ANALYSIS RECORD</p><h3>{reportTitle}</h3><strong>{result.coverage.score === null ? "N/A" : `${result.coverage.score.toFixed(1)}%`}</strong><p>{result.analysis_mode} · {result.metadata.resume_label}</p></header>
         {stale && <p className="living-report-stale" role="status">Inputs changed after this result. This screen report remains visible as prior output; regenerate before export.</p>}
         <dl className="living-report-metrics">
-          <div><dt>Represented</dt><dd>{result.coverage.matched}</dd></div><div><dt>Opportunities</dt><dd>{result.coverage.missing}</dd></div><div><dt>Total</dt><dd>{result.coverage.total}</dd></div>
+          <div><dt>{isFocused ? "Categorized represented" : "Exact terms shared"}</dt><dd>{result.coverage.matched}</dd></div><div><dt>{isFocused ? "Categorized gaps" : "Unmatched JD terms"}</dt><dd>{result.coverage.missing}</dd></div><div><dt>{isFocused ? "Categorized total" : "Unique JD terms"}</dt><dd>{result.coverage.total}</dd></div>
         </dl>
         <section className="living-report-provenance">
           <h4>Evidence contract</h4>
@@ -32,8 +44,8 @@ export function LivingReport({ result, stale }: LivingReportProps) {
         </section>
         <section><h4>Category record</h4>{applicable.length ? <ul>{applicable.map((category) => <li key={category.category}><span>{category.category}</span><strong>{category.matched} / {category.total}</strong><small>{category.display_value}</small></li>)}</ul> : <p>No applicable categorized concepts were returned.</p>}</section>
         <div className="living-report-columns">
-          <section><h4>Represented language</h4>{result.matched_terms.length ? <><ol>{result.matched_terms.slice(0, SCREEN_REPORT_TERM_LIMIT).map((item) => <li key={`${item.term}-${item.category}`}><span>{item.term}</span><small>{item.category ?? "Uncategorized"}</small></li>)}</ol>{result.matched_terms.length > SCREEN_REPORT_TERM_LIMIT && <p className="living-report-limit">First {SCREEN_REPORT_TERM_LIMIT} of {result.matched_terms.length}, preserving engine order.</p>}</> : <p>None returned.</p>}</section>
-          <section><h4>Review opportunities</h4>{result.missing_terms.length ? <><ol>{result.missing_terms.slice(0, SCREEN_REPORT_TERM_LIMIT).map((item) => <li key={`${item.term}-${item.category}`}><span>{item.term}</span><small>{item.category ?? "Uncategorized"}</small></li>)}</ol>{result.missing_terms.length > SCREEN_REPORT_TERM_LIMIT && <p className="living-report-limit">First {SCREEN_REPORT_TERM_LIMIT} of {result.missing_terms.length}, preserving engine order.</p>}</> : <p>None returned.</p>}</section>
+          <section><h4>{isFocused ? "Curated concepts represented" : "Exact terms shared"}</h4>{reportMatchedTerms.length ? <><ol>{reportMatchedTerms.slice(0, SCREEN_REPORT_TERM_LIMIT).map((item) => <li key={`${item.term}-${item.category}`}><span>{item.term}</span><small>{item.category ?? "Uncategorized"}</small></li>)}</ol>{reportMatchedTerms.length > SCREEN_REPORT_TERM_LIMIT && <p className="living-report-limit">First {SCREEN_REPORT_TERM_LIMIT} of {reportMatchedTerms.length}, preserving engine order.</p>}</> : <p>None returned.</p>}</section>
+          <section><h4>{isFocused ? "Curated concepts to review" : "Unmatched JD terms"}</h4>{reportMissingTerms.length ? <><ol>{reportMissingTerms.slice(0, SCREEN_REPORT_TERM_LIMIT).map((item) => <li key={`${item.term}-${item.category}`}><span>{item.term}</span><small>{item.category ?? "Uncategorized"}</small></li>)}</ol>{reportMissingTerms.length > SCREEN_REPORT_TERM_LIMIT && <p className="living-report-limit">First {SCREEN_REPORT_TERM_LIMIT} of {reportMissingTerms.length}, preserving engine order.</p>}</> : <p>None returned.</p>}</section>
         </div>
         <footer><LockKeyhole size={15} /><p>This view is assembled locally from the current API response and is not saved. The downloadable PDF remains generated by the existing protected server report engine.</p></footer>
       </div>
