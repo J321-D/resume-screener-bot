@@ -105,7 +105,7 @@ export function DocumentXRay({ result, selectedFindingId, reviewDecisions, onSel
 
   useEffect(() => {
     if (!selectedFindingId) return;
-    const root = document.getElementById("document-xray");
+    const root = window.document.getElementById("document-xray");
     const mark = Array.from(root?.querySelectorAll<HTMLElement>("mark[data-finding-id]") ?? [])
       .find((item) => item.dataset.findingId === selectedFindingId);
     if (!mark) return;
