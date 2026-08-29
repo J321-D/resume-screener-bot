@@ -106,8 +106,8 @@ export function DocumentXRay({ result, selectedFindingId, reviewDecisions, onSel
   useEffect(() => {
     if (!selectedFindingId) return;
     const root = document.getElementById("document-xray");
-    const selector = `mark[data-finding-id="${CSS.escape(selectedFindingId)}"]`;
-    const mark = root?.querySelector<HTMLElement>(selector);
+    const mark = Array.from(root?.querySelectorAll<HTMLElement>("mark[data-finding-id]") ?? [])
+      .find((item) => item.dataset.findingId === selectedFindingId);
     if (!mark) return;
     mark.classList.remove("is-evidence-flash");
     void mark.offsetWidth;
