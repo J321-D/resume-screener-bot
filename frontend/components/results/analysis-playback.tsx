@@ -35,7 +35,7 @@ function stagesForMode(isFocused: boolean) {
         ? "Classify curated concepts to review using your own factual experience."
         : "Review curated relevant concepts separately from the raw lexical score.",
     },
-    { id: "living-report", label: "Report", description: "Read the screen report or request the protected PDF." },
+    { id: "living-report", label: "Report", description: "Preview the screen report or request the protected PDF." },
   ] as const;
 }
 
@@ -71,7 +71,7 @@ export function AnalysisPlayback({ result, reducedMotion }: AnalysisPlaybackProp
   return (
     <section className="analysis-playback" aria-labelledby="playback-title">
       <header>
-        <div><span className="mono-label">RESULT SYSTEM MAP</span><h3 id="playback-title">Walk through this analysis</h3><p>Six factual views of the same returned result. Playback changes presentation only.</p></div>
+        <div><span className="mono-label">TECHNICAL DETAILS // RESULT SYSTEM MAP</span><h3 id="playback-title">Walk through this analysis</h3><p>Optional factual views of the same returned result. Playback changes presentation only and never changes the score.</p></div>
         <button type="button" aria-pressed={touring} onClick={() => setTouring((current) => !current)}>{touring ? <X size={15} /> : <Play size={15} />}{touring ? "End walkthrough" : "Start walkthrough"}</button>
       </header>
       <nav aria-label="Analysis result map">
