@@ -97,14 +97,18 @@ class V21MerckBenchmarkTests(unittest.TestCase):
         self.assertEqual(result.primary_coverage.total, 20)
         self.assertEqual(result.primary_coverage.score, 20.0)
 
-        matched = {item.concept for item in result.matched if item.category is not ConceptCategory.UNCATEGORIZED}
+        matched = {
+            item.concept
+            for item in result.matched
+            if item.category is not ConceptCategory.UNCATEGORIZED
+        }
         self.assertEqual(
             matched,
             {
                 "bachelor degree",
                 "mammalian cell culture",
                 "process scale-up",
-                "bioprocesses",
+                "bioprocessing",
             },
         )
 
@@ -117,7 +121,7 @@ class V21MerckBenchmarkTests(unittest.TestCase):
         self.assertIn("protein purification", missing)  # Bradford/TLC != protein purification
         self.assertIn("design of experiments", missing)  # experimental design != DOE
         self.assertIn("protein expression", missing)  # cell culture != protein expression
-        self.assertIn("chromatographic techniques", missing)  # TLC != broad chromatography claim
+        self.assertIn("chromatography", missing)  # TLC != broad chromatography claim
         self.assertIn("data analysis", missing)  # data interpretation != data analysis
 
     def test_uncategorized_language_never_enters_primary_denominator(self) -> None:
