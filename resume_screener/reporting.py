@@ -69,7 +69,12 @@ def _add_page(document: fitz.Document, font: fitz.Font) -> fitz.Page:
     page.insert_font(fontname=_PDF_FONT_NAME, fontbuffer=font.buffer)
     page.draw_rect(page.rect, color=None, fill=(0.985, 0.99, 1.0))
     page.draw_rect(
-        fitz.Rect(_PAGE_MARGIN - 10, _PAGE_MARGIN - 14, page.rect.width - _PAGE_MARGIN + 10, page.rect.height - _PAGE_MARGIN + 8),
+        fitz.Rect(
+            _PAGE_MARGIN - 10,
+            _PAGE_MARGIN - 14,
+            page.rect.width - _PAGE_MARGIN + 10,
+            page.rect.height - _PAGE_MARGIN + 8,
+        ),
         color=(0.82, 0.86, 0.91),
         width=0.6,
     )
@@ -175,7 +180,9 @@ def generate_pdf_report(
             )
     if additional_sections:
         for section_title, section_lines in additional_sections:
-            report_lines.extend(["", _replace_unsupported_glyphs(f"{section_title}:", font)])
+            report_lines.extend(
+                ["", _replace_unsupported_glyphs(f"{section_title}:", font)]
+            )
             report_lines.extend(
                 _replace_unsupported_glyphs(line, font)
                 for line in section_lines
@@ -193,9 +200,15 @@ def generate_pdf_report(
         title_size = 21
         title_width = font.text_length(title, fontsize=title_size)
         title_x = max(_PAGE_MARGIN, (page.rect.width - title_width) / 2)
-        y_position = _PAGE_MARGIN + 17
+        header_panel_bottom = _PAGE_MARGIN + 68
+        y_position = _PAGE_MARGIN + 40
         page.draw_rect(
-            fitz.Rect(_PAGE_MARGIN, _PAGE_MARGIN - 4, page.rect.width - _PAGE_MARGIN, _PAGE_MARGIN + 48),
+            fitz.Rect(
+                _PAGE_MARGIN,
+                _PAGE_MARGIN - 4,
+                page.rect.width - _PAGE_MARGIN,
+                header_panel_bottom,
+            ),
             color=None,
             fill=_PANEL,
         )
@@ -213,7 +226,7 @@ def generate_pdf_report(
             fontsize=title_size,
             color=_INK,
         )
-        y_position += 3 * _LINE_HEIGHT
+        y_position = header_panel_bottom + _LINE_HEIGHT + 8
 
         for logical_line in report_lines:
             for line in _wrap_line(logical_line, font, content_width):
@@ -221,12 +234,17 @@ def generate_pdf_report(
                     page = _add_page(document, font)
                     y_position = _PAGE_MARGIN + _FONT_SIZE
                 if line:
-                    is_section = line.endswith(":") and not line.startswith(("Matched Keywords", "Missing Keywords", "Analysis Mode"))
+                    is_section = line.endswith(":") and not line.startswith(
+                        ("Matched Keywords", "Missing Keywords", "Analysis Mode")
+                    )
                     if is_section:
                         y_position += 4
                         page.draw_line(
                             fitz.Point(_PAGE_MARGIN, y_position - 11),
-                            fitz.Point(page.rect.width - _PAGE_MARGIN, y_position - 11),
+                            fitz.Point(
+                                page.rect.width - _PAGE_MARGIN,
+                                y_position - 11,
+                            ),
                             color=(0.80, 0.85, 0.90),
                             width=0.5,
                         )
@@ -249,7 +267,12 @@ def generate_pdf_report(
             )
             page_label = f"{page_number:02d} / {len(document):02d}"
             report_page.insert_text(
-                (report_page.rect.width - _PAGE_MARGIN - font.text_length(page_label, fontsize=7), report_page.rect.height - _PAGE_MARGIN + 14),
+                (
+                    report_page.rect.width
+                    - _PAGE_MARGIN
+                    - font.text_length(page_label, fontsize=7),
+                    report_page.rect.height - _PAGE_MARGIN + 14,
+                ),
                 page_label,
                 fontname=_PDF_FONT_NAME,
                 fontsize=7,

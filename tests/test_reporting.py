@@ -239,6 +239,22 @@ class GeneratePdfReportTests(unittest.TestCase):
             normalized,
         )
 
+    def test_dossier_kicker_and_title_do_not_overlap(self) -> None:
+        pdf_bytes = generate_pdf_report(
+            {"process scale-up"},
+            ["technology transfer"],
+            report_title="Categorized Keyword Coverage Report",
+        )
+
+        with fitz.open(stream=pdf_bytes, filetype="pdf") as document:
+            page = document[0]
+            kicker_boxes = page.search_for("RKS // DETERMINISTIC LEXICAL DOSSIER")
+            title_boxes = page.search_for("Categorized Keyword Coverage Report")
+
+        self.assertEqual(len(kicker_boxes), 1)
+        self.assertEqual(len(title_boxes), 1)
+        self.assertLessEqual(kicker_boxes[0].y1 + 4, title_boxes[0].y0)
+
 
 if __name__ == "__main__":
     unittest.main()
