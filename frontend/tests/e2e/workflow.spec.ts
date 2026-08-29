@@ -5,6 +5,15 @@ async function waitForAnalyzerHydration(page: Page) {
   await expect(page.locator("html")).toHaveAttribute("data-analysis-state", /^(idle|input_ready)$/);
 }
 
+async function openTechnicalDetails(page: Page) {
+  const toggle = page.getByRole("button", { name: /Technical details/ });
+  await expect(toggle).toBeVisible();
+  if ((await toggle.getAttribute("aria-expanded")) !== "true") {
+    await toggle.click();
+  }
+  await expect(toggle).toHaveAttribute("aria-expanded", "true");
+}
+
 const payload = {
   analysis_mode: "Skills-focused analysis",
   coverage: { score: 66.7, matched: 2, missing: 1, total: 3, label: "Categorized Keyword Coverage" },
@@ -67,6 +76,7 @@ test("inspects canonical documents and synchronizes X-Ray with authoritative TRA
   const runScan = page.getByRole("button", { name: "Run Keyword Scan" });
   await expect(runScan).toBeEnabled();
   await runScan.click();
+  await openTechnicalDetails(page);
   const resumeDocument = page.getByRole("article", { name: "Résumé canonical text" });
   await expect(resumeDocument).toContainText("QC Python");
   await resumeDocument.getByRole("button", { name: "QC" }).press("Enter");
@@ -122,6 +132,7 @@ test("compares two session-only résumé runs and clears them on refresh", async
   await expect(page.getByText(/temporary text revision/).first()).toBeVisible();
   await expect(page.locator(".comparison-grid")).toContainText("Newly represented");
   await page.locator(".comparison-grid").getByRole("button", { name: /SQL/i }).click();
+  await openTechnicalDetails(page);
   await expect(page.getByRole("article", { name: "SQL" })).toBeVisible();
   expect(await page.evaluate(() => ({ local: localStorage.length, session: sessionStorage.length }))).toEqual({ local: 0, session: 0 });
   await page.reload();
@@ -361,6 +372,7 @@ test("walks, presents, and reports the same result without persistence", async (
   await page.getByLabel("Job-description text").fill("quality control Python SQL GMP");
   await page.getByRole("button", { name: "Run Keyword Scan" }).click();
   await expect(page.getByRole("heading", { name: "Your lexical coverage map" })).toBeVisible();
+  await openTechnicalDetails(page);
 
   await page.getByRole("button", { name: "Start walkthrough" }).click();
   await expect(page.getByRole("status").filter({ hasText: "STAGE 01" })).toContainText("Coverage");
