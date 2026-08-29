@@ -1,0 +1,287 @@
+/* V2.1 result-experience polish: hierarchy, evidence drawer, motion, and mobile navigation. */
+.results {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Put the decision-useful result first, and move engineering views later. */
+.results > .results-heading { order: 0; }
+.results > .stale-banner,
+.results > .focus-scope { order: 1; }
+.results > #summary { order: 2; }
+.results > .results-polish-toolbar { order: 3; }
+.results > #findings { order: 4; }
+.results > #relevant-keyword-review { order: 5; }
+.results > #category-signal { order: 6; }
+.results > .explanation-card { order: 7; }
+.results > .result-warnings { order: 8; }
+.results > #review { order: 9; }
+.results > #living-report { order: 10; }
+.results > .export-card,
+.results > .export-error { order: 11; }
+.results > .technical-details-toggle { order: 19; }
+.results > .analysis-playback { order: 20; }
+.results > #fingerprint { order: 21; }
+.results > div:has(> #document-xray) { order: 22; }
+.results > div:has(> #evidence-explorer) { order: 23; }
+.results > div:has(> .diagnostics-explorer) { order: 24; }
+.results > .system-transparency { order: 25; }
+.results > .results-next-actions { order: 90; }
+.results > .results-disclaimer { order: 91; }
+.results > .results-mobile-nav { order: 100; }
+
+/* Keep the existing accessible heading while making mode-specific language visible. */
+.results[data-analysis-mode="focused"] .results-heading h2,
+.results[data-analysis-mode="focused"] .coverage-copy > p:first-of-type {
+  font-size: 0;
+}
+.results[data-analysis-mode="focused"] .results-heading h2::after {
+  content: "Your role coverage map";
+  font-size: clamp(34px, 4.4vw, 58px);
+  letter-spacing: -.055em;
+}
+.results[data-analysis-mode="focused"] .coverage-copy > p:first-of-type::before {
+  content: "Coverage across supported categorized role concepts in the supplied résumé and role description. ";
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+.results[data-analysis-mode="focused"] .coverage-copy > p:first-of-type .context-link {
+  font-size: 12px;
+}
+.results[data-analysis-mode="focused"] .coverage-matrix thead th:nth-child(3) {
+  font-size: 0;
+}
+.results[data-analysis-mode="focused"] .coverage-matrix thead th:nth-child(3)::after {
+  content: "Gap";
+  font-size: 7px;
+}
+
+/* Search + category controls for the primary returned concepts. */
+.results-polish-toolbar {
+  margin: 2px 0 18px;
+  padding: 12px;
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto;
+  align-items: center;
+  gap: 10px 16px;
+  border: 1px solid rgba(120, 165, 255, .14);
+  border-radius: 14px;
+  background: rgba(10, 16, 32, .68);
+  backdrop-filter: blur(14px);
+}
+.results-polish-search {
+  min-height: 42px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(7, 11, 20, .48);
+  color: var(--text-muted);
+  transition: border-color var(--motion-standard) var(--ease-standard), box-shadow var(--motion-standard) var(--ease-standard);
+}
+.results-polish-search:focus-within { border-color: var(--border-hover); box-shadow: var(--focus-ring); }
+.results-polish-search input {
+  min-width: 0;
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+  font-size: 12px;
+}
+.results-polish-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 7px; }
+.results-polish-chip,
+.results-polish-actions a {
+  min-height: 34px;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: rgba(255,255,255,.018);
+  color: var(--text-secondary);
+  font-size: 9px;
+  cursor: pointer;
+  transition: transform var(--motion-fast) var(--ease-standard), border-color var(--motion-fast) var(--ease-standard), background var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard);
+}
+.results-polish-chip:hover,
+.results-polish-chip:focus-visible,
+.results-polish-chip[aria-pressed="true"],
+.results-polish-actions a:hover,
+.results-polish-actions a:focus-visible {
+  border-color: rgba(83,229,255,.36);
+  background: rgba(83,229,255,.07);
+  color: var(--cyan);
+  transform: translateY(-1px);
+  outline: 0;
+}
+.results-polish-categories { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; }
+.results-polish-status { grid-column: 1 / -1; margin: 0; color: var(--text-muted); font-size: 9px; }
+
+/* Make evidence-bearing chips feel inspectable without adding decorative motion. */
+.term-cloud li { transition: transform var(--motion-fast) var(--ease-standard), border-color var(--motion-fast) var(--ease-standard), box-shadow var(--motion-fast) var(--ease-standard), background var(--motion-fast) var(--ease-standard); }
+.term-cloud li button::after {
+  content: "View evidence";
+  max-width: 0;
+  overflow: hidden;
+  opacity: 0;
+  color: var(--cyan);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 7px;
+  white-space: nowrap;
+  transition: max-width var(--motion-standard) var(--ease-standard), opacity var(--motion-fast) var(--ease-standard);
+}
+.term-cloud li button:hover::after,
+.term-cloud li button:focus-visible::after { max-width: 76px; opacity: .9; }
+
+/* Technical views stay available, but live after the decision path. */
+.technical-details-toggle {
+  margin: 30px 0 0;
+  min-height: 52px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  border: 1px solid rgba(120,165,255,.16);
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(18,27,48,.72), rgba(8,13,25,.72));
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: border-color var(--motion-standard) var(--ease-standard), background var(--motion-standard) var(--ease-standard), transform var(--motion-fast) var(--ease-standard);
+}
+.technical-details-toggle:hover,
+.technical-details-toggle:focus-visible { border-color: rgba(83,229,255,.34); color: var(--text); outline: 0; }
+.technical-details-toggle span { display: grid; gap: 2px; text-align: left; }
+.technical-details-toggle strong { color: var(--text); font-size: 12px; }
+.technical-details-toggle small { color: var(--text-muted); font-size: 9px; }
+.technical-details-toggle svg { transition: transform var(--motion-standard) var(--ease-standard); }
+.results[data-technical-open="false"] .technical-details-toggle svg { transform: rotate(-90deg); }
+.results[data-technical-open="false"] > .analysis-playback,
+.results[data-technical-open="false"] > #fingerprint,
+.results[data-technical-open="false"] > div:has(> #document-xray),
+.results[data-technical-open="false"] > div:has(> #evidence-explorer),
+.results[data-technical-open="false"] > div:has(> .diagnostics-explorer),
+.results[data-technical-open="false"] > .system-transparency {
+  max-height: 0;
+  margin-block: 0;
+  overflow: clip;
+  opacity: 0;
+  pointer-events: none;
+}
+.results > .analysis-playback,
+.results > #fingerprint,
+.results > div:has(> #document-xray),
+.results > div:has(> #evidence-explorer),
+.results > div:has(> .diagnostics-explorer),
+.results > .system-transparency {
+  transition: max-height 360ms var(--ease-standard), opacity var(--motion-standard) var(--ease-standard), margin var(--motion-standard) var(--ease-standard);
+}
+.results[data-technical-open="true"] > .analysis-playback,
+.results[data-technical-open="true"] > #fingerprint,
+.results[data-technical-open="true"] > div:has(> #document-xray),
+.results[data-technical-open="true"] > div:has(> #evidence-explorer),
+.results[data-technical-open="true"] > div:has(> .diagnostics-explorer),
+.results[data-technical-open="true"] > .system-transparency { max-height: 5000px; opacity: 1; }
+
+/* Evidence proof drawer. No backdrop: the analysis remains readable and testable. */
+.evidence-proof-drawer {
+  position: fixed;
+  z-index: 120;
+  top: 76px;
+  right: 16px;
+  bottom: 16px;
+  width: min(430px, calc(100vw - 32px));
+  padding: 18px;
+  overflow: auto;
+  border: 1px solid rgba(83,229,255,.32);
+  border-radius: 18px;
+  background: linear-gradient(150deg, rgba(18,27,48,.985), rgba(7,11,20,.985));
+  box-shadow: 0 28px 90px rgba(0,0,0,.56), inset 0 1px rgba(255,255,255,.06);
+}
+.evidence-proof-drawer > header { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+.evidence-proof-drawer > header > div { display: grid; gap: 4px; }
+.evidence-proof-drawer .mono-label { margin: 0; }
+.evidence-proof-drawer h3 { margin: 2px 0 0; font-size: 23px; letter-spacing: -.035em; }
+.evidence-proof-close { width: 36px; height: 36px; display: grid; place-items: center; flex: 0 0 auto; border: 1px solid var(--border); border-radius: 9px; background: transparent; color: var(--text-secondary); cursor: pointer; }
+.evidence-proof-close:hover,.evidence-proof-close:focus-visible { border-color: var(--border-hover); color: var(--text); outline: 0; box-shadow: var(--focus-ring); }
+.evidence-proof-meta { margin: 16px 0 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.evidence-proof-meta span { padding: 5px 8px; border: 1px solid var(--border); border-radius: 999px; color: var(--text-secondary); font-size: 8px; }
+.evidence-proof-explanation { margin: 16px 0 0; padding: 12px; border: 1px solid rgba(83,229,255,.16); border-radius: 11px; background: rgba(83,229,255,.04); color: var(--text-secondary); font-size: 10px; line-height: 1.55; }
+.evidence-proof-sources { margin-top: 16px; display: grid; gap: 10px; }
+.evidence-proof-source { padding: 12px; display: grid; gap: 6px; border: 1px solid rgba(120,165,255,.14); border-radius: 11px; background: rgba(7,11,20,.42); }
+.evidence-proof-source > span { color: var(--cyan); font-family: var(--font-geist-mono), monospace; font-size: 8px; letter-spacing: .08em; text-transform: uppercase; }
+.evidence-proof-source strong { color: var(--text); font-size: 13px; overflow-wrap: anywhere; }
+.evidence-proof-source code { color: var(--text-muted); font-size: 8px; }
+.evidence-proof-empty { margin-top: 14px; color: var(--text-muted); font-size: 10px; line-height: 1.55; }
+.evidence-proof-footer { margin-top: 16px; padding-top: 13px; border-top: 1px solid rgba(120,165,255,.12); color: var(--text-muted); font-size: 9px; line-height: 1.55; }
+
+/* Primary cards resolve with subtle physicality, not continuous animation. */
+.coverage-card,
+.terms-card,
+.insight-card,
+.review-workspace,
+.export-card,
+.living-report {
+  transition: transform var(--motion-standard) var(--ease-standard), border-color var(--motion-standard) var(--ease-standard), box-shadow var(--motion-standard) var(--ease-standard);
+}
+.coverage-card:hover,
+.terms-card:hover,
+.insight-card:hover,
+.export-card:hover { transform: translateY(-2px); border-color: rgba(83,229,255,.24); box-shadow: 0 22px 64px rgba(0,0,0,.16), inset 0 1px rgba(255,255,255,.04); }
+.explanation-card summary svg:last-child,
+.living-report summary svg:last-child { transition: transform var(--motion-standard) var(--ease-standard); }
+
+/* Mobile result navigation reduces long-page friction. */
+.results-mobile-nav { display: none; }
+@media (max-width: 760px) {
+  .results { padding-bottom: 74px; }
+  .results-polish-toolbar { grid-template-columns: 1fr; }
+  .results-polish-actions { justify-content: flex-start; }
+  .results-polish-categories { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 3px; scrollbar-width: thin; }
+  .results-polish-chip { flex: 0 0 auto; }
+  .evidence-proof-drawer { top: auto; right: 8px; bottom: 66px; left: 8px; width: auto; max-height: min(72dvh, 640px); }
+  .results-mobile-nav {
+    position: fixed;
+    z-index: 110;
+    left: 12px;
+    right: 12px;
+    bottom: 10px;
+    min-height: 50px;
+    padding: 5px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border: 1px solid rgba(120,165,255,.22);
+    border-radius: 14px;
+    background: rgba(8,13,25,.93);
+    box-shadow: 0 18px 58px rgba(0,0,0,.44);
+    backdrop-filter: blur(18px) saturate(140%);
+  }
+  .results-mobile-nav a { min-width: 0; display: grid; place-items: center; border-radius: 9px; color: var(--text-muted); font-size: 9px; }
+  .results-mobile-nav a:hover,.results-mobile-nav a:focus-visible { background: rgba(83,229,255,.07); color: var(--cyan); outline: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .results-polish-chip,
+  .term-cloud li,
+  .term-cloud li button::after,
+  .technical-details-toggle,
+  .technical-details-toggle svg,
+  .coverage-card,
+  .terms-card,
+  .insight-card,
+  .review-workspace,
+  .export-card,
+  .living-report,
+  .results > .analysis-playback,
+  .results > #fingerprint,
+  .results > div:has(> #document-xray),
+  .results > div:has(> #evidence-explorer),
+  .results > div:has(> .diagnostics-explorer),
+  .results > .system-transparency { transition: none !important; }
+  .coverage-card:hover,.terms-card:hover,.insight-card:hover,.export-card:hover,.results-polish-chip:hover { transform: none; }
+}
