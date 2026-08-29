@@ -103,6 +103,21 @@ export function DocumentXRay({ result, selectedFindingId, reviewDecisions, onSel
     if (documents.some((item) => item.document_id === target)) setDocumentId(target);
   }, [activeEvidenceId, documents, selected]);
 
+  useEffect(() => {
+    if (!selectedFindingId) return;
+    const root = document.getElementById("document-xray");
+    const selector = `mark[data-finding-id="${CSS.escape(selectedFindingId)}"]`;
+    const mark = root?.querySelector<HTMLElement>(selector);
+    if (!mark) return;
+    mark.classList.remove("is-evidence-flash");
+    void mark.offsetWidth;
+    mark.classList.add("is-evidence-flash");
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    mark.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "center", inline: "nearest" });
+    const timer = window.setTimeout(() => mark.classList.remove("is-evidence-flash"), 1500);
+    return () => window.clearTimeout(timer);
+  }, [documentId, selectedFindingId, view]);
+
   function moveSelection(direction: -1 | 1) {
     if (!navigable.length) return;
     const nextIndex = selectedIndex < 0
@@ -151,7 +166,7 @@ export function DocumentXRay({ result, selectedFindingId, reviewDecisions, onSel
             {document?.sections.map((section) => {
               const block = { block_id: section.section_id, start: section.start, end: section.end, text: Array.from(canonicalText).slice(section.start, section.end).join(""), block_type: { value: null, unknown_reason: "not_applicable" as const }, evidence_refs: [] };
               return <section className="xray-semantic-section" key={section.section_id} data-section={section.normalized_type}><header><span>{section.normalized_type}</span><strong>{section.raw_heading}</strong><small>{section.detection_method.replaceAll("_", " ")}</small></header><div className="xray-text">{segmentDocumentBlock(block, documentOccurrences).map((segment) => segment.occurrence ? (
-                <mark key={segment.key} tabIndex={0} role="button" aria-pressed={segment.occurrence.finding.finding_id === selectedFindingId} data-method={segment.occurrence.finding.match_method} onClick={() => selectOccurrence(segment.occurrence!)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); selectOccurrence(segment.occurrence!); } }}>{segment.text}</mark>
+                <mark key={segment.key} tabIndex={0} role="button" aria-pressed={segment.occurrence.finding.finding_id === selectedFindingId} data-finding-id={segment.occurrence.finding.finding_id} data-evidence-id={segment.occurrence.evidence.evidence_id} data-method={segment.occurrence.finding.match_method} onClick={() => selectOccurrence(segment.occurrence!)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); selectOccurrence(segment.occurrence!); } }}>{segment.text}</mark>
               ) : <span key={segment.key}>{segment.text}</span>)}</div></section>;
             })}
           </div> : <div className="xray-text" data-scanner={scanner ? "active" : "focused"}>
@@ -161,6 +176,8 @@ export function DocumentXRay({ result, selectedFindingId, reviewDecisions, onSel
                 tabIndex={0}
                 role="button"
                 aria-pressed={segment.occurrence.finding.finding_id === selectedFindingId}
+                data-finding-id={segment.occurrence.finding.finding_id}
+                data-evidence-id={segment.occurrence.evidence.evidence_id}
                 data-method={segment.occurrence.finding.match_method}
                 title={`${segment.occurrence.finding.display_term} · ${segment.occurrence.finding.match_method.replaceAll("_", " ")}`}
                 onClick={() => selectOccurrence(segment.occurrence!)}
