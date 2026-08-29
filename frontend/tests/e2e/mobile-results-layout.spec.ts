@@ -44,7 +44,7 @@ test("stacks summary metrics without clipping at 325px", async ({ page }) => {
   await page.getByLabel("Résumé text").fill("process scale-up BS degree mammalian cell culture Bioprocesses");
   await page.getByLabel("Job-description text").fill("technology transfer process scale-up BS degree");
   await page.getByRole("button", { name: "Run Keyword Scan" }).click();
-  await expect(page.getByRole("img", { name: "20.0% categorized keyword coverage" })).toBeVisible();
+  await expect(page.getByRole("img", { name: "20% categorized keyword coverage" })).toBeVisible();
 
   const cards = page.locator(".metric-stack .metric-card");
   await expect(cards).toHaveCount(3);
