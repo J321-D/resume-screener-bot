@@ -1,11 +1,11 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { Binary, ChevronDown, ChevronUp, CircleDot, FileSearch, Filter, GitBranch, ScanSearch, Search, SlidersHorizontal, X } from "lucide-react";
+import { Binary, Check, ChevronDown, ChevronUp, CircleDot, Clipboard, FileSearch, Filter, GitBranch, ScanSearch, Search, SlidersHorizontal, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
-import type { AnalysisFinding, AnalysisViewModel, RelevantKeyword } from "@/lib/contracts";
+import type { AnalysisFinding, AnalysisViewModel } from "@/lib/contracts";
 import type { ReviewDecisions } from "@/components/review/review-state";
 
 interface EvidenceIntelligenceProps {
@@ -17,6 +17,7 @@ interface EvidenceIntelligenceProps {
 }
 
 type EvidenceStatus = "all" | AnalysisFinding["status"];
+type CopyState = "idle" | "represented" | "gaps" | "evidence" | "error";
 
 const sourceLabel = {
   resume: "Résumé",
@@ -46,18 +47,21 @@ function proofExplanation(status: "matched" | "missing", method: string) {
 export function EvidenceIntelligence({ result, selectedFindingId, reviewDecisions, onSelectFinding, focusSelection = true }: EvidenceIntelligenceProps) {
   const reduceMotion = useReducedMotion();
   const inspectorRef = useRef<HTMLElement>(null);
+  const resultSearchRef = useRef<HTMLInputElement>(null);
+  const copyResetRef = useRef<number | null>(null);
   const [status, setStatus] = useState<EvidenceStatus>("all");
   const [category, setCategory] = useState("all");
   const [source, setSource] = useState("all");
   const [method, setMethod] = useState("all");
   const [review, setReview] = useState("all");
   const [resultsRoot, setResultsRoot] = useState<HTMLElement | null>(null);
-  const [technicalOpen, setTechnicalOpen] = useState(true);
+  const [technicalOpen, setTechnicalOpen] = useState(false);
   const [resultQuery, setResultQuery] = useState("");
   const [resultCategory, setResultCategory] = useState("all");
   const [visiblePrimaryCount, setVisiblePrimaryCount] = useState(0);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedKeywordId, setSelectedKeywordId] = useState<string | null>(null);
+  const [copyState, setCopyState] = useState<CopyState>("idle");
 
   const isFocused = result.analysis_mode === "Skills-focused analysis";
   const findings = result.evidenceContract.findings;
@@ -69,10 +73,13 @@ export function EvidenceIntelligence({ result, selectedFindingId, reviewDecision
   const methods = [...new Set(findings.map((finding) => finding.match_method))];
   const sources = [...new Set(findings.flatMap((finding) => finding.evidence.map((item) => item.source_document)))];
   const primaryCategories = result.categories.filter((item) => item.category !== "Uncategorized" && item.total > 0).map((item) => item.category);
-  const primaryTermCount = isFocused
-    ? result.matched_terms.filter((item) => item.category && item.category !== "Uncategorized").length
-      + result.missing_terms.filter((item) => item.category && item.category !== "Uncategorized").length
-    : result.matched_terms.length + result.missing_terms.length;
+  const primaryMatched = isFocused
+    ? result.matched_terms.filter((item) => item.category && item.category !== "Uncategorized")
+    : result.matched_terms;
+  const primaryMissing = isFocused
+    ? result.missing_terms.filter((item) => item.category && item.category !== "Uncategorized")
+    : result.missing_terms;
+  const primaryTermCount = primaryMatched.length + primaryMissing.length;
 
   const filtered = useMemo(() => findings.filter((finding) => {
     if (status !== "all" && finding.status !== status) return false;
@@ -82,6 +89,30 @@ export function EvidenceIntelligence({ result, selectedFindingId, reviewDecision
     if (review !== "all" && reviewDecisions[finding.finding_id] !== review) return false;
     return true;
   }), [category, findings, method, review, reviewDecisions, source, status]);
+
+  async function copyText(kind: Exclude<CopyState, "idle" | "error">, text: string) {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopyState(kind);
+      if (copyResetRef.current) window.clearTimeout(copyResetRef.current);
+      copyResetRef.current = window.setTimeout(() => setCopyState("idle"), 1800);
+    } catch {
+      setCopyState("error");
+    }
+  }
+
+  function copyTerms(kind: "represented" | "gaps") {
+    const items = kind === "represented" ? primaryMatched : primaryMissing;
+    const label = kind === "represented"
+      ? (isFocused ? "Curated concepts represented" : "Exact terms shared")
+      : (isFocused ? "Curated concepts to review" : "Unmatched JD terms");
+    const body = items.length ? items.map((item) => `- ${item.term}`).join("\n") : "- None";
+    void copyText(kind, `${label}\n${body}`);
+  }
+
+  useEffect(() => () => {
+    if (copyResetRef.current) window.clearTimeout(copyResetRef.current);
+  }, []);
 
   useEffect(() => {
     const root = document.querySelector<HTMLElement>(".results");
@@ -100,6 +131,8 @@ export function EvidenceIntelligence({ result, selectedFindingId, reviewDecision
     setResultCategory("all");
     setSelectedKeywordId(null);
     setDrawerOpen(false);
+    setTechnicalOpen(false);
+    setCopyState("idle");
   }, [result.metadata.analyzed_at]);
 
   useEffect(() => {
@@ -122,6 +155,20 @@ export function EvidenceIntelligence({ result, selectedFindingId, reviewDecision
     setVisiblePrimaryCount(shown || (nodes.length ? 0 : primaryTermCount));
     return () => nodes.forEach((node) => { node.hidden = false; });
   }, [primaryTermCount, resultCategory, resultQuery, result.metadata.analyzed_at]);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "/" || event.metaKey || event.ctrlKey || event.altKey) return;
+      const target = event.target;
+      if (target instanceof HTMLElement && (target.matches("input, textarea, select") || target.isContentEditable)) return;
+      if (!resultSearchRef.current) return;
+      event.preventDefault();
+      resultSearchRef.current.focus();
+      resultSearchRef.current.select();
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, []);
 
   useEffect(() => {
     if (!selectedFindingId || !focusSelection) return;
@@ -181,9 +228,12 @@ export function EvidenceIntelligence({ result, selectedFindingId, reviewDecision
       <label className="results-polish-search">
         <Search size={15} aria-hidden="true" />
         <span className="sr-only">Search returned terms</span>
-        <input value={resultQuery} onChange={(event) => setResultQuery(event.target.value)} placeholder="Search returned terms" />
+        <input ref={resultSearchRef} aria-keyshortcuts="/" value={resultQuery} onChange={(event) => setResultQuery(event.target.value)} placeholder="Search returned terms" />
+        <kbd className="results-polish-shortcut" aria-hidden="true">/</kbd>
       </label>
       <div className="results-polish-actions">
+        <button type="button" data-copy-state={copyState === "represented" ? "copied" : "idle"} onClick={() => copyTerms("represented")}><Clipboard size={13} aria-hidden="true" /> {copyState === "represented" ? "Copied represented" : "Copy represented"}</button>
+        <button type="button" data-copy-state={copyState === "gaps" ? "copied" : "idle"} onClick={() => copyTerms("gaps")}><Clipboard size={13} aria-hidden="true" /> {copyState === "gaps" ? "Copied gaps" : "Copy gaps"}</button>
         <a href="#workspace"><SlidersHorizontal size={13} aria-hidden="true" /> Compare modes</a>
         <a href="#review">Review gaps</a>
       </div>
@@ -196,6 +246,7 @@ export function EvidenceIntelligence({ result, selectedFindingId, reviewDecision
         </div>
       )}
       <p className="results-polish-status" role="status">Showing {visiblePrimaryCount} of {primaryTermCount} primary returned terms. Search and filters change presentation only.</p>
+      <span className="results-polish-copy-status" role="status" aria-live="polite">{copyState === "error" ? "Clipboard unavailable. Use the visible lists to copy manually." : ""}</span>
     </div>,
     resultsRoot,
   ) : null;
@@ -223,6 +274,30 @@ export function EvidenceIntelligence({ result, selectedFindingId, reviewDecision
   const drawerMethod = selectedKeyword?.match_method ?? drawerFinding?.match_method ?? null;
   const drawerTitle = selectedKeyword?.display_term ?? drawerFinding?.display_term ?? null;
   const drawerCategory = selectedKeyword?.category ?? drawerFinding?.category ?? null;
+
+  function copyDrawerEvidence() {
+    if (!drawerTitle || !drawerStatus || !drawerMethod) return;
+    const selectedEvidence = selectedKeyword?.evidence.map((evidence) => ({
+      source: sourceLabel[evidence.source_document],
+      surface: evidence.matched_surface,
+      documentId: evidence.document_id,
+      start: evidence.source_span.start,
+      end: evidence.source_span.end,
+    })) ?? drawerFinding?.evidence.map((evidence) => ({
+      source: sourceLabel[evidence.source_document],
+      surface: evidence.matched_surface,
+      documentId: evidence.document_id,
+      start: evidence.source_span.start,
+      end: evidence.source_span.end,
+    })) ?? [];
+    const lines = [
+      `${drawerStatus === "matched" ? "Why this matched" : "Why this is missing"}: ${drawerTitle}`,
+      `Category: ${drawerCategory ?? "Uncategorized"}`,
+      `Method: ${drawerMethod.replaceAll("_", " ")}`,
+      ...selectedEvidence.map((evidence) => `${evidence.source}: ${evidence.surface} (${evidence.documentId} [${evidence.start}, ${evidence.end}))`),
+    ];
+    void copyText("evidence", lines.join("\n"));
+  }
 
   const drawer = drawerOpen && drawerTitle && typeof document !== "undefined" ? createPortal(
     <motion.aside
@@ -263,6 +338,10 @@ export function EvidenceIntelligence({ result, selectedFindingId, reviewDecision
       </div>
       {selectedKeyword && !selectedKeyword.evidence.length && <p className="evidence-proof-empty">No exact evidence occurrence was returned for this curated keyword.</p>}
       {drawerFinding && !drawerFinding.evidence.length && <p className="evidence-proof-empty">{unknownLabel(drawerFinding.unavailable_evidence_reason ?? "not_available")}</p>}
+      <div className="evidence-proof-copy">
+        <button type="button" onClick={copyDrawerEvidence}>{copyState === "evidence" ? <Check size={14} aria-hidden="true" /> : <Clipboard size={14} aria-hidden="true" />} {copyState === "evidence" ? "Evidence copied" : "Copy evidence"}</button>
+        <span className="results-polish-copy-status" role="status" aria-live="polite">{copyState === "error" ? "Clipboard unavailable." : ""}</span>
+      </div>
       <p className="evidence-proof-footer">Evidence is literal request-scoped provenance. The drawer does not infer experience, requirement severity, candidate quality, or hiring likelihood.</p>
     </motion.aside>,
     document.body,
