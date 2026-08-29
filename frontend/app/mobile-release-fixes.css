@@ -1,0 +1,19 @@
+/* Final V2.1 phone-width release fixes discovered during rendered QA. */
+@media (max-width: 520px) {
+  .result-hero-grid .metric-stack {
+    grid-template-columns: 1fr;
+  }
+
+  .result-hero-grid .metric-card {
+    min-width: 0;
+    width: 100%;
+    min-height: 96px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .result-hero-grid .metric-card strong {
+    display: block;
+    margin-top: 0;
+  }
+}

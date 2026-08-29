@@ -92,6 +92,10 @@ def generate_pdf_report(
     ordered_matched_keywords: list[str] | None = None,
     primary_coverage: PrimaryCoverage | None = None,
     document_section_summaries: list[str] | None = None,
+    report_title: str = "Keyword Matching Report",
+    matched_label: str = "Matched Keywords",
+    missing_label: str = "Missing Keywords",
+    additional_sections: list[tuple[str, list[str]]] | None = None,
 ) -> bytes:
     """Build the current report and return valid, Unicode-capable PDF bytes.
 
@@ -100,7 +104,7 @@ def generate_pdf_report(
     remains predictable instead of raising an encoding error.
     """
     font = fitz.Font(fontname=_FONT_RESOURCE)
-    title = _replace_unsupported_glyphs("Keyword Matching Report", font)
+    title = _replace_unsupported_glyphs(report_title, font)
     matched_for_report = (
         ordered_matched_keywords
         if ordered_matched_keywords is not None
@@ -108,11 +112,11 @@ def generate_pdf_report(
     )
     report_lines = [
         _replace_unsupported_glyphs(
-            f"Matched Keywords: {matched_for_report}", font
+            f"{matched_label}: {matched_for_report}", font
         ),
         "",
         _replace_unsupported_glyphs(
-            f"Missing Keywords: {filtered_missing_keywords[:50]}", font
+            f"{missing_label}: {filtered_missing_keywords[:50]}", font
         ),
     ]
     if analysis_mode is not None:
@@ -168,6 +172,13 @@ def generate_pdf_report(
                     f"({explanation.concept})",
                     font,
                 )
+            )
+    if additional_sections:
+        for section_title, section_lines in additional_sections:
+            report_lines.extend(["", _replace_unsupported_glyphs(f"{section_title}:", font)])
+            report_lines.extend(
+                _replace_unsupported_glyphs(line, font)
+                for line in section_lines
             )
     if document_section_summaries:
         report_lines.extend(["", "Document / Section Summary:"])

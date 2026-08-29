@@ -33,6 +33,12 @@ def _concept_for(surface: str) -> str:
 
 
 _POSSESSIVE_SUFFIX = re.compile(r"(?<=\w)['’]s\b", re.IGNORECASE)
+_R_AND_D = re.compile(r"(?<!\w)r\s*&\s*d(?!\w)", re.IGNORECASE)
+
+
+def _without_r_and_d_abbreviation(text: str) -> str:
+    """Blank R&D abbreviations without changing source offsets."""
+    return _R_AND_D.sub(lambda match: " " * len(match.group(0)), text)
 
 
 def _without_possessive_suffixes(text: str) -> str:
@@ -92,7 +98,9 @@ def normalize_concept_occurrences(
     preventing its component tokens from being emitted separately for that span.
     Offsets use Python Unicode code-point indexing and always target ``text``.
     """
-    source_stable_text = _without_possessive_suffixes(text)
+    source_stable_text = _without_r_and_d_abbreviation(
+        _without_possessive_suffixes(text)
+    )
     normalized_text, source_offsets = _lower_with_source_offsets(source_stable_text)
     matches = list(TOKEN_PATTERN.finditer(normalized_text))
     occurrences: list[NormalizedConceptOccurrence] = []
@@ -182,7 +190,9 @@ def normalize_concepts(
     This remains the established v1 normalization path. The separate occurrence
     scanner adds authoritative offsets without changing these display semantics.
     """
-    normalized_text = _without_possessive_suffixes(text)
+    normalized_text = _without_r_and_d_abbreviation(
+        _without_possessive_suffixes(text)
+    )
     matches = list(TOKEN_PATTERN.finditer(normalized_text.lower()))
     concepts: OrderedDict[str, NormalizedConcept] = OrderedDict()
     index = 0

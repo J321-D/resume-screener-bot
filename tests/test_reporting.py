@@ -38,6 +38,34 @@ class GeneratePdfReportTests(unittest.TestCase):
         self.assertIn("Matched Keywords: ['python', 'sql']", report_text)
         self.assertIn("Missing Keywords: ['matlab']", report_text)
 
+    def test_supports_mode_specific_labels_and_additional_sections(self) -> None:
+        report_text = extract_pdf_text(
+            generate_pdf_report(
+                {"python"},
+                ["sql"],
+                report_title="Raw Lexical Overlap Report",
+                matched_label="Exact Terms Shared",
+                missing_label="Unmatched JD Terms",
+                additional_sections=[
+                    (
+                        "Relevant Keyword Review",
+                        [
+                            "Represented Curated Concepts: ['python']",
+                            "Curated Concepts To Review: ['sql']",
+                        ],
+                    )
+                ],
+            )
+        )
+        normalized = " ".join(report_text.split())
+
+        self.assertIn("Raw Lexical Overlap Report", normalized)
+        self.assertIn("Exact Terms Shared: ['python']", normalized)
+        self.assertIn("Unmatched JD Terms: ['sql']", normalized)
+        self.assertIn("Relevant Keyword Review:", normalized)
+        self.assertIn("Represented Curated Concepts: ['python']", normalized)
+        self.assertIn("Curated Concepts To Review: ['sql']", normalized)
+
     def test_preserves_accented_latin_text(self) -> None:
         report_text = extract_pdf_text(
             generate_pdf_report({"résumé", "café"}, ["naïve"])

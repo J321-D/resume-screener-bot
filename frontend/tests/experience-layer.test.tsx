@@ -31,7 +31,11 @@ describe("result experience layer", () => {
     await user.click(screen.getByRole("button", { name: "Next walkthrough stage" }));
     expect(screen.getByRole("status")).toHaveTextContent("Signature");
     expect(Element.prototype.scrollIntoView).toHaveBeenCalledWith({ behavior: "auto", block: "center" });
-    expect(screen.getByText(/2 represented · 1 opportunities/)).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /2 categorized represented · 1 categorized gaps · 1 scored categories/,
+      ),
+    ).toBeInTheDocument();
     expect(localStorage).toHaveLength(0);
   });
 

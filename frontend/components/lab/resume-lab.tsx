@@ -73,6 +73,14 @@ export function ResumeLab({ runs, activeRunId, notice, demoAvailable, onSelectRu
   const comparison = useMemo(() => baseline && current && baseline.runId !== current.runId ? compareAnalysisRuns(baseline, current) : null, [baseline, current]);
   const changedFindings = comparison?.findings.filter((finding) => !finding.status.startsWith("unchanged")) ?? [];
   const unchangedFindings = comparison?.findings.filter((finding) => finding.status.startsWith("unchanged")) ?? [];
+  const modePair = useMemo(() => {
+    const anchor = runs.find((run) => run.runId === activeRunId) ?? runs.at(-1);
+    if (!anchor) return null;
+    const sameInputs = runs.filter((run) => run.resumeIdentity === anchor.resumeIdentity && run.jobIdentity === anchor.jobIdentity);
+    const focused = [...sameInputs].reverse().find((run) => run.analysis.analysis_mode === "Skills-focused analysis");
+    const full = [...sameInputs].reverse().find((run) => run.analysis.analysis_mode === "Full lexical analysis");
+    return focused && full ? { focused, full } : null;
+  }, [activeRunId, runs]);
 
   function inspectDifference(finding: ComparisonFinding) {
     const run = finding.current ? current : baseline;
@@ -110,6 +118,22 @@ export function ResumeLab({ runs, activeRunId, notice, demoAvailable, onSelectRu
         <div className="lab-capacity"><span>{runs.length} / {MAX_LAB_RUNS} runs</span><span>{new Set(runs.map((run) => run.resumeIdentity)).size} / {MAX_RESUME_VARIANTS} variants</span></div>
       </header>
       {notice && <p className="lab-notice" role="status">{notice}</p>}
+
+      {modePair && (
+        <section className="mode-comparison-card" aria-labelledby="mode-comparison-title">
+          <header><div><span className="mono-label">SAME INPUTS // TWO DENOMINATORS</span><h3 id="mode-comparison-title">Analysis mode comparison</h3></div><p>These scores answer different questions and should not be treated as interchangeable percentages.</p></header>
+          <div className="mode-comparison-grid">
+            <button type="button" onClick={() => onSelectRun(modePair.focused.runId)} aria-pressed={activeRunId === modePair.focused.runId}>
+              <span>SKILLS-FOCUSED</span><strong>{scoreLabel(modePair.focused.analysis.coverage.score)}</strong><small>{modePair.focused.analysis.coverage.matched} represented / {modePair.focused.analysis.coverage.total} categorized concepts</small>
+            </button>
+            <div aria-hidden="true"><GitCompareArrows size={18} /></div>
+            <button type="button" onClick={() => onSelectRun(modePair.full.runId)} aria-pressed={activeRunId === modePair.full.runId}>
+              <span>RAW LEXICAL</span><strong>{scoreLabel(modePair.full.analysis.coverage.score)}</strong><small>{modePair.full.analysis.coverage.matched} exact shared / {modePair.full.analysis.coverage.total} unique JD terms</small>
+            </button>
+          </div>
+          <p>Skills-focused measures only supported categorized role concepts. Raw Lexical counts every unique JD token equally. The card preserves both views without converting one denominator into the other.</p>
+        </section>
+      )}
 
       <section className="resume-hangar" aria-labelledby="hangar-title">
         <header><div><span className="mono-label">ONE ROLE // BOUNDED VARIANTS</span><h3 id="hangar-title">Résumé hangar</h3></div><p>Node size does not indicate quality. Fingerprints encode returned counts only.</p></header>

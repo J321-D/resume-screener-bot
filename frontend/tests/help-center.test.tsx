@@ -9,7 +9,7 @@ describe("HelpCenter", () => {
     const user = userEvent.setup();
     render(<HelpCenter />);
 
-    expect(screen.getByRole("status")).toHaveTextContent("17 answers");
+    expect(screen.getByRole("status")).toHaveTextContent("18 answers");
     await user.type(screen.getByRole("searchbox", { name: "Search help" }), "66.7");
 
     expect(screen.getByRole("heading", { name: "What does 66.7% coverage mean?" })).toBeInTheDocument();
@@ -29,7 +29,7 @@ describe("HelpCenter", () => {
     await user.type(screen.getByRole("searchbox", { name: "Search help" }), "no-such-topic");
     expect(screen.getByText("No matching answer.")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Clear filters" }));
-    expect(screen.getByRole("status")).toHaveTextContent("17 answers");
+    expect(screen.getByRole("status")).toHaveTextContent("18 answers");
   });
 
   it("offers only the privacy-warned external feedback path", () => {

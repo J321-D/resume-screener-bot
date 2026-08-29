@@ -1,22 +1,41 @@
-"""Narrow, documented taxonomy for Milestone 1 category coverage.
+"""Curated deterministic taxonomy for Skills-focused category coverage.
 
 Unknown concepts intentionally fall back to ``Uncategorized``. This taxonomy is
-not a universal skills ontology and does not infer categories from spelling.
+not a universal skills ontology and does not infer categories from spelling,
+proximity, or related experience.
 """
 
 from resume_screener.models import ConceptCategory
 
 TECHNICAL_SKILLS = frozenset(
     {
+        "analytical technologies",
         "aseptic processing",
+        "aseptic technique",
+        "bioprocessing",
         "bioreactor",
         "cell culture",
+        "centrifugation",
         "chromatography",
+        "data analysis",
         "design of experiments",
+        "downstream process development",
+        "experimentation",
         "machine learning",
+        "mammalian cell culture",
+        "membrane filtration",
+        "microbial culture",
+        "multivariate analysis",
         "process development",
+        "process scale-up",
+        "protein biochemistry",
+        "protein expression",
+        "protein purification",
         "real time",
+        "recombinant protein",
         "statistical analysis",
+        "technology transfer",
+        "upstream process development",
     }
 )
 
@@ -55,6 +74,7 @@ TOOLS_SOFTWARE = frozenset(
 
 EDUCATION = frozenset(
     {
+        "bachelor degree",
         "bachelor",
         "bachelor's",
         "degree",
@@ -69,13 +89,14 @@ EXPERIENCE_ACTION = frozenset(
     {
         "collaborated",
         "communication",
+        "continuous improvement",
+        "cross-functional collaboration",
         "cross-functional communication",
         "developed",
         "implemented",
         "led",
         "managed",
         "technical writing",
-        "continuous improvement",
         "validated",
     }
 )

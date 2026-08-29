@@ -1,0 +1,72 @@
+/* V2.1 restrained motion layer. Motion communicates state changes; it never loops. */
+@keyframes result-resolve-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes result-chip-in {
+  from { opacity: 0; transform: translateY(4px) scale(.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes result-detail-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.results > #summary {
+  animation: result-resolve-in var(--motion-emphasis) var(--ease-standard) both;
+}
+.results > .results-polish-toolbar {
+  animation: result-resolve-in var(--motion-standard) var(--ease-standard) 70ms both;
+}
+.results > #findings {
+  animation: result-resolve-in var(--motion-emphasis) var(--ease-standard) 110ms both;
+}
+.results > #category-signal,
+.results > #review,
+.results > #living-report,
+.results > .export-card {
+  animation: result-resolve-in var(--motion-emphasis) var(--ease-standard) 150ms both;
+}
+
+/* Newly disclosed/search-restored chips resolve instead of popping into place. */
+.results .term-cloud li:not([hidden]) {
+  animation: result-chip-in 180ms var(--ease-standard) both;
+}
+.results .term-cloud li:nth-child(2n) { animation-delay: 18ms; }
+.results .term-cloud li:nth-child(3n) { animation-delay: 32ms; }
+
+/* Native details remain native and accessible; only the revealed body is animated. */
+.results details[open] > :not(summary) {
+  animation: result-detail-in var(--motion-standard) var(--ease-standard) both;
+}
+.results details summary svg:last-child {
+  transition: transform var(--motion-standard) var(--ease-standard);
+}
+.results details[open] summary svg:last-child { transform: rotate(180deg); }
+
+/* Active filters and evidence selection have one consistent interaction rhythm. */
+.results [aria-pressed="true"],
+.results [aria-current="step"] {
+  transition: border-color var(--motion-standard) var(--ease-standard), background var(--motion-standard) var(--ease-standard), color var(--motion-standard) var(--ease-standard), box-shadow var(--motion-standard) var(--ease-standard);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .results > #summary,
+  .results > .results-polish-toolbar,
+  .results > #findings,
+  .results > #category-signal,
+  .results > #review,
+  .results > #living-report,
+  .results > .export-card,
+  .results .term-cloud li:not([hidden]),
+  .results details[open] > :not(summary) {
+    animation: none !important;
+  }
+  .results details summary svg:last-child,
+  .results [aria-pressed="true"],
+  .results [aria-current="step"] {
+    transition: none !important;
+  }
+}

@@ -38,7 +38,7 @@ function run(id: string, findings: AnalysisFinding[], options: Partial<AnalysisR
     normalized_matches: [],
     metadata: { resume_label: id, resume_count: 1, input_mode: "pasted_text", analyzed_at: "2026-08-13T12:00:00Z" },
     warnings: [],
-    evidenceContract: { version: "2.0", findings, sourceDocuments: [] },
+    evidenceContract: { version: "2.0", findings, sourceDocuments: [], relevantKeywords: [] },
   };
   return {
     runId: id,

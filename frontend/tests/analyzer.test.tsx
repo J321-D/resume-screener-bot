@@ -103,10 +103,15 @@ describe("Analyzer", () => {
     expect(results).toHaveAttribute("tabindex", "-1");
     expect(results).toHaveFocus();
     expect(Element.prototype.scrollIntoView).toHaveBeenCalledWith({ behavior: "smooth", block: "start" });
-    expect(screen.getByRole("img", { name: "66.7% keyword coverage" })).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "66.7% categorized keyword coverage" })).toBeInTheDocument();
     expect(screen.getAllByText("quality control").length).toBeGreaterThan(0);
     expect(screen.getByText("CATEGORIZED GAPS")).toBeInTheDocument();
-    expect(screen.getByText("Coverage opportunities")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        name: "Curated concepts to review",
+        level: 3,
+      }),
+    ).toBeInTheDocument();
     expect(screen.getByText("Uncategorized lexical coverage")).toBeInTheDocument();
     expect(screen.getByText("N/A — no applicable concepts")).toBeInTheDocument();
     expect(screen.getByText(/excluded from the primary categorized score/i)).toBeInTheDocument();
@@ -189,8 +194,8 @@ describe("Analyzer", () => {
 
     await user.click(screen.getByRole("button", { name: /Tools\/software.*50\.0%/i }));
     expect(screen.getByRole("complementary", { name: "Focused evidence view" })).toHaveTextContent("Category evidence isolated");
-    expect(within(screen.getByRole("list", { name: "Coverage opportunities" })).getByText("SQL", { exact: true })).toBeInTheDocument();
-    await waitFor(() => expect(within(screen.getByRole("list", { name: "Coverage opportunities" })).queryByText("GMP", { exact: true })).not.toBeInTheDocument());
+    expect(within(screen.getByRole("list", { name: "Curated concepts to review" })).getByText("SQL", { exact: true })).toBeInTheDocument();
+    await waitFor(() => expect(within(screen.getByRole("list", { name: "Curated concepts to review" })).queryByText("GMP", { exact: true })).not.toBeInTheDocument());
     await waitFor(() => expect(within(screen.getByLabelText("Opportunity review list")).getAllByRole("article")).toHaveLength(1));
 
     await user.selectOptions(screen.getByLabelText("Review status for SQL"), "add");
@@ -198,11 +203,11 @@ describe("Analyzer", () => {
     expect(screen.getByLabelText("Review status for SQL")).toHaveValue("add");
     expect(screen.getByLabelText("Review status for GMP")).toBeInTheDocument();
 
-    await user.click(within(screen.getByRole("list", { name: "Coverage opportunities" })).getByRole("button", { name: "GMP" }));
+    await user.click(within(screen.getByRole("list", { name: "Curated concepts to review" })).getByRole("button", { name: "GMP" }));
     expect(screen.getByRole("complementary", { name: "Focused evidence view" })).toHaveTextContent("GMP");
     await waitFor(() => expect(within(screen.getByLabelText("Opportunity review list")).getAllByRole("article")).toHaveLength(1));
     expect(screen.getByLabelText("Review status for GMP")).toBeInTheDocument();
-    expect(screen.getByRole("img", { name: "66.7% keyword coverage" })).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "66.7% categorized keyword coverage" })).toBeInTheDocument();
 
     const matrix = screen.getByRole("table", { name: /résumé representation and coverage opportunities/i });
     await user.click(within(matrix).getByRole("button", { name: "Tools/software" }));
@@ -226,7 +231,7 @@ describe("Analyzer", () => {
     await user.type(screen.getByLabelText("Job-description text"), "Python SQL");
     await user.click(screen.getByRole("button", { name: /run keyword scan/i }));
 
-    const list = await screen.findByRole("list", { name: "Coverage opportunities" });
+    const list = await screen.findByRole("list", { name: "Curated concepts to review" });
     expect(within(list).getAllByRole("listitem").map((item) => item.textContent)).toEqual(
       missingTerms.slice(0, 12).map((item) => item.term),
     );

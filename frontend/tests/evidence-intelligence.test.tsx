@@ -18,7 +18,7 @@ describe("Contract v2 evidence view model", () => {
   it("marks legacy responses explicitly unavailable without changing their result", () => {
     const view = analysisViewModel(analysis);
     expect(view.coverage).toEqual(analysis.coverage);
-    expect(view.evidenceContract).toEqual({ version: "unavailable", findings: [], sourceDocuments: [], diagnostics: [] });
+    expect(view.evidenceContract).toEqual({ version: "unavailable", findings: [], sourceDocuments: [], diagnostics: [], relevantKeywords: [] });
   });
 
   it("keeps rolling compatibility with pre-block v2 responses", () => {

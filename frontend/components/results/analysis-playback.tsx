@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, ChevronLeft, ChevronRight, Map, Play, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import type { AnalysisResponse } from "@/lib/contracts";
 
@@ -10,16 +10,41 @@ interface AnalysisPlaybackProps {
   reducedMotion: boolean;
 }
 
-const stages = [
-  { id: "summary", label: "Coverage", description: "Read the returned lexical coverage and source metadata." },
-  { id: "fingerprint", label: "Signature", description: "Inspect the deterministic category/count signature." },
-  { id: "findings", label: "Evidence", description: "Review represented terms and ordered opportunities." },
-  { id: "category-signal", label: "Categories", description: "Compare returned category coverage without reweighting it." },
-  { id: "review", label: "Review", description: "Classify opportunities using your own factual experience." },
-  { id: "living-report", label: "Report", description: "Read the screen report or request the protected PDF." },
-] as const;
+function stagesForMode(isFocused: boolean) {
+  return [
+    {
+      id: "summary",
+      label: "Coverage",
+      description: isFocused
+        ? "Read categorized concept coverage and source metadata."
+        : "Read raw lexical overlap and source metadata.",
+    },
+    { id: "fingerprint", label: "Signature", description: "Inspect the deterministic category/count signature." },
+    {
+      id: "findings",
+      label: "Evidence",
+      description: isFocused
+        ? "Review represented curated concepts and categorized gaps."
+        : "Review exact shared terms and unmatched JD terms.",
+    },
+    { id: "category-signal", label: "Categories", description: "Compare returned category coverage without reweighting it." },
+    {
+      id: "review",
+      label: "Review",
+      description: isFocused
+        ? "Classify curated concepts to review using your own factual experience."
+        : "Review curated relevant concepts separately from the raw lexical score.",
+    },
+    { id: "living-report", label: "Report", description: "Preview the screen report or request the protected PDF." },
+  ] as const;
+}
 
 export function AnalysisPlayback({ result, reducedMotion }: AnalysisPlaybackProps) {
+  const isFocused = result.analysis_mode === "Skills-focused analysis";
+  const stages = useMemo(() => stagesForMode(isFocused), [isFocused]);
+  const scoredCategoryCount = result.categories.filter(
+    (category) => category.category !== "Uncategorized" && category.total > 0,
+  ).length;
   const [active, setActive] = useState(0);
   const [touring, setTouring] = useState(false);
 
@@ -34,7 +59,7 @@ export function AnalysisPlayback({ result, reducedMotion }: AnalysisPlaybackProp
       behavior: reducedMotion ? "auto" : "smooth",
       block: "center",
     });
-  }, [active, reducedMotion, touring]);
+  }, [active, reducedMotion, stages, touring]);
 
   useEffect(() => () => { delete document.documentElement.dataset.resultView; }, []);
 
@@ -46,7 +71,7 @@ export function AnalysisPlayback({ result, reducedMotion }: AnalysisPlaybackProp
   return (
     <section className="analysis-playback" aria-labelledby="playback-title">
       <header>
-        <div><span className="mono-label">RESULT SYSTEM MAP</span><h3 id="playback-title">Walk through this analysis</h3><p>Six factual views of the same returned result. Playback changes presentation only.</p></div>
+        <div><span className="mono-label">TECHNICAL DETAILS // RESULT SYSTEM MAP</span><h3 id="playback-title">Walk through this analysis</h3><p>Optional factual views of the same returned result. Playback changes presentation only and never changes the score.</p></div>
         <button type="button" aria-pressed={touring} onClick={() => setTouring((current) => !current)}>{touring ? <X size={15} /> : <Play size={15} />}{touring ? "End walkthrough" : "Start walkthrough"}</button>
       </header>
       <nav aria-label="Analysis result map">
@@ -68,7 +93,11 @@ export function AnalysisPlayback({ result, reducedMotion }: AnalysisPlaybackProp
           <button type="button" aria-label="Next walkthrough stage" disabled={active === stages.length - 1} onClick={() => setActive((current) => Math.min(stages.length - 1, current + 1))}><ChevronRight size={16} /></button>
         </div>
       )}
-      <p className="playback-proof">Current response: {result.coverage.matched} represented · {result.coverage.missing} opportunities · {result.categories.filter((category) => category.total > 0).length} applicable categories</p>
+      <p className="playback-proof">
+        {isFocused
+          ? `Current response: ${result.coverage.matched} categorized represented · ${result.coverage.missing} categorized gaps · ${scoredCategoryCount} scored categories`
+          : `Current response: ${result.coverage.matched} exact terms shared · ${result.coverage.missing} unmatched JD terms`}
+      </p>
     </section>
   );
 }

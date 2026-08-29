@@ -2,14 +2,26 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 
-export function CoverageRing({ score, reducedMotion }: { score: number | null; reducedMotion?: boolean }) {
+export function CoverageRing({
+  score,
+  label = "Keyword coverage",
+  reducedMotion,
+}: {
+  score: number | null;
+  label?: string;
+  reducedMotion?: boolean;
+}) {
   const systemReducedMotion = useReducedMotion();
   const reduceMotion = reducedMotion ?? systemReducedMotion;
   const normalized = Math.max(0, Math.min(score ?? 0, 100));
   const circumference = 2 * Math.PI * 76;
 
   return (
-    <div className="coverage-ring" role="img" aria-label={score === null ? "Keyword coverage not applicable" : `${score}% keyword coverage`}>
+    <div
+      className="coverage-ring"
+      role="img"
+      aria-label={score === null ? `${label} not applicable` : `${score}% ${label.toLowerCase()}`}
+    >
       <svg viewBox="0 0 180 180" aria-hidden="true">
         <circle className="ring-track" cx="90" cy="90" r="76" />
         <motion.circle
@@ -23,7 +35,7 @@ export function CoverageRing({ score, reducedMotion }: { score: number | null; r
           style={{ strokeDasharray: circumference }}
         />
       </svg>
-      <div aria-hidden="true"><strong>{score === null ? "N/A" : `${score.toFixed(1)}%`}</strong><span>KEYWORD COVERAGE</span></div>
+      <div aria-hidden="true"><strong>{score === null ? "N/A" : `${score.toFixed(1)}%`}</strong><span>{label.toUpperCase()}</span></div>
     </div>
   );
 }
