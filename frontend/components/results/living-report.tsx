@@ -31,7 +31,7 @@ export function LivingReport({ result, stale }: LivingReportProps) {
 
   return (
     <details id="living-report" className="living-report" tabIndex={-1}>
-      <summary><span><BookOpenText size={17} /><span><strong>Report preview</strong><small>Living Report · inspect the screen record before requesting the PDF</small></span></span><ChevronDown size={17} /></summary>
+      <summary><span><BookOpenText size={17} /><span><strong>Living Report</strong><small>Report preview · inspect the screen record before requesting the PDF</small></span></span><ChevronDown size={17} /></summary>
       <div className="living-report-body">
         <header><p className="mono-label">REPORT PREVIEW // LIVE ANALYSIS RECORD</p><h3>{reportTitle}</h3><strong>{result.coverage.score === null ? "N/A" : `${result.coverage.score.toFixed(1)}%`}</strong><p>{result.analysis_mode} · {result.metadata.resume_label}</p></header>
         {stale && <p className="living-report-stale" role="status">Inputs changed after this result. This preview remains visible as prior output; regenerate before export.</p>}
