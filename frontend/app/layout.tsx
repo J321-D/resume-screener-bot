@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { WebAnalytics } from "@/components/analytics/web-analytics";
 
 import "./globals.css";
+import "./results-polish.css";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
 const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono" });
@@ -11,14 +12,14 @@ const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono"
 export const metadata: Metadata = {
   title: "Resume Keyword Screener",
   description:
-    "Privacy-conscious lexical résumé-to-job comparison with matched terms, coverage opportunities, and Unicode PDF reports.",
+    "Privacy-conscious deterministic résumé-to-job comparison with categorized role coverage, evidence-backed review, raw lexical overlap, and Unicode PDF reports.",
   metadataBase: new URL("https://resume-keyword-screener.vercel.app"),
   icons: {
     icon: "/favicon.svg",
   },
   openGraph: {
     title: "Resume Keyword Screener",
-    description: "Map your résumé language to the role—privately and deterministically.",
+    description: "Map your résumé language to the role—privately, deterministically, and with inspectable evidence.",
     images: ["/social-preview.svg"],
     type: "website",
     url: "https://resume-keyword-screener.vercel.app",
