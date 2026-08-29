@@ -27,7 +27,7 @@ function ResultPolishHarness() {
 }
 
 describe("V2.1 result experience polish", () => {
-  it("adds result search, category filtering, mobile anchors, and session-only technical disclosure", async () => {
+  it("adds result search, category filtering, copy tools, mobile anchors, and collapsed technical disclosure", async () => {
     const user = userEvent.setup();
     render(<ResultPolishHarness />);
 
@@ -35,8 +35,13 @@ describe("V2.1 result experience polish", () => {
     const primary = screen.getByRole("list", { name: "Primary returned concepts" });
     expect(within(toolbar).getByText(/Showing 2 of 2 primary returned terms/)).toBeInTheDocument();
     expect(screen.getByRole("navigation", { name: "Result sections" })).toBeInTheDocument();
+    expect(within(toolbar).getByRole("button", { name: /Copy represented/ })).toBeInTheDocument();
+    expect(within(toolbar).getByRole("button", { name: /Copy gaps/ })).toBeInTheDocument();
 
     const search = within(toolbar).getByPlaceholderText("Search returned terms");
+    document.body.focus();
+    await user.keyboard("/");
+    expect(search).toHaveFocus();
     await user.type(search, "quality");
     expect(within(primary).getByText("quality control").closest("li")).toBeVisible();
     expect(within(primary).getByText("SQL").closest("li")).not.toBeVisible();
@@ -47,16 +52,17 @@ describe("V2.1 result experience polish", () => {
     expect(within(primary).getByText("quality control").closest("li")).not.toBeVisible();
 
     const technicalToggle = screen.getByRole("button", { name: /Technical details/ });
-    expect(technicalToggle).toHaveAttribute("aria-expanded", "true");
-    await user.click(technicalToggle);
     expect(technicalToggle).toHaveAttribute("aria-expanded", "false");
     expect(document.querySelector(".results")).toHaveAttribute("data-technical-open", "false");
+    await user.click(technicalToggle);
+    expect(technicalToggle).toHaveAttribute("aria-expanded", "true");
+    expect(document.querySelector(".results")).toHaveAttribute("data-technical-open", "true");
 
     expect(localStorage).toHaveLength(0);
     expect(sessionStorage).toHaveLength(0);
   });
 
-  it("opens a literal evidence drawer from a primary concept without changing the result", async () => {
+  it("opens a literal evidence drawer with a copy utility without changing the result", async () => {
     const user = userEvent.setup();
     render(<ResultPolishHarness />);
 
@@ -66,6 +72,7 @@ describe("V2.1 result experience polish", () => {
     expect(drawer).toHaveTextContent("QC");
     expect(drawer).toHaveTextContent("resume_1");
     expect(drawer).toHaveTextContent("No fuzzy, embedding, or generative inference is used.");
+    expect(within(drawer).getByRole("button", { name: /Copy evidence/ })).toBeInTheDocument();
 
     await user.keyboard("{Escape}");
     await waitFor(() => expect(screen.queryByRole("dialog", { name: "Why this matched: quality control" })).not.toBeInTheDocument());
