@@ -17,6 +17,7 @@ export function FileDropZone({ files, multiple = false, onFiles, label, descript
   const inputId = useId();
   const [dragging, setDragging] = useState(false);
   const dragDepth = useRef(0);
+  const filesValidated = files.length > 0 && files.every((file) => !validateFile(file).error);
 
   function addFiles(incoming: File[]) {
     onFiles(multiple ? [...files, ...incoming] : incoming.slice(0, 1));
@@ -26,7 +27,7 @@ export function FileDropZone({ files, multiple = false, onFiles, label, descript
     <div className="file-field">
       <div className="field-heading">
         <div><label htmlFor={inputId}>{label}</label><p>{description}</p></div>
-        <span><ShieldCheck size={13} /> Validated</span>
+        {filesValidated && <span><ShieldCheck size={13} /> Validated</span>}
       </div>
       <label
         className={`drop-zone ${dragging ? "is-dragging" : ""}`}
