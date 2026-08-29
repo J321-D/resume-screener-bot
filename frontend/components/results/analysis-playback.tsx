@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, ChevronLeft, ChevronRight, Map, Play, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import type { AnalysisResponse } from "@/lib/contracts";
 
@@ -41,7 +41,7 @@ function stagesForMode(isFocused: boolean) {
 
 export function AnalysisPlayback({ result, reducedMotion }: AnalysisPlaybackProps) {
   const isFocused = result.analysis_mode === "Skills-focused analysis";
-  const stages = stagesForMode(isFocused);
+  const stages = useMemo(() => stagesForMode(isFocused), [isFocused]);
   const scoredCategoryCount = result.categories.filter(
     (category) => category.category !== "Uncategorized" && category.total > 0,
   ).length;
@@ -59,7 +59,7 @@ export function AnalysisPlayback({ result, reducedMotion }: AnalysisPlaybackProp
       behavior: reducedMotion ? "auto" : "smooth",
       block: "center",
     });
-  }, [active, reducedMotion, touring]);
+  }, [active, reducedMotion, stages, touring]);
 
   useEffect(() => () => { delete document.documentElement.dataset.resultView; }, []);
 

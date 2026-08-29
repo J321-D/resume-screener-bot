@@ -106,7 +106,12 @@ describe("Analyzer", () => {
     expect(screen.getByRole("img", { name: "66.7% categorized keyword coverage" })).toBeInTheDocument();
     expect(screen.getAllByText("quality control").length).toBeGreaterThan(0);
     expect(screen.getByText("CATEGORIZED GAPS")).toBeInTheDocument();
-    expect(screen.getByText("Curated concepts to review")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", {
+        name: "Curated concepts to review",
+        level: 3,
+      }),
+    ).toBeInTheDocument();
     expect(screen.getByText("Uncategorized lexical coverage")).toBeInTheDocument();
     expect(screen.getByText("N/A — no applicable concepts")).toBeInTheDocument();
     expect(screen.getByText(/excluded from the primary categorized score/i)).toBeInTheDocument();
