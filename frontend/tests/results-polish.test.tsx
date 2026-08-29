@@ -32,18 +32,19 @@ describe("V2.1 result experience polish", () => {
     render(<ResultPolishHarness />);
 
     const toolbar = await screen.findByLabelText("Result search and filters");
+    const primary = screen.getByRole("list", { name: "Primary returned concepts" });
     expect(within(toolbar).getByText(/Showing 2 of 2 primary returned terms/)).toBeInTheDocument();
     expect(screen.getByRole("navigation", { name: "Result sections" })).toBeInTheDocument();
 
     const search = within(toolbar).getByPlaceholderText("Search returned terms");
     await user.type(search, "quality");
-    expect(screen.getByText("quality control").closest("li")).toBeVisible();
-    expect(screen.getByText("SQL").closest("li")).not.toBeVisible();
+    expect(within(primary).getByText("quality control").closest("li")).toBeVisible();
+    expect(within(primary).getByText("SQL").closest("li")).not.toBeVisible();
 
     await user.clear(search);
     await user.click(within(toolbar).getByRole("button", { name: "Tools/software" }));
-    expect(screen.getByText("SQL").closest("li")).toBeVisible();
-    expect(screen.getByText("quality control").closest("li")).not.toBeVisible();
+    expect(within(primary).getByText("SQL").closest("li")).toBeVisible();
+    expect(within(primary).getByText("quality control").closest("li")).not.toBeVisible();
 
     const technicalToggle = screen.getByRole("button", { name: /Technical details/ });
     expect(technicalToggle).toHaveAttribute("aria-expanded", "true");
