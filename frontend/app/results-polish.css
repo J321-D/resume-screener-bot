@@ -2,6 +2,7 @@
 .results {
   display: flex;
   flex-direction: column;
+  scroll-margin-top: 18px;
 }
 
 /* Put the decision-useful result first, and move engineering views later. */
@@ -80,9 +81,9 @@
   border-radius: 10px;
   background: rgba(7, 11, 20, .48);
   color: var(--text-muted);
-  transition: border-color var(--motion-standard) var(--ease-standard), box-shadow var(--motion-standard) var(--ease-standard);
+  transition: border-color var(--motion-standard) var(--ease-standard), box-shadow var(--motion-standard) var(--ease-standard), transform var(--motion-fast) var(--ease-standard);
 }
-.results-polish-search:focus-within { border-color: var(--border-hover); box-shadow: var(--focus-ring); }
+.results-polish-search:focus-within { border-color: var(--border-hover); box-shadow: var(--focus-ring); transform: translateY(-1px); }
 .results-polish-search input {
   min-width: 0;
   width: 100%;
@@ -92,9 +93,19 @@
   color: var(--text);
   font-size: 12px;
 }
+.results-polish-shortcut {
+  margin-left: auto;
+  padding: 2px 5px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text-muted);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 8px;
+}
 .results-polish-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 7px; }
 .results-polish-chip,
-.results-polish-actions a {
+.results-polish-actions a,
+.results-polish-actions button {
   min-height: 34px;
   padding: 0 10px;
   display: inline-flex;
@@ -104,23 +115,37 @@
   border-radius: 999px;
   background: rgba(255,255,255,.018);
   color: var(--text-secondary);
+  font: inherit;
   font-size: 9px;
   cursor: pointer;
-  transition: transform var(--motion-fast) var(--ease-standard), border-color var(--motion-fast) var(--ease-standard), background var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard);
+  transition: transform var(--motion-fast) var(--ease-standard), border-color var(--motion-fast) var(--ease-standard), background var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard), box-shadow var(--motion-fast) var(--ease-standard);
 }
 .results-polish-chip:hover,
 .results-polish-chip:focus-visible,
 .results-polish-chip[aria-pressed="true"],
 .results-polish-actions a:hover,
-.results-polish-actions a:focus-visible {
+.results-polish-actions a:focus-visible,
+.results-polish-actions button:hover,
+.results-polish-actions button:focus-visible {
   border-color: rgba(83,229,255,.36);
   background: rgba(83,229,255,.07);
   color: var(--cyan);
   transform: translateY(-1px);
   outline: 0;
 }
+.results-polish-actions button:active,
+.results-polish-chip:active,
+.term-cloud li button:active,
+.button:active,
+.technical-details-toggle:active { transform: translateY(0) scale(.985); }
+.results-polish-actions button[data-copy-state="copied"] {
+  border-color: rgba(111,232,183,.38);
+  background: rgba(111,232,183,.08);
+  color: #8df3c8;
+}
 .results-polish-categories { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; }
 .results-polish-status { grid-column: 1 / -1; margin: 0; color: var(--text-muted); font-size: 9px; }
+.results-polish-copy-status { color: var(--text-muted); font-size: 8px; min-height: 1em; }
 
 /* Make evidence-bearing chips feel inspectable without adding decorative motion. */
 .term-cloud li { transition: transform var(--motion-fast) var(--ease-standard), border-color var(--motion-fast) var(--ease-standard), box-shadow var(--motion-fast) var(--ease-standard), background var(--motion-fast) var(--ease-standard); }
@@ -137,6 +162,7 @@
 }
 .term-cloud li button:hover::after,
 .term-cloud li button:focus-visible::after { max-width: 76px; opacity: .9; }
+.term-cloud li:has(button:focus-visible) { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,0,0,.14); }
 
 /* Technical views stay available, but live after the decision path. */
 .technical-details-toggle {
@@ -155,7 +181,7 @@
   transition: border-color var(--motion-standard) var(--ease-standard), background var(--motion-standard) var(--ease-standard), transform var(--motion-fast) var(--ease-standard);
 }
 .technical-details-toggle:hover,
-.technical-details-toggle:focus-visible { border-color: rgba(83,229,255,.34); color: var(--text); outline: 0; }
+.technical-details-toggle:focus-visible { border-color: rgba(83,229,255,.34); color: var(--text); outline: 0; transform: translateY(-1px); }
 .technical-details-toggle span { display: grid; gap: 2px; text-align: left; }
 .technical-details-toggle strong { color: var(--text); font-size: 12px; }
 .technical-details-toggle small { color: var(--text-muted); font-size: 9px; }
@@ -172,6 +198,7 @@
   overflow: clip;
   opacity: 0;
   pointer-events: none;
+  visibility: hidden;
 }
 .results > .analysis-playback,
 .results > #fingerprint,
@@ -179,6 +206,8 @@
 .results > div:has(> #evidence-explorer),
 .results > div:has(> .diagnostics-explorer),
 .results > .system-transparency {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 760px;
   transition: max-height 360ms var(--ease-standard), opacity var(--motion-standard) var(--ease-standard), margin var(--motion-standard) var(--ease-standard);
 }
 .results[data-technical-open="true"] > .analysis-playback,
@@ -186,7 +215,7 @@
 .results[data-technical-open="true"] > div:has(> #document-xray),
 .results[data-technical-open="true"] > div:has(> #evidence-explorer),
 .results[data-technical-open="true"] > div:has(> .diagnostics-explorer),
-.results[data-technical-open="true"] > .system-transparency { max-height: 5000px; opacity: 1; }
+.results[data-technical-open="true"] > .system-transparency { max-height: 5000px; opacity: 1; visibility: visible; }
 
 /* Evidence proof drawer. No backdrop: the analysis remains readable and testable. */
 .evidence-proof-drawer {
@@ -219,6 +248,9 @@
 .evidence-proof-source code { color: var(--text-muted); font-size: 8px; }
 .evidence-proof-empty { margin-top: 14px; color: var(--text-muted); font-size: 10px; line-height: 1.55; }
 .evidence-proof-footer { margin-top: 16px; padding-top: 13px; border-top: 1px solid rgba(120,165,255,.12); color: var(--text-muted); font-size: 9px; line-height: 1.55; }
+.evidence-proof-copy { margin-top: 14px; display: flex; align-items: center; gap: 8px; }
+.evidence-proof-copy button { min-height: 34px; padding: 0 11px; border: 1px solid var(--border); border-radius: 9px; background: rgba(255,255,255,.025); color: var(--text-secondary); cursor: pointer; }
+.evidence-proof-copy button:hover,.evidence-proof-copy button:focus-visible { border-color: var(--border-hover); color: var(--cyan); outline: 0; }
 
 /* Primary cards resolve with subtle physicality, not continuous animation. */
 .coverage-card,
@@ -235,15 +267,59 @@
 .export-card:hover { transform: translateY(-2px); border-color: rgba(83,229,255,.24); box-shadow: 0 22px 64px rgba(0,0,0,.16), inset 0 1px rgba(255,255,255,.04); }
 .explanation-card summary svg:last-child,
 .living-report summary svg:last-child { transition: transform var(--motion-standard) var(--ease-standard); }
+.review-workspace button[aria-pressed="true"],
+.review-workspace [data-selected="true"] { transition: transform var(--motion-fast) var(--ease-standard), background var(--motion-fast) var(--ease-standard), border-color var(--motion-fast) var(--ease-standard); }
+.review-workspace button[aria-pressed="true"] { transform: scale(1.015); }
+
+/* Exact evidence receives a brief source flash when focus moves. */
+.xray-text mark.is-evidence-flash {
+  animation: evidence-focus-flash 1.45s var(--ease-standard) 1;
+  outline: 2px solid rgba(83,229,255,.42);
+  outline-offset: 2px;
+}
+@keyframes evidence-focus-flash {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(83,229,255,0); }
+  35% { box-shadow: 0 0 0 6px rgba(83,229,255,.14), 0 0 26px rgba(83,229,255,.2); }
+}
+
+/* A truthful skeleton makes request latency feel continuous without fake progress. */
+.analysis-progress-shell { display: grid; gap: 14px; }
+.analysis-preview-skeleton {
+  min-height: 156px;
+  padding: 18px;
+  display: grid;
+  grid-template-columns: 112px minmax(0,1fr) 96px;
+  gap: 18px;
+  align-items: center;
+  border: 1px solid rgba(120,165,255,.13);
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(14,23,42,.62), rgba(7,11,20,.5));
+  overflow: hidden;
+}
+.analysis-preview-skeleton-ring { width: 96px; aspect-ratio: 1; border-radius: 50%; border: 10px solid rgba(120,165,255,.09); border-top-color: rgba(83,229,255,.22); }
+.analysis-preview-skeleton-copy { display: grid; gap: 9px; }
+.skeleton-line,.analysis-preview-skeleton-metrics span { display: block; border-radius: 999px; background: linear-gradient(90deg, rgba(255,255,255,.035), rgba(83,229,255,.09), rgba(255,255,255,.035)); background-size: 220% 100%; animation: skeleton-sweep 1.5s ease-in-out infinite; }
+.skeleton-line { height: 10px; }
+.skeleton-line.is-kicker { width: 34%; height: 7px; }
+.skeleton-line.is-title { width: 72%; height: 18px; }
+.skeleton-line.is-copy { width: 92%; }
+.skeleton-line.is-copy.short { width: 62%; }
+.analysis-preview-skeleton-metrics { display: grid; gap: 9px; }
+.analysis-preview-skeleton-metrics span { height: 32px; border-radius: 9px; }
+@keyframes skeleton-sweep { 0% { background-position: 100% 0; } 100% { background-position: -120% 0; } }
 
 /* Mobile result navigation reduces long-page friction. */
 .results-mobile-nav { display: none; }
 @media (max-width: 760px) {
   .results { padding-bottom: 74px; }
   .results-polish-toolbar { grid-template-columns: 1fr; }
-  .results-polish-actions { justify-content: flex-start; }
+  .results-polish-actions { justify-content: flex-start; overflow-x: auto; flex-wrap: nowrap; padding-bottom: 2px; }
+  .results-polish-actions > * { flex: 0 0 auto; }
   .results-polish-categories { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 3px; scrollbar-width: thin; }
   .results-polish-chip { flex: 0 0 auto; }
+  .analysis-preview-skeleton { grid-template-columns: 76px 1fr; min-height: 132px; }
+  .analysis-preview-skeleton-ring { width: 68px; border-width: 8px; }
+  .analysis-preview-skeleton-metrics { grid-column: 1 / -1; grid-template-columns: repeat(3,1fr); }
   .evidence-proof-drawer { top: auto; right: 8px; bottom: 66px; left: 8px; width: auto; max-height: min(72dvh, 640px); }
   .results-mobile-nav {
     position: fixed;
@@ -261,12 +337,16 @@
     box-shadow: 0 18px 58px rgba(0,0,0,.44);
     backdrop-filter: blur(18px) saturate(140%);
   }
-  .results-mobile-nav a { min-width: 0; display: grid; place-items: center; border-radius: 9px; color: var(--text-muted); font-size: 9px; }
-  .results-mobile-nav a:hover,.results-mobile-nav a:focus-visible { background: rgba(83,229,255,.07); color: var(--cyan); outline: 0; }
+  .results-mobile-nav a { min-width: 0; display: grid; place-items: center; border-radius: 9px; color: var(--text-muted); font-size: 9px; transition: background var(--motion-fast) var(--ease-standard), color var(--motion-fast) var(--ease-standard), transform var(--motion-fast) var(--ease-standard); }
+  .results-mobile-nav a:nth-child(3),.results-mobile-nav a:nth-child(4) { color: var(--text-secondary); background: rgba(83,229,255,.035); }
+  .results-mobile-nav a:hover,.results-mobile-nav a:focus-visible { background: rgba(83,229,255,.07); color: var(--cyan); outline: 0; transform: translateY(-1px); }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .results-polish-chip,
+  .results-polish-actions a,
+  .results-polish-actions button,
+  .results-polish-search,
   .term-cloud li,
   .term-cloud li button::after,
   .technical-details-toggle,
@@ -277,11 +357,13 @@
   .review-workspace,
   .export-card,
   .living-report,
+  .results-mobile-nav a,
   .results > .analysis-playback,
   .results > #fingerprint,
   .results > div:has(> #document-xray),
   .results > div:has(> #evidence-explorer),
   .results > div:has(> .diagnostics-explorer),
   .results > .system-transparency { transition: none !important; }
-  .coverage-card:hover,.terms-card:hover,.insight-card:hover,.export-card:hover,.results-polish-chip:hover { transform: none; }
+  .coverage-card:hover,.terms-card:hover,.insight-card:hover,.export-card:hover,.results-polish-chip:hover,.technical-details-toggle:hover,.results-mobile-nav a:hover { transform: none; }
+  .skeleton-line,.analysis-preview-skeleton-metrics span,.xray-text mark.is-evidence-flash { animation: none !important; }
 }
