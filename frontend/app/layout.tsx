@@ -6,6 +6,7 @@ import { WebAnalytics } from "@/components/analytics/web-analytics";
 import "./globals.css";
 import "./results-polish.css";
 import "./results-motion.css";
+import "./v21-interactions.css";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
 const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono" });
