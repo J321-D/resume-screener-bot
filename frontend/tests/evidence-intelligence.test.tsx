@@ -54,6 +54,47 @@ describe("EvidenceIntelligence", () => {
     await waitFor(() => expect(screen.getByRole("article", { name: "SQL" })).toHaveTextContent("job_description_1 · [16, 19)"));
   });
 
+  it("does not close technical details after first paint and resets only for a new analysis", async () => {
+    const user = userEvent.setup();
+    const result = analysisViewModel(analysisV2ResponseSchema.parse(v2Payload));
+    const props = {
+      selectedFindingId: null,
+      reviewDecisions: {},
+      onSelectFinding: vi.fn(),
+    };
+
+    const { rerender } = render(
+      <div className="results">
+        <EvidenceIntelligence result={result} {...props} />
+      </div>,
+    );
+
+    const toggle = await screen.findByRole("button", { name: /Technical details/i });
+    await user.click(toggle);
+    expect(toggle).toHaveAttribute("aria-expanded", "true");
+
+    rerender(
+      <div className="results">
+        <EvidenceIntelligence result={result} {...props} />
+      </div>,
+    );
+    await waitFor(() => expect(screen.getByRole("button", { name: /Technical details/i })).toHaveAttribute("aria-expanded", "true"));
+
+    const nextResult = {
+      ...result,
+      metadata: {
+        ...result.metadata,
+        analyzed_at: "2026-09-25T13:55:00Z",
+      },
+    };
+    rerender(
+      <div className="results">
+        <EvidenceIntelligence result={nextResult} {...props} />
+      </div>,
+    );
+    await waitFor(() => expect(screen.getByRole("button", { name: /Technical details/i })).toHaveAttribute("aria-expanded", "false"));
+  });
+
   it("cross-filters by status, source, method, and stable review decision", async () => {
     const user = userEvent.setup();
     const result = analysisViewModel(analysisV2ResponseSchema.parse(v2Payload));
