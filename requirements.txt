@@ -4,7 +4,7 @@ PyMuPDF>=1.28.2,<2
 docx2txt>=0.8,<1
 matplotlib>=3.11.2,<4
 plotly>=6.9.0,<7
-pandas>=2.2,<3
+pandas>=3.0.6,<4
 fpdf2>=2.8.8,<3
 fastapi==0.141.1
 uvicorn==0.35.0
