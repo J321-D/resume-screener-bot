@@ -1,0 +1,39 @@
+name: Safe Dependabot Maintainer
+
+on:
+  workflow_run:
+    workflows: ["Verify"]
+    types: [completed]
+
+permissions:
+  actions: write
+  checks: read
+  contents: write
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: safe-dependabot-maintainer
+  cancel-in-progress: false
+
+jobs:
+  maintain:
+    if: github.event.workflow_run.event == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out trusted default branch only
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: main
+          persist-credentials: false
+
+      - name: Evaluate exact Verify run
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          VERIFY_RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          python scripts/dependabot_safe_maintainer.py \
+            --workflow-run-id "$VERIFY_RUN_ID" \
+            --execute
