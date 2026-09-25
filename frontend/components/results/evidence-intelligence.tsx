@@ -49,6 +49,7 @@ export function EvidenceIntelligence({ result, selectedFindingId, reviewDecision
   const inspectorRef = useRef<HTMLElement>(null);
   const resultSearchRef = useRef<HTMLInputElement>(null);
   const copyResetRef = useRef<number | null>(null);
+  const previousAnalyzedAtRef = useRef(result.metadata.analyzed_at);
   const [status, setStatus] = useState<EvidenceStatus>("all");
   const [category, setCategory] = useState("all");
   const [source, setSource] = useState("all");
@@ -127,6 +128,9 @@ export function EvidenceIntelligence({ result, selectedFindingId, reviewDecision
   }, [isFocused, technicalOpen, result.metadata.analyzed_at]);
 
   useEffect(() => {
+    const analyzedAt = result.metadata.analyzed_at;
+    if (previousAnalyzedAtRef.current === analyzedAt) return;
+    previousAnalyzedAtRef.current = analyzedAt;
     setResultQuery("");
     setResultCategory("all");
     setSelectedKeywordId(null);
