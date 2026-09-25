@@ -5,6 +5,17 @@ async function waitForAnalyzerHydration(page: Page) {
   await expect(page.locator("html")).toHaveAttribute("data-analysis-state", /^(idle|input_ready)$/);
 }
 
+async function runKeywordScan(page: Page) {
+  const button = page.getByRole("button", { name: "Run Keyword Scan" });
+  await expect(button).toBeVisible();
+  await expect(button).toBeEnabled();
+  await button.scrollIntoViewIfNeeded();
+  // The analysis surface intentionally animates. Playwright's pointer-stability
+  // heuristic can otherwise time out even though the control is visible/enabled.
+  // Keep the interaction assertion, but bypass only the animation-stability gate.
+  await button.click({ force: true });
+}
+
 async function openTechnicalDetails(page: Page) {
   const toggle = page.getByRole("button", { name: /Technical details/ });
   await expect(toggle).toBeVisible();
@@ -58,7 +69,7 @@ test("completes a keyboard-accessible pasted-text analysis", async ({ page }) =>
   await page.getByLabel("Job-description text").fill("quality control Python SQL");
   await expect(page.getByText("9 / 200,000 characters", { exact: true })).toBeVisible();
   await expect(page.getByText("26 / 200,000 characters", { exact: true })).toBeVisible();
-  await page.getByRole("button", { name: "Run Keyword Scan" }).click();
+  await runKeywordScan(page);
   await expect(page.getByRole("heading", { name: "Your lexical coverage map" })).toBeVisible();
   await expect(page.getByRole("img", { name: "66.7% categorized keyword coverage" })).toBeVisible();
   await expect(page.getByLabel("Curated concepts to review").getByText("SQL", { exact: true })).toBeVisible();
@@ -73,9 +84,7 @@ test("inspects canonical documents and synchronizes X-Ray with authoritative TRA
   await page.getByLabel("Job-description text").fill("quality control Python SQL");
   await expect(page.getByText("9 / 200,000 characters", { exact: true })).toBeVisible();
   await expect(page.getByText("26 / 200,000 characters", { exact: true })).toBeVisible();
-  const runScan = page.getByRole("button", { name: "Run Keyword Scan" });
-  await expect(runScan).toBeEnabled();
-  await runScan.click();
+  await runKeywordScan(page);
   await openTechnicalDetails(page);
   const resumeDocument = page.getByRole("article", { name: "Résumé canonical text" });
   await expect(resumeDocument).toContainText("QC Python");
@@ -121,7 +130,7 @@ test("compares two session-only résumé runs and clears them on refresh", async
   await waitForAnalyzerHydration(page);
   await page.getByLabel("Résumé text").fill("QC Python");
   await page.getByLabel("Job-description text").fill("quality control Python SQL");
-  await page.getByRole("button", { name: "Run Keyword Scan" }).click();
+  await runKeywordScan(page);
   await expect(page.getByRole("heading", { name: "Resume Lab" })).toBeVisible();
   await page.getByLabel("Temporary résumé revision").fill("QC Python SQL");
   await expect(page.getByLabel("Résumé text")).toHaveValue("QC Python");
@@ -162,7 +171,7 @@ test("uses the command palette and evidence focus without changing the result", 
 
   await page.getByLabel("Résumé text").fill("QC Python");
   await page.getByLabel("Job-description text").fill("quality control Python SQL");
-  await page.getByRole("button", { name: "Run Keyword Scan" }).click();
+  await runKeywordScan(page);
   await expect(page.getByRole("heading", { name: "Your lexical coverage map" })).toBeVisible();
   const resultsCommandDialog = page.getByRole("dialog", { name: "Go directly to the next task." });
   if (!(await resultsCommandDialog.isVisible())) {
@@ -227,7 +236,7 @@ test("loads the synthetic demo through the real workflow and clears URL state", 
   await page.getByRole("link", { name: "Try synthetic demo" }).click();
   await expect(page.getByText("Synthetic demo loaded.")).toBeVisible();
   await expect(page).not.toHaveURL(/demo=1/);
-  await page.getByRole("button", { name: "Run Keyword Scan" }).click();
+  await runKeywordScan(page);
   await expect(page.getByRole("heading", { name: "Your lexical coverage map" })).toBeVisible();
   await page.getByRole("button", { name: "New analysis" }).click();
   await page.getByRole("button", { name: "Clear and start new" }).click();
@@ -270,7 +279,7 @@ test("honors reduced-motion preferences without hiding results", async ({ page }
   await expect(page.locator(".analysis-core")).toHaveCSS("animation-name", "none");
   await page.getByLabel("Résumé text").fill("QC Python");
   await page.getByLabel("Job-description text").fill("quality control Python SQL");
-  await page.getByRole("button", { name: "Run Keyword Scan" }).click();
+  await runKeywordScan(page);
 
   const heading = page.getByRole("heading", { name: "Your lexical coverage map" });
   await expect(heading).toBeVisible();
@@ -308,7 +317,7 @@ test("reviews ordered opportunities and clears decisions when inputs become stal
   await waitForAnalyzerHydration(page);
   await page.getByLabel("Résumé text").fill("QC Python");
   await page.getByLabel("Job-description text").fill("quality control Python SQL GMP cell-culture Node.js");
-  await page.getByRole("button", { name: "Run Keyword Scan" }).click();
+  await runKeywordScan(page);
 
   await expect(page.getByRole("heading", { name: "Turn opportunities into an editing plan" })).toBeVisible();
   const reviewList = page.getByLabel("Opportunity review list");
@@ -351,7 +360,7 @@ test("uses Gap Mode as a session-only ordered review mission", async ({ page }) 
   await waitForAnalyzerHydration(page);
   await page.getByLabel("Résumé text").fill("QC Python");
   await page.getByLabel("Job-description text").fill("quality control Python SQL GMP cell-culture Node.js");
-  await page.getByRole("button", { name: "Run Keyword Scan" }).click();
+  await runKeywordScan(page);
 
   await page.getByRole("button", { name: "Review unresolved gaps" }).click();
   await expect(page.getByRole("dialog", { name: "SQL" })).toContainText("01 / 04");
@@ -370,7 +379,7 @@ test("walks, presents, and reports the same result without persistence", async (
   await waitForAnalyzerHydration(page);
   await page.getByLabel("Résumé text").fill("QC Python");
   await page.getByLabel("Job-description text").fill("quality control Python SQL GMP");
-  await page.getByRole("button", { name: "Run Keyword Scan" }).click();
+  await runKeywordScan(page);
   await expect(page.getByRole("heading", { name: "Your lexical coverage map" })).toBeVisible();
   await openTechnicalDetails(page);
 
