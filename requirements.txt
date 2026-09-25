@@ -1,5 +1,5 @@
 # Compatible dependency families for the deterministic application and API.
-streamlit>=1.40,<2
+streamlit>=1.64.0,<2
 PyMuPDF>=1.28.2,<2
 docx2txt>=0.8,<1
 matplotlib>=3.11.2,<4
