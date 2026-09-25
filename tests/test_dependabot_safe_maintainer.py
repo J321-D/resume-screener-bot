@@ -40,6 +40,101 @@ class DependabotSafeMaintainerTests(unittest.TestCase):
         self.assertFalse(m.files_safe(["src/app.tsx"]))
         self.assertFalse(m.files_safe([]))
 
+    def test_trusted_action_major_requires_exact_official_sha_only(self):
+        repo = "J321-D/resume-screener-bot"
+        old_sha = "a" * 40
+        new_sha = "b" * 40
+        candidate = self.candidate(
+            title="bump actions/checkout from 4.4.0 to 7.0.1",
+            files=(".github/workflows/verify.yml",),
+            base_sha="base",
+            head_sha="head",
+        )
+        before = (
+            "jobs:\n"
+            "  verify:\n"
+            f"    - uses: actions/checkout@{old_sha} # v4\n"
+            "    - run: echo ok\n"
+        )
+        after = (
+            "jobs:\n"
+            "  verify:\n"
+            f"    - uses: actions/checkout@{new_sha} # v7.0.1\n"
+            "    - run: echo ok\n"
+        )
+        with (
+            mock.patch.object(
+                m,
+                "_file_text",
+                side_effect=lambda _repo, _path, ref: before if ref == "base" else after,
+            ),
+            mock.patch.object(m, "_resolve_tag_sha", return_value=new_sha),
+        ):
+            m.validate_candidate(repo, candidate)
+
+    def test_trusted_action_major_rejects_any_extra_workflow_edit(self):
+        repo = "J321-D/resume-screener-bot"
+        old_sha = "a" * 40
+        new_sha = "b" * 40
+        candidate = self.candidate(
+            title="bump actions/checkout from 4.4.0 to 7.0.1",
+            files=(".github/workflows/verify.yml",),
+            base_sha="base",
+            head_sha="head",
+        )
+        before = (
+            "permissions:\n"
+            "  contents: read\n"
+            f"- uses: actions/checkout@{old_sha} # v4\n"
+        )
+        after = (
+            "permissions:\n"
+            "  contents: write\n"
+            f"- uses: actions/checkout@{new_sha} # v7.0.1\n"
+        )
+        with (
+            mock.patch.object(
+                m,
+                "_file_text",
+                side_effect=lambda _repo, _path, ref: before if ref == "base" else after,
+            ),
+            mock.patch.object(m, "_resolve_tag_sha", return_value=new_sha),
+            self.assertRaises(m.Refused),
+        ):
+            m.validate_candidate(repo, candidate)
+
+    def test_trusted_action_major_rejects_sha_not_matching_official_tag(self):
+        repo = "J321-D/resume-screener-bot"
+        old_sha = "a" * 40
+        pr_sha = "b" * 40
+        official_sha = "c" * 40
+        candidate = self.candidate(
+            title="bump actions/setup-node from 4.4.0 to 7.0.0",
+            files=(".github/workflows/verify.yml",),
+            base_sha="base",
+            head_sha="head",
+        )
+        before = f"- uses: actions/setup-node@{old_sha} # v4\n"
+        after = f"- uses: actions/setup-node@{pr_sha} # v7.0.0\n"
+        with (
+            mock.patch.object(
+                m,
+                "_file_text",
+                side_effect=lambda _repo, _path, ref: before if ref == "base" else after,
+            ),
+            mock.patch.object(m, "_resolve_tag_sha", return_value=official_sha),
+            self.assertRaises(m.Refused),
+        ):
+            m.validate_candidate(repo, candidate)
+
+    def test_trusted_action_lane_still_blocks_unknown_actions(self):
+        candidate = self.candidate(
+            title="bump evil/action from 1.0.0 to 2.0.0",
+            files=(".github/workflows/verify.yml",),
+        )
+        with self.assertRaises(m.Refused):
+            m.validate_candidate("J321-D/resume-screener-bot", candidate)
+
     def test_checks_require_both_verify_jobs_and_every_check_green(self):
         good = [
             {
@@ -101,14 +196,16 @@ class DependabotSafeMaintainerTests(unittest.TestCase):
         return m.Candidate(**base)
 
     def test_validate_candidate_blocks_major_pre1_and_unexpected_files(self):
-        m.validate_candidate(self.candidate())
+        m.validate_candidate("J321-D/resume-screener-bot", self.candidate())
 
         with self.assertRaises(m.Refused):
             m.validate_candidate(
+                "J321-D/resume-screener-bot",
                 self.candidate(title="bump next from 15.5.23 to 16.3.1")
             )
         with self.assertRaises(m.Refused):
             m.validate_candidate(
+                "J321-D/resume-screener-bot",
                 self.candidate(
                     title=(
                         "update docx2txt requirement from <1,>=0.8 "
@@ -117,9 +214,9 @@ class DependabotSafeMaintainerTests(unittest.TestCase):
                 )
             )
         with self.assertRaises(m.Refused):
-            m.validate_candidate(self.candidate(files=("src/app.py",)))
+            m.validate_candidate("J321-D/resume-screener-bot", self.candidate(files=("src/app.py",)))
         with self.assertRaises(m.Refused):
-            m.validate_candidate(self.candidate(author="someone-else"))
+            m.validate_candidate("J321-D/resume-screener-bot", self.candidate(author="someone-else"))
 
     @mock.patch.dict(os.environ, {"GITHUB_REPOSITORY": "J321-D/resume-screener-bot"})
     def test_successful_current_head_would_merge_only_after_green_checks(self):
