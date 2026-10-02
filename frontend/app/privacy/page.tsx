@@ -34,10 +34,10 @@ export default function PrivacyPage() {
       <p>
         This Version 2 frontend is configured to use Vercel Web Analytics for
         anonymous aggregate page views, referrers, approximate region, browser,
-        operating system, and device category. Analytics receives only the fixed
-        public page path—never document text, filenames, extracted terms, report
-        contents, or form input—and does not use analytics cookies or custom
-        interaction events.
+        operating system, and device category. Analytics receives only an allowlisted
+        public page path—including the optional premium-interest experiment page when
+        enabled—never document text, filenames, extracted terms, report contents, or
+        form input. The app does not use analytics cookies or custom interaction events.
       </p>
       <section className="system-explorer privacy-explorer" aria-labelledby="privacy-explorer-title">
         <p className="mono-label">REQUEST LIFECYCLE</p><h2 id="privacy-explorer-title">What moves—and what remains.</h2>

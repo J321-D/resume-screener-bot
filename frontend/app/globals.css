@@ -648,3 +648,26 @@ html[data-theme="precision-light"] .document-xray { background:linear-gradient(1
 @media (prefers-reduced-motion:reduce) { .xray-text mark,.xray-source-tabs button,.xray-scanner-toggle { transition:none!important; } }
 @media (forced-colors:active) { .document-xray,.xray-document,.xray-inspector,.xray-text mark { border:1px solid CanvasText;box-shadow:none; }.xray-text mark { color:HighlightText;background:Highlight; } }
 @media print { .document-xray { box-shadow:none;background:white;color:black; }.xray-toolbar,.xray-source-tabs,.xray-scanner-toggle,.xray-inspector { display:none!important; }.xray-layout { display:block; }.xray-document { border:0; }.xray-text { max-height:none;overflow:visible;color:black;font-size:9pt; }.xray-text mark { background:transparent!important;color:inherit!important;box-shadow:none!important;text-decoration:underline; } }
+
+
+/* Disabled-by-default revenue validation surface. No custom analytics or PII. */
+.premium-interest-card {
+  margin: 24px 0;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  border: 1px solid rgba(77, 220, 255, .18);
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(77, 220, 255, .055), rgba(128, 92, 255, .045));
+}
+.premium-interest-card h3 { margin: 4px 0 7px; font-size: 20px; letter-spacing: -.025em; }
+.premium-interest-card p { margin: 0; max-width: 720px; color: var(--text-secondary); font-size: 10px; line-height: 1.6; }
+.premium-interest-card .button { flex: 0 0 auto; }
+.premium-interest-page { min-height: 62vh; }
+@media (max-width: 720px) {
+  .premium-interest-card { align-items: stretch; flex-direction: column; }
+  .premium-interest-card .button { justify-content: center; }
+}
+@media print { .premium-interest-card { display: none !important; } }
