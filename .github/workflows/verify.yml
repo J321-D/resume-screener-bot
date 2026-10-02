@@ -13,7 +13,76 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    outputs:
+      python_changed: ${{ steps.diff.outputs.python_changed }}
+      frontend_changed: ${{ steps.diff.outputs.frontend_changed }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Classify changed paths
+        id: diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
+            git fetch --no-tags origin "$GITHUB_BASE_REF"
+            base="origin/$GITHUB_BASE_REF"
+            files="$(git diff --name-only "$base"...HEAD)"
+          else
+            before="${{ github.event.before }}"
+            if [[ -n "$before" && "$before" != "0000000000000000000000000000000000000000" ]]; then
+              files="$(git diff --name-only "$before" HEAD)"
+            elif git rev-parse HEAD^ >/dev/null 2>&1; then
+              files="$(git diff --name-only HEAD^ HEAD)"
+            else
+              # Unknown ancestry fails open.
+              echo "python_changed=true" >> "$GITHUB_OUTPUT"
+              echo "frontend_changed=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          fi
+
+          frontend_changed=false
+          python_changed=false
+          only_frontend=true
+          any=false
+          while IFS= read -r path; do
+            [[ -z "$path" ]] && continue
+            any=true
+            case "$path" in
+              frontend/*)
+                frontend_changed=true
+                ;;
+              .github/workflows/verify.yml)
+                frontend_changed=true
+                python_changed=true
+                only_frontend=false
+                ;;
+              *)
+                python_changed=true
+                only_frontend=false
+                ;;
+            esac
+          done <<< "$files"
+
+          if [[ "$any" != "true" ]]; then
+            # Empty/ambiguous diff fails open.
+            python_changed=true
+            frontend_changed=true
+          elif [[ "$only_frontend" == "true" ]]; then
+            python_changed=false
+          fi
+
+          echo "python_changed=$python_changed" >> "$GITHUB_OUTPUT"
+          echo "frontend_changed=$frontend_changed" >> "$GITHUB_OUTPUT"
+
   python:
+    needs: changes
+    if: ${{ always() && (needs.changes.result != 'success' || needs.changes.outputs.python_changed == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -29,6 +98,8 @@ jobs:
       - run: python -m pip check
 
   frontend:
+    needs: changes
+    if: ${{ always() && (needs.changes.result != 'success' || needs.changes.outputs.frontend_changed == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
     defaults:
