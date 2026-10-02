@@ -39,9 +39,9 @@ export function premiumPaidCheckoutEnabled(
   return flag === "1" && validPremiumPayPalLink(paymentLink) !== null;
 }
 
-export function createPremiumAnalysisCode(): string {
-  const bytes = new Uint8Array(6);
-  globalThis.crypto.getRandomValues(bytes);
+export function createPremiumAnalysisCode(seed?: Uint8Array): string {
+  const bytes = seed ?? globalThis.crypto.getRandomValues(new Uint8Array(6));
+  if (bytes.length !== 6) throw new Error("premium analysis code requires exactly 6 random bytes");
   const body = Array.from(bytes, (value) => value.toString(16).padStart(2, "0")).join("").toUpperCase();
   return `RKS-${body}`;
 }
