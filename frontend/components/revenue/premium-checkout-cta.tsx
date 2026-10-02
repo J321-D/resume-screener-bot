@@ -1,7 +1,7 @@
 "use client";
 
 import { ExternalLink, LockKeyhole } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   PREMIUM_CHECKOUT_PRICE_USD,
@@ -15,10 +15,18 @@ interface PremiumCheckoutCtaProps {
 }
 
 export function PremiumCheckoutCta({ stale }: PremiumCheckoutCtaProps) {
-  const [analysisCode] = useState(() => createPremiumAnalysisCode());
+  const [analysisCode, setAnalysisCode] = useState<string | null>(null);
   const paymentLink = validPremiumPayPalLink(process.env.NEXT_PUBLIC_PREMIUM_PAYPAL_LINK);
 
-  if (!premiumPaidCheckoutEnabled() || !paymentLink || stale) return null;
+  useEffect(() => {
+    if (premiumPaidCheckoutEnabled() && paymentLink && !stale) {
+      setAnalysisCode(createPremiumAnalysisCode());
+    } else {
+      setAnalysisCode(null);
+    }
+  }, [paymentLink, stale]);
+
+  if (!premiumPaidCheckoutEnabled() || !paymentLink || stale || !analysisCode) return null;
 
   return (
     <aside className="premium-interest-card" aria-labelledby="premium-checkout-title">
