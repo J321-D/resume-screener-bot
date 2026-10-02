@@ -3,6 +3,7 @@
 from api.services.paypal_payment_evidence import (
     PREMIUM_PRODUCT_ID,
     PREMIUM_PRODUCT_NAME,
+    PREMIUM_ANALYSIS_CODE_LABEL,
     validate_completed_payment,
     validate_payment_link_resource,
 )
@@ -19,6 +20,7 @@ def _link_resource(**updates):
             "name":PREMIUM_PRODUCT_NAME,
             "product_id":PREMIUM_PRODUCT_ID,
             "unit_amount":{"currency_code":"USD","value":"9.00"},
+            "customer_notes":[{"label":PREMIUM_ANALYSIS_CODE_LABEL,"required":True}],
         }],
     }
     row.update(updates)
@@ -62,6 +64,9 @@ def test_exact_payment_link_resource_is_ready_but_not_authorized():
     assert out["payment_resource_id"]=="PLB-ABC123XYZ"
     assert out["product_id"]==PREMIUM_PRODUCT_ID
     assert out["price_usd"]=="9.00"
+    assert out["customer_binding"]=={
+        "field":"Analysis code","required":True,"provider_mapping_proven":False,
+    }
     assert out["payment_action_authorized"] is False
     assert out["public_activation_authorized"] is False
 
@@ -74,10 +79,17 @@ def test_payment_link_resource_rejects_wrong_host_query_price_or_product():
             "name":PREMIUM_PRODUCT_NAME,
             "product_id":PREMIUM_PRODUCT_ID,
             "unit_amount":{"currency_code":"USD","value":"9.01"},
+            "customer_notes":[{"label":PREMIUM_ANALYSIS_CODE_LABEL,"required":True}],
         }]),
         _link_resource(line_items=[{
             "name":PREMIUM_PRODUCT_NAME,
             "product_id":"OTHER",
+            "unit_amount":{"currency_code":"USD","value":"9.00"},
+            "customer_notes":[{"label":PREMIUM_ANALYSIS_CODE_LABEL,"required":True}],
+        }]),
+        _link_resource(line_items=[{
+            "name":PREMIUM_PRODUCT_NAME,
+            "product_id":PREMIUM_PRODUCT_ID,
             "unit_amount":{"currency_code":"USD","value":"9.00"},
         }]),
     ]
@@ -89,6 +101,7 @@ def test_payment_link_resource_rejects_wrong_host_query_price_or_product():
     assert "PAYMENT_LINK_ID_MISMATCH" in reasons
     assert "PRICE_MISMATCH" in reasons
     assert "PRODUCT_ID_MISMATCH" in reasons
+    assert "REQUIRED_ANALYSIS_CODE_FIELD_MISSING" in reasons
 
 
 def test_completed_payment_qualifies_only_signed_live_exact_product_and_price():
