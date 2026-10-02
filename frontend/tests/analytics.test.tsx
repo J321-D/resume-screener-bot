@@ -31,7 +31,7 @@ describe("privacy-safe Web Analytics", () => {
     })));
   });
 
-  it.each(["/", "/methodology", "/privacy"])(
+  it.each(["/", "/methodology", "/privacy", "/premium-interest"])(
     "allows the public path %s while removing query and fragment data",
     (pathname) => {
       expect(filterAnalyticsEvent({
