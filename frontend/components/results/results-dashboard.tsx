@@ -8,6 +8,7 @@ import { findingForTerm, type AnalysisResponse, type AnalysisViewModel, type Pub
 import type { ReviewDecisions, ReviewNotes, ReviewOpportunity } from "@/components/review/review-state";
 import { ReviewWorkspace } from "@/components/review/review-workspace";
 import { PremiumInterestCta } from "@/components/revenue/premium-interest-cta";
+import { PremiumCheckoutCta } from "@/components/revenue/premium-checkout-cta";
 import { AnalysisPlayback } from "./analysis-playback";
 import { AnalysisFingerprint } from "./analysis-fingerprint";
 import { CoverageRing } from "./coverage-ring";
@@ -23,6 +24,7 @@ interface ResultsDashboardProps {
   reporting: boolean;
   reportError: PublicError | null;
   analysisKey: string;
+  premiumAnalysisCode?: string | null;
   onDownload: () => void;
   onNewAnalysis: () => void;
   initialSelectedFindingId?: string | null;
@@ -102,7 +104,7 @@ function TermList({ items, label, limit, reduceMotion, evidenceFor, onSelect, se
   );
 }
 
-export function ResultsDashboard({ result, stale, reporting, reportError, analysisKey, onDownload, onNewAnalysis, initialSelectedFindingId = null, initialReviewDecisions = {}, initialReviewNotes = {}, onReviewStateChange }: ResultsDashboardProps) {
+export function ResultsDashboard({ result, stale, reporting, reportError, analysisKey, premiumAnalysisCode = null, onDownload, onNewAnalysis, initialSelectedFindingId = null, initialReviewDecisions = {}, initialReviewNotes = {}, onReviewStateChange }: ResultsDashboardProps) {
   const reduceMotion = useReducedMotion();
   const resultsRef = useRef<HTMLElement>(null);
   const date = new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(result.metadata.analyzed_at));
@@ -512,6 +514,7 @@ export function ResultsDashboard({ result, stale, reporting, reportError, analys
 
       <SystemTransparency result={result} />
       <LivingReport result={result} stale={stale} />
+      {!stale && <PremiumCheckoutCta analysisCode={premiumAnalysisCode} />}
       <PremiumInterestCta />
 
       <motion.article className="export-card" data-reporting={reporting ? "active" : "idle"} variants={cardVariants}>
