@@ -67,10 +67,10 @@ describe("disabled-by-default premium checkout handoff", () => {
     process.env.NEXT_PUBLIC_PREMIUM_PAYPAL_LINK = "https://www.paypal.com/ncp/payment/PLB-ABC123XYZ";
     render(<PremiumCheckoutCta stale={false} />);
 
-    expect(await screen.findByRole("heading", { name: /Get the premium tailored review for \\$\\s*9/i }))
+    expect(await screen.findByRole("heading", { name: /Get the premium tailored review for \$\s*9/i }))
       .toBeInTheDocument();
     const code = screen.getByText(/^RKS-[A-F0-9]{12}$/);
-    const link = screen.getByRole("link", { name: /Pay \\$\\s*9 with PayPal/i });
+    const link = screen.getByRole("link", { name: /Pay \$\s*9 with PayPal/i });
     expect(link).toHaveAttribute("href", "https://www.paypal.com/ncp/payment/PLB-ABC123XYZ");
     expect(link.getAttribute("href")).not.toContain(code.textContent ?? "");
     expect(screen.getByText(/does not contain your résumé, job description, email, or name/i)).toBeInTheDocument();
