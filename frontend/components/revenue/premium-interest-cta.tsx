@@ -6,10 +6,11 @@ import {
   PREMIUM_INTEREST_PATH,
   PREMIUM_INTEREST_PRICE_USD,
   premiumInterestExperimentEnabled,
+  premiumPaidCheckoutEnabled,
 } from "@/lib/revenue-experiment";
 
 export function PremiumInterestCta() {
-  if (!premiumInterestExperimentEnabled()) return null;
+  if (!premiumInterestExperimentEnabled() || premiumPaidCheckoutEnabled()) return null;
 
   return (
     <aside className="premium-interest-card" aria-labelledby="premium-interest-title">
