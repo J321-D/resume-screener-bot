@@ -4,6 +4,7 @@ from api.services.paypal_payment_evidence import (
     PREMIUM_PRODUCT_ID,
     PREMIUM_PRODUCT_NAME,
     PREMIUM_ANALYSIS_CODE_LABEL,
+    build_payment_link_request,
     validate_completed_payment,
     validate_payment_link_resource,
 )
@@ -21,6 +22,8 @@ def _link_resource(**updates):
             "product_id":PREMIUM_PRODUCT_ID,
             "unit_amount":{"currency_code":"USD","value":"9.00"},
             "customer_notes":[{"label":PREMIUM_ANALYSIS_CODE_LABEL,"required":True}],
+            "collect_shipping_address":False,
+            "adjustable_quantity":{"maximum":1},
         }],
     }
     row.update(updates)
@@ -187,3 +190,49 @@ def test_contract_has_no_credentials_network_routes_or_income_side_effects():
         "RevenueRegistry",
     )
     assert all(token not in source for token in forbidden)
+
+
+
+def test_payment_link_request_is_exact_fixed_price_privacy_minimized_and_inert():
+    out=build_payment_link_request("https://resume-keyword-screener.vercel.app/premium-return")
+
+    assert out["integration_mode"]=="LINK"
+    assert out["type"]=="BUY_NOW"
+    assert out["reusable"]=="MULTIPLE"
+    assert out["return_url"]=="https://resume-keyword-screener.vercel.app/premium-return"
+    assert len(out["line_items"])==1
+    item=out["line_items"][0]
+    assert item["name"]==PREMIUM_PRODUCT_NAME
+    assert item["product_id"]==PREMIUM_PRODUCT_ID
+    assert item["unit_amount"]=={"currency_code":"USD","value":"9.00"}
+    assert item["collect_shipping_address"] is False
+    assert item["adjustable_quantity"]=={"maximum":1}
+    assert item["customer_notes"]==[
+        {"label":PREMIUM_ANALYSIS_CODE_LABEL,"required":True}
+    ]
+    assert "Analysis code" in item["description"]
+
+
+def test_payment_link_request_rejects_non_https_credentials_and_fragment():
+    bad=(
+        "http://example.com/return",
+        "https://user:pass@example.com/return",
+        "https://example.com/return#fragment",
+        "",
+    )
+    for value in bad:
+        try:
+            build_payment_link_request(value)
+        except ValueError:
+            continue
+        raise AssertionError(f"unsafe return URL accepted: {value!r}")
+
+
+def test_checkout_resource_rejects_shipping_and_quantity_expansion():
+    shipping=_link_resource()
+    shipping["line_items"][0]["collect_shipping_address"]=True
+    quantity=_link_resource()
+    quantity["line_items"][0]["adjustable_quantity"]={"maximum":2}
+
+    assert validate_payment_link_resource(shipping)["reason"]=="SHIPPING_ADDRESS_COLLECTION_NOT_ALLOWED"
+    assert validate_payment_link_resource(quantity)["reason"]=="QUANTITY_MUST_BE_ONE"
