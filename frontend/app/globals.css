@@ -671,3 +671,14 @@ html[data-theme="precision-light"] .document-xray { background:linear-gradient(1
   .premium-interest-card .button { justify-content: center; }
 }
 @media print { .premium-interest-card { display: none !important; } }
+
+
+/* Dormant until all premium checkout readiness gates explicitly pass. */
+.premium-checkout-cta > div:last-child { display:grid;justify-items:end;gap:7px; }
+.premium-checkout-cta > div:last-child small { color:var(--text-muted);font-size:8px; }
+.premium-analysis-code { margin:12px 0 8px;display:flex;align-items:center;gap:9px; }
+.premium-analysis-code span { color:var(--text-muted);font-size:8px;text-transform:uppercase;letter-spacing:.08em; }
+.premium-analysis-code code { padding:6px 8px;border:1px solid rgba(83,229,255,.2);border-radius:7px;background:rgba(83,229,255,.045);color:var(--cyan);font-family:var(--font-geist-mono),monospace;font-size:10px;letter-spacing:.08em; }
+.premium-checkout-note { color:var(--text-muted)!important;font-size:9px!important; }
+@media (max-width:720px) { .premium-checkout-cta > div:last-child { justify-items:stretch; }.premium-analysis-code { align-items:flex-start;flex-direction:column; } }
+@media print { .premium-checkout-cta { display:none!important; } }
