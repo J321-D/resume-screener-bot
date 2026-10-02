@@ -8,6 +8,7 @@ import { findingForTerm, type AnalysisResponse, type AnalysisViewModel, type Pub
 import type { ReviewDecisions, ReviewNotes, ReviewOpportunity } from "@/components/review/review-state";
 import { ReviewWorkspace } from "@/components/review/review-workspace";
 import { PremiumInterestCta } from "@/components/revenue/premium-interest-cta";
+import { PremiumCheckoutCta } from "@/components/revenue/premium-checkout-cta";
 import { AnalysisPlayback } from "./analysis-playback";
 import { AnalysisFingerprint } from "./analysis-fingerprint";
 import { CoverageRing } from "./coverage-ring";
@@ -513,6 +514,7 @@ export function ResultsDashboard({ result, stale, reporting, reportError, analys
       <SystemTransparency result={result} />
       <LivingReport result={result} stale={stale} />
       <PremiumInterestCta />
+      <PremiumCheckoutCta key={analysisKey} stale={stale} />
 
       <motion.article className="export-card" data-reporting={reporting ? "active" : "idle"} variants={cardVariants}>
         <div className="report-thumbnail" aria-hidden="true"><span>RKS</span><div /><div /><div /></div>
