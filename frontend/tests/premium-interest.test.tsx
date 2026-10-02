@@ -35,7 +35,7 @@ describe("premium interest revenue experiment", () => {
   it("shows a transparent non-payment willingness-to-pay CTA only when enabled", () => {
     process.env.NEXT_PUBLIC_PREMIUM_INTEREST_EXPERIMENT = "1";
     render(<PremiumInterestCta />);
-    expect(screen.getByRole("heading", { name: /premium human-style review/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /premium tailored review/i })).toBeInTheDocument();
     const link = screen.getByRole("link", { name: `I'd pay $${PREMIUM_INTEREST_PRICE_USD}` });
     expect(link).toHaveAttribute("href", PREMIUM_INTEREST_PATH);
     expect(screen.getByText(/records only an anonymous page view/i)).toBeInTheDocument();
