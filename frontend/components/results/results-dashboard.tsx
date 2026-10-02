@@ -5,6 +5,7 @@ import { AlertTriangle, ArrowDownToLine, Check, ChevronDown, Clipboard, Clock3, 
 import { useEffect, useId, useRef, useState } from "react";
 
 import { findingForTerm, type AnalysisResponse, type AnalysisViewModel, type PublicError } from "@/lib/contracts";
+import { premiumPaidCheckoutEnabled } from "@/lib/revenue-experiment";
 import type { ReviewDecisions, ReviewNotes, ReviewOpportunity } from "@/components/review/review-state";
 import { ReviewWorkspace } from "@/components/review/review-workspace";
 import { PremiumInterestCta } from "@/components/revenue/premium-interest-cta";
@@ -514,7 +515,7 @@ export function ResultsDashboard({ result, stale, reporting, reportError, analys
       <SystemTransparency result={result} />
       <LivingReport result={result} stale={stale} />
       <PremiumInterestCta />
-      <PremiumCheckoutCta key={analysisKey} stale={stale} />
+      {premiumPaidCheckoutEnabled() && <PremiumCheckoutCta key={analysisKey} stale={stale} />}
 
       <motion.article className="export-card" data-reporting={reporting ? "active" : "idle"} variants={cardVariants}>
         <div className="report-thumbnail" aria-hidden="true"><span>RKS</span><div /><div /><div /></div>
