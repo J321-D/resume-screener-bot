@@ -62,15 +62,15 @@ describe("disabled-by-default premium checkout handoff", () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it("renders the exact $9 hosted checkout without putting the analysis code in the URL", () => {
+  it("renders the exact $9 hosted checkout without putting the analysis code in the URL", async () => {
     process.env.NEXT_PUBLIC_PREMIUM_PAID_CHECKOUT_EXPERIMENT = "1";
     process.env.NEXT_PUBLIC_PREMIUM_PAYPAL_LINK = "https://www.paypal.com/ncp/payment/PLB-ABC123XYZ";
     render(<PremiumCheckoutCta stale={false} />);
 
-    expect(screen.getByRole("heading", { name: new RegExp(`premium tailored review for \\\$\${PREMIUM_CHECKOUT_PRICE_USD}`, "i") }))
+    expect(await screen.findByRole("heading", { name: `Get the premium tailored review for ${PREMIUM_CHECKOUT_PRICE_USD}` }))
       .toBeInTheDocument();
     const code = screen.getByText(/^RKS-[A-F0-9]{12}$/);
-    const link = screen.getByRole("link", { name: new RegExp(`Pay \\\$\${PREMIUM_CHECKOUT_PRICE_USD} with PayPal`, "i") });
+    const link = screen.getByRole("link", { name: `Pay ${PREMIUM_CHECKOUT_PRICE_USD} with PayPal` });
     expect(link).toHaveAttribute("href", "https://www.paypal.com/ncp/payment/PLB-ABC123XYZ");
     expect(link.getAttribute("href")).not.toContain(code.textContent ?? "");
     expect(screen.getByText(/does not contain your résumé, job description, email, or name/i)).toBeInTheDocument();
