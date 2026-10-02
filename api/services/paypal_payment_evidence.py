@@ -50,6 +50,48 @@ class EvidenceDecision:
         }
 
 
+def build_payment_link_request(return_url: str) -> dict:
+    """Build the frozen PayPal Payment Link request without making a network call.
+
+    The future approved adapter may submit this object only after provider/account
+    authority is explicit. Keeping construction pure lets CI lock the exact offer
+    before any payment action exists.
+    """
+    parsed=urlparse(str(return_url or "").strip())
+    if (
+        parsed.scheme!="https"
+        or not parsed.hostname
+        or parsed.username is not None
+        or parsed.password is not None
+        or parsed.fragment
+    ):
+        raise ValueError("return_url must be a clean public HTTPS URL")
+    return {
+        "integration_mode":"LINK",
+        "type":"BUY_NOW",
+        "reusable":"MULTIPLE",
+        "return_url":return_url,
+        "line_items":[{
+            "name":PREMIUM_PRODUCT_NAME,
+            "product_id":PREMIUM_PRODUCT_ID,
+            "description":(
+                "One deterministic premium tailored resume review. "
+                "Enter the Analysis code shown in Resume Keyword Screener so the payment can be matched to the correct review."
+            ),
+            "unit_amount":{
+                "currency_code":PREMIUM_CURRENCY,
+                "value":str(PREMIUM_PRICE_USD),
+            },
+            "collect_shipping_address":False,
+            "customer_notes":[{
+                "label":PREMIUM_ANALYSIS_CODE_LABEL,
+                "required":True,
+            }],
+            "adjustable_quantity":{"maximum":1},
+        }],
+    }
+
+
 def _money(value: object) -> Decimal | None:
     try:
         parsed=Decimal(str(value))
@@ -101,6 +143,11 @@ def validate_payment_link_resource(resource: dict) -> dict:
         return {"status":"INVALID","reason":"PRODUCT_ID_MISMATCH"}
     if str(item.get("name") or "")!=PREMIUM_PRODUCT_NAME:
         return {"status":"INVALID","reason":"PRODUCT_NAME_MISMATCH"}
+    if item.get("collect_shipping_address") not in (False,None):
+        return {"status":"INVALID","reason":"SHIPPING_ADDRESS_COLLECTION_NOT_ALLOWED"}
+    quantity=item.get("adjustable_quantity") if isinstance(item.get("adjustable_quantity"),dict) else {}
+    if quantity and int(quantity.get("maximum") or 0)!=1:
+        return {"status":"INVALID","reason":"QUANTITY_MUST_BE_ONE"}
     amount=item.get("unit_amount") if isinstance(item.get("unit_amount"),dict) else {}
     if str(amount.get("currency_code") or "")!=PREMIUM_CURRENCY:
         return {"status":"INVALID","reason":"CURRENCY_MISMATCH"}
