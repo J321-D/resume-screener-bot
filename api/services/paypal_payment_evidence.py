@@ -20,6 +20,7 @@ PREMIUM_PRODUCT_ID = "RKS-PREMIUM-TAILORED-REPORT-V1"
 PREMIUM_PRODUCT_NAME = "Premium Tailored Resume Review"
 PREMIUM_PRICE_USD = Decimal("9.00")
 PREMIUM_CURRENCY = "USD"
+PREMIUM_ANALYSIS_CODE_LABEL = "Analysis code"
 PAYPAL_CAPTURE_EVENT = "PAYMENT.CAPTURE.COMPLETED"
 PAYPAL_LINK_ID_RE = re.compile(r"^PLB-[A-Z0-9]+$")
 PAYPAL_CAPTURE_ID_RE = re.compile(r"^[A-Z0-9]{8,64}$")
@@ -105,6 +106,12 @@ def validate_payment_link_resource(resource: dict) -> dict:
         return {"status":"INVALID","reason":"CURRENCY_MISMATCH"}
     if _money(amount.get("value"))!=PREMIUM_PRICE_USD:
         return {"status":"INVALID","reason":"PRICE_MISMATCH"}
+    notes=item.get("customer_notes")
+    if not isinstance(notes,list) or len(notes)!=1 or not isinstance(notes[0],dict):
+        return {"status":"INVALID","reason":"REQUIRED_ANALYSIS_CODE_FIELD_MISSING"}
+    note=notes[0]
+    if note.get("required") is not True or str(note.get("label") or "")!=PREMIUM_ANALYSIS_CODE_LABEL:
+        return {"status":"INVALID","reason":"ANALYSIS_CODE_FIELD_MISMATCH"}
 
     return {
         "status":"READY",
@@ -115,6 +122,11 @@ def validate_payment_link_resource(resource: dict) -> dict:
         "product_name":PREMIUM_PRODUCT_NAME,
         "price_usd":str(PREMIUM_PRICE_USD),
         "currency":PREMIUM_CURRENCY,
+        "customer_binding":{
+            "field":PREMIUM_ANALYSIS_CODE_LABEL,
+            "required":True,
+            "provider_mapping_proven":False,
+        },
         "payment_action_authorized":False,
         "public_activation_authorized":False,
     }
