@@ -17,7 +17,7 @@ export function PremiumCheckoutCta({ analysisCode }: PremiumCheckoutCtaProps) {
   if (!config.ready || !config.url || !code) return null;
 
   return (
-    <section className="premium-checkout-cta" aria-labelledby="premium-checkout-title">
+    <section className="premium-interest-card premium-checkout-cta" aria-labelledby="premium-checkout-title">
       <div>
         <p className="mono-label">ONE-TIME PREMIUM REVIEW</p>
         <h3 id="premium-checkout-title">Premium tailored resume review · $9</h3>
