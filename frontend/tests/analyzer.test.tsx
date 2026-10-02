@@ -269,7 +269,7 @@ describe("Analyzer", () => {
     expect(screen.getByRole("button", { name: /analyzing/i })).toBeDisabled();
     resolveRequest(await jsonResponse());
     expect(await screen.findByRole("status", { name: "Analysis status: Results assembled" })).toBeInTheDocument();
-    expect(document.documentElement).toHaveAttribute("data-analysis-state", "results");
+    await waitFor(() => expect(document.documentElement).toHaveAttribute("data-analysis-state", "results"));
   });
 
   it("marks results stale and disables export when inputs change", async () => {
