@@ -451,6 +451,7 @@ export function Analyzer() {
           reporting={reporting}
           reportError={reportError}
           analysisKey={activeRunId ?? resultSignature ?? "unkeyed"}
+          premiumAnalysisCode={resultSignature}
           onDownload={downloadReport}
           onNewAnalysis={startNewAnalysis}
           initialSelectedFindingId={initialFindingId}
