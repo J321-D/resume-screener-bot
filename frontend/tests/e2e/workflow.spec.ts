@@ -397,6 +397,7 @@ test("walks, presents, and reports the same result without persistence", async (
   await page.getByText("Living Report", { exact: true }).click();
   await expect(page.getByText("LIVE ANALYSIS RECORD")).toBeVisible();
   await page.getByRole("button", { name: "Show performance HUD" }).click();
+  await expect(page.getByRole("button", { name: "Hide performance HUD" })).toHaveAttribute("aria-expanded", "true");
   await expect(page.getByText(/LOCAL BROWSER TELEMETRY.*NOT TRANSMITTED/)).toBeVisible();
 
   expect(await page.evaluate(() => ({ local: localStorage.length, session: sessionStorage.length }))).toEqual({ local: 0, session: 0 });

@@ -311,6 +311,12 @@
 /* Mobile result navigation reduces long-page friction. */
 .results-mobile-nav { display: none; }
 @media (max-width: 760px) {
+  /* Avoid moving-scroll click races beneath the fixed mobile result navigation. */
+  html:has(.results-mobile-nav) {
+    scroll-behavior: auto;
+    scroll-padding-bottom: calc(76px + env(safe-area-inset-bottom));
+  }
+  .results .performance-toggle { scroll-margin-bottom: calc(76px + env(safe-area-inset-bottom)); }
   .results { padding-bottom: 74px; }
   .results-polish-toolbar { grid-template-columns: 1fr; }
   .results-polish-actions { justify-content: flex-start; overflow-x: auto; flex-wrap: nowrap; padding-bottom: 2px; }
