@@ -95,7 +95,7 @@ export default function BioprocessExamplePage() {
           <p className="mb-3 font-mono text-xs uppercase tracking-[.12em] text-[#a9b3c8]">03 / The evidence map</p>
           <h2 id="map-title" className="text-2xl font-semibold tracking-tight sm:text-3xl">Two explicit overlaps. Four review prompts.</h2>
           <p className="mt-3 max-w-3xl leading-7 text-[#a9b3c8]">
-            These are hand-labeled teaching examples, <strong className="text-[#f6f8fc]">not the application's calculated categories or a coverage percentage</strong>.
+            These are hand-labeled teaching examples, <strong className="text-[#f6f8fc]">not the application&apos;s calculated categories or a coverage percentage</strong>.
             A missing phrase is a question to investigate, not an instruction to add an unearned claim.
           </p>
           <div className="mt-7 grid gap-4 lg:grid-cols-2">
@@ -145,7 +145,7 @@ export default function BioprocessExamplePage() {
 
         <footer className="mt-8 max-w-3xl text-sm leading-7 text-[#9caec3]">
           <p>Scope: English-first deterministic lexical comparison; no guarantee of ATS compatibility,
-          recruiter screening, job interviews, or employment. The actual tool's curated taxonomy and normalization
+          recruiter screening, job interviews, or employment. The actual tool&apos;s curated taxonomy and normalization
           can produce different labels from this teaching example. Read the <Link href="/methodology" className="underline underline-offset-4 hover:text-[#53e5ff]">methodology</Link> and{" "}
           <Link href="/privacy" className="underline underline-offset-4 hover:text-[#53e5ff]">privacy information</Link> before uploading documents.</p>
         </footer>
