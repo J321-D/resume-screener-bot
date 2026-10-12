@@ -18,6 +18,7 @@ describe("public web security and indexing contracts", () => {
       "https://resume-keyword-screener.vercel.app/methodology",
       "https://resume-keyword-screener.vercel.app/privacy",
       "https://resume-keyword-screener.vercel.app/help",
+      "https://resume-keyword-screener.vercel.app/examples/bioprocess-resume-review",
     ]);
   });
 
