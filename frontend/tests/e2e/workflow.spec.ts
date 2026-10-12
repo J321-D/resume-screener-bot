@@ -168,6 +168,9 @@ test("uses the command palette and evidence focus without changing the result", 
   await expect(page.getByRole("dialog", { name: "Go directly to the next task." })).toBeVisible();
   await expect(page.getByText("Review missing terms")).toHaveCount(0);
   await page.keyboard.press("Escape");
+  // Closing the command palette is asynchronous in Firefox. Wait until the
+  // underlying form is interactable before pasting, as a real user must.
+  await expect(page.getByRole("dialog", { name: "Go directly to the next task." })).toBeHidden();
 
   await page.getByLabel("Résumé text").fill("QC Python");
   await page.getByLabel("Job-description text").fill("quality control Python SQL");

@@ -266,7 +266,7 @@ export function ResultsDashboard({ result, stale, reporting, reportError, analys
     >
       <p className="sr-only" role="status" aria-live="polite">Analysis complete. {isFocused ? "Categorized keyword coverage" : "Raw lexical overlap"} {result.coverage.score === null ? "not applicable" : `${result.coverage.score.toFixed(1)}%`}. {result.coverage.matched} of {result.coverage.total} terms matched.</p>
       <div className="results-heading">
-        <div><p className="eyebrow"><span /> Scan complete</p><h2 id="results-title">Your lexical coverage map</h2></div>
+        <div><p className="eyebrow"><span /> Scan complete</p><h2 id="results-title" aria-label="Your lexical coverage map">Your lexical coverage map</h2></div>
         <div className="results-heading-actions">
           <fieldset className="density-switcher">
             <legend className="sr-only">Result information density</legend>
