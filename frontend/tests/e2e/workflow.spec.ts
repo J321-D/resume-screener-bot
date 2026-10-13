@@ -168,6 +168,9 @@ test("uses the command palette and evidence focus without changing the result", 
   await expect(page.getByRole("dialog", { name: "Go directly to the next task." })).toBeVisible();
   await expect(page.getByText("Review missing terms")).toHaveCount(0);
   await page.keyboard.press("Escape");
+  // Closing the command palette is asynchronous in Firefox. Wait until the
+  // underlying form is interactable before pasting, as a real user must.
+  await expect(page.getByRole("dialog", { name: "Go directly to the next task." })).toBeHidden();
 
   await page.getByLabel("Résumé text").fill("QC Python");
   await page.getByLabel("Job-description text").fill("quality control Python SQL");
@@ -397,6 +400,7 @@ test("walks, presents, and reports the same result without persistence", async (
   await page.getByText("Living Report", { exact: true }).click();
   await expect(page.getByText("LIVE ANALYSIS RECORD")).toBeVisible();
   await page.getByRole("button", { name: "Show performance HUD" }).click();
+  await expect(page.getByRole("button", { name: "Hide performance HUD" })).toHaveAttribute("aria-expanded", "true");
   await expect(page.getByText(/LOCAL BROWSER TELEMETRY.*NOT TRANSMITTED/)).toBeVisible();
 
   expect(await page.evaluate(() => ({ local: localStorage.length, session: sessionStorage.length }))).toEqual({ local: 0, session: 0 });

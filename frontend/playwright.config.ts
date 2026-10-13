@@ -13,9 +13,11 @@ export default defineConfig({
     { name: "mobile", use: { ...devices["iPhone 13"], browserName: "webkit" } },
   ],
   webServer: {
-    command: "pnpm dev",
+    // CI already builds above this step. Test the immutable production bundle,
+    // not Next dev hot reload, whose compiler remounts can erase pasted input.
+    command: process.env.CI ? "pnpm start" : "pnpm dev",
     url: "http://localhost:3000",
-    reuseExistingServer: true,
+    reuseExistingServer: !process.env.CI,
     timeout: 120_000,
   },
 });
