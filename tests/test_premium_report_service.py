@@ -123,3 +123,42 @@ def test_premium_report_uses_no_storage_or_external_provider_contract():
         "open(",
     )
     assert all(token not in source for token in forbidden)
+
+
+def test_premium_filters_fixture_and_document_labels_without_hiding_technical_evidence():
+    documents=PreparedDocuments(
+        resumes=[ExtractedDocument(text=(
+            "FICTIONAL SAMPLE NOT REAL\nSKILLS\nPython cell culture\n"
+            "EXPERIENCE\nMeasured cell viability with Python"
+        ),source_name="FICTIONAL_resume.txt")],
+        job_description=ExtractedDocument(text=(
+            "FICTIONAL JOB POSTING VACANCY\nSKILLS\n"
+            "Python cell culture GMP CAPA technology transfer process validation"
+        ),source_name="FICTIONAL_job.txt"),
+        resume_label="FICTIONAL_resume.txt",
+        input_mode="pasted_text",warnings=[],
+    )
+    plan=build_premium_review_plan(documents,AnalysisMode.SKILLS_FOCUSED)
+    priority=" ".join(plan.priority_review_items)
+    strengths=" ".join(plan.represented_strength_items)
+    for noise in ('"JOB"','"POSTING"','"VACANCY"','"FICTIONAL"','"NOT"','"REAL"','"SKILLS"'):
+        assert noise not in priority and noise not in strengths
+    for technical in ('GMP','CAPA','technology transfer','process validation'):
+        assert technical in priority
+    assert 'Python' in strengths
+    data=generate_premium_report_for_documents(documents,AnalysisMode.SKILLS_FOCUSED)
+    text=_pdf_text(data)
+    assert 'Premium Tailored Resume Review' in text
+    assert 'GMP' in text and 'technology transfer' in text
+    assert "'POSTING'" not in text and "'VACANCY'" not in text
+    assert 'not a hiring or ATS-performance prediction' in text
+    assert 'original unfiltered lexical analysis' in text
+
+
+def test_document_label_filter_is_exact_and_preserves_uncategorized_technical_terms():
+    from api.services.premium_report_service import _meaningful_report_term
+    for generic in ('FICTIONAL','job','skills','not','VACANCY'):
+        assert not _meaningful_report_term(generic)
+    for technical in ('GMP','CAPA','upstream','engineering','process validation',
+                      'cell culture','DOE'):
+        assert _meaningful_report_term(technical)

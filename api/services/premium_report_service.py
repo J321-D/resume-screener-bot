@@ -24,6 +24,26 @@ MAX_PRIORITY_ITEMS = 12
 MAX_STRENGTH_ITEMS = 12
 MAX_DIAGNOSTIC_ITEMS = 8
 
+# Review-output hygiene only. Never change the underlying lexical analysis or
+# its numerical score. These exact words describe filenames, sample fixtures
+# and document section headings rather than substantiated job skills.
+_DOCUMENT_LABEL_TERMS = frozenset({
+    "fictional", "not", "real", "sample",
+    "job", "posting", "vacancy",
+    "skills", "experience", "projects", "responsibilities",
+})
+
+
+def _meaningful_report_term(value: str) -> bool:
+    """Suppress generic document labels in paid evidence summaries.
+
+    Technical terms, including all other uncategorized terms, must remain
+    visible. This is intentionally a narrow exact-match list, not a heuristic
+    pretending to know which qualifications matter to a recruiter.
+    """
+    term=str(value).strip()
+    return len(term)>1 and term.casefold() not in _DOCUMENT_LABEL_TERMS
+
 
 @dataclass(frozen=True)
 class PremiumReviewPlan:
@@ -68,7 +88,7 @@ def _priority_items(payload: dict) -> tuple[str, ...]:
         if not isinstance(finding,dict) or finding.get("status")!="missing":
             continue
         display=str(finding.get("display_term") or "").strip()
-        if not display:
+        if not _meaningful_report_term(display):
             continue
         category=str(finding.get("category") or "Uncategorized")
         jd=_first_evidence(finding,"job_description")
@@ -83,8 +103,8 @@ def _priority_items(payload: dict) -> tuple[str, ...]:
             break
     if not rows:
         rows.append(
-            "No missing deterministic coverage concepts were returned for this analysis. "
-            "Do not add keywords merely to increase a score."
+            "No actionable priority terms remained after omitting generic document labels. "
+            "The full lexical result remains available; do not add keywords merely to increase a score."
         )
     return tuple(rows)
 
@@ -96,7 +116,7 @@ def _strength_items(payload: dict) -> tuple[str, ...]:
         if not isinstance(finding,dict) or finding.get("status")!="matched":
             continue
         display=str(finding.get("display_term") or "").strip()
-        if not display:
+        if not _meaningful_report_term(display):
             continue
         resume=_first_evidence(finding,"resume")
         if not resume:
@@ -111,7 +131,7 @@ def _strength_items(payload: dict) -> tuple[str, ...]:
         if len(rows)>=MAX_STRENGTH_ITEMS:
             break
     if not rows:
-        rows.append("No represented deterministic coverage concepts were returned.")
+        rows.append("No meaningful represented terms remained after omitting generic document labels.")
     return tuple(rows)
 
 
@@ -165,8 +185,10 @@ def generate_premium_report_for_documents(
     """Generate the internal premium fulfillment artifact from request-scoped data."""
     analysis=analyze_documents(documents,analysis_mode)
     plan=build_premium_review_plan(documents,analysis_mode)
-    matched=[item.term for item in analysis.matched_terms]
-    missing=[item.term for item in analysis.missing_terms]
+    # Only the premium presentation is curated. The underlying analysis,
+    # evidence findings, scoring and free endpoint remain unchanged.
+    matched=[item.term for item in analysis.matched_terms if _meaningful_report_term(item.term)]
+    missing=[item.term for item in analysis.missing_terms if _meaningful_report_term(item.term)]
     score=(
         "N/A"
         if plan.coverage_score is None
@@ -186,7 +208,8 @@ def generate_premium_report_for_documents(
                 [
                     f"Contract: {plan.schema}",
                     f"{plan.coverage_label}: {score}",
-                    "This premium artifact adds evidence-backed prioritization; the underlying deterministic analysis remains unchanged.",
+                    "This report omits common document labels from visible terms; the coverage score still reflects the original unfiltered lexical analysis.",
+                    "The premium checklist adds evidence-backed prioritization; no qualification or ATS outcome is inferred.",
                 ],
             ),
             ("Priority Review Checklist",list(plan.priority_review_items)),
