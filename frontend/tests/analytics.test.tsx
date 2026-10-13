@@ -31,7 +31,7 @@ describe("privacy-safe Web Analytics", () => {
     })));
   });
 
-  it.each(["/", "/methodology", "/privacy", "/premium-interest"])(
+  it.each(["/", "/methodology", "/privacy", "/premium-interest", "/examples/bioprocess-resume-review"])(
     "allows the public path %s while removing query and fragment data",
     (pathname) => {
       expect(filterAnalyticsEvent({
@@ -49,6 +49,8 @@ describe("privacy-safe Web Analytics", () => {
     expect(filterAnalyticsEvent({ type: "pageview", url: "http://localhost:3000/" })).toBeNull();
     expect(filterAnalyticsEvent({ type: "pageview", url: "https://resume-screener-bot-preview-example.vercel.app/" })).toBeNull();
     expect(filterAnalyticsEvent({ type: "pageview", url: "https://example.com/privacy" })).toBeNull();
+    expect(filterAnalyticsEvent({ type: "pageview", url: "https://resume-keyword-screener.vercel.app/examples/bioprocess-resume-review/private" })).toBeNull();
+    expect(filterAnalyticsEvent({ type: "pageview", url: "https://resume-keyword-screener.vercel.app/examples/other" })).toBeNull();
     expect(filterAnalyticsEvent({ type: "pageview", url: "https://[invalid" })).toBeNull();
   });
 });

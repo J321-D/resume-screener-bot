@@ -1,0 +1,13 @@
+# Bioprocess acquisition — evidence contract
+
+**Proposed; not yet publicly launched.** This supports existing acquisition PR #54 and stacked mobile fix PR #58. No customer contact, payment collection, or production launch is authorized by this artifact.
+
+## Hypothesis and falsifier
+
+A transparent fictional bioprocess résumé example may attract genuine job seekers to the existing free analyzer. This is a discovery hypothesis, not a conversion, hiring, or revenue claim. After approved publication, assess a *14-day full-period* sample using **only** the existing Vercel anonymous aggregate production page-view metrics. Record exact release SHA, observation period, raw pageview/visitor results, and any suspected QA/crawler contamination. A preregistered threshold of 25 distinct example-page visitors is an early audience-discovery signal, not a verified conversion or sale. Fewer than 25 is **NEED_MORE_DISTRIBUTION_DATA**, not proof the product is unwanted; this gate must not be tuned after seeing results.
+
+Measure only these fixed public route counts from direct Vercel readback: `/examples/bioprocess-resume-review`, `/`, and `/premium-interest`. The landing-page's mere HTTP 200 response is NOT analytics evidence. **Anonymous aggregate path counts cannot attribute an example visitor to an analysis, premium CTA, payment or hiring result.** No custom events, session tracking, referral identifiers, raw IPs, cookies, uploaded résumé/JD data, or URL query/fragment values.
+
+The original $9 premium-interest experiment #9 is already PAUSED / NEED_MORE_DATA on its preregistered 72-hour window: just 2 production homepage pageviews (1 visitor) and zero premium-interest pageviews, versus the required denominator of 25 homepage pageviews. Do not resume, retrospectively extend, restart or convert it to SUCCESS by publishing this page. Any future experiment needs a fresh preregistered denominator, explicit activation approval, truthful marketing disclosures, and readback. Paid checkout remains off pending separate provider identity, customer terms/fulfillment, account approval and payment evidence.
+
+The worked example is manually illustrated and fictional. It does not promise an ATS pass, job offer, measured skill, healthcare qualification or any particular result. The existing production Vercel analytics integration is widened **only** to this exact public pathname and strips query/fragment data; it still drops unapproved paths and non-production origins. Tests should prove this exact route allowed and close variants denied. Independent privacy/UX review and exact-head CI remain required before merging to production.

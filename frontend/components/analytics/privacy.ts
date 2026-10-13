@@ -1,6 +1,6 @@
 import type { BeforeSendEvent } from "@vercel/analytics";
 
-const ANALYTICS_PATHS = new Set(["/", "/methodology", "/privacy", "/premium-interest"]);
+const ANALYTICS_PATHS = new Set(["/", "/methodology", "/privacy", "/premium-interest", "/examples/bioprocess-resume-review"]);
 export const ANALYTICS_ORIGIN = "https://resume-keyword-screener.vercel.app";
 
 export function analyticsModeForEnvironment(
