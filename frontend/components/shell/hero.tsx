@@ -33,6 +33,9 @@ export function Hero() {
             <FlaskConical size={16} /> Cinematic demo
           </a>
         </div>
+        <p className="hero-disclaimer boot-stage boot-stage-4">
+          Prefer a hands-on, scoped review? <a href="https://jeffrey-rapid-services.vercel.app/" className="underline underline-offset-4 hover:text-[#53e5ff] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#53e5ff]">Explore independent human services</a> (optional; the screener stays free).
+        </p>
       </div>
       <div className="hero-visual boot-stage boot-stage-1" role="img" aria-label="Analysis core showing five deterministic lexical dimensions">
         <CoreField />
